@@ -1,0 +1,174 @@
+hero:
+  title: 'Unleash your server development.'
+  description: An ultra-efficient JavaScript server framework that runs anywhere - Node.js, Bun, or Deno - with unmatched flexibility and complete configurability for developers who refuse to sacrifice speed or control.
+  slug: '// Next generation server framework'
+  tabs:
+    - title: Minimal
+      content: |
+        ::code-tree{defaultValue="src/index.ts"}
+        ```ts [src/index.ts]
+        import { createApp } from '@vercube/core';
+
+        const app = await createApp();
+        await app.listen();
+
+        ```
+
+        ```json [package.json]
+        {
+          "name": "vercube-app",
+          "private": true,
+          "type": "module",
+          "scripts": {
+            "dev": "vercube dev",
+            "build": "vercube build"
+          },
+          "dependencies": {
+            "@vercube/core": "latest",
+            "@vercube/di": "latest",
+          },
+          "devDependencies": {
+            "@vercube/cli": "latest"
+          }
+        }
+        ```
+
+        ```ts [vercube.config.ts]
+        import { defineConfig } from '@vercube/core'
+
+        export default defineConfig({
+          server: {
+            port: 3000,
+          }
+        });
+        ```
+        ::
+    - title: Routing
+      content: |
+        ::code-tree{defaultValue="src/Controllers/FooController.ts"}
+        ```ts [src/index.ts]
+        import { createApp } from '@vercube/core';
+        import { useContainer } from '@/Boot/Container';
+
+        const app = await createApp();
+        app.container.expand(useContainer);
+        await app.listen();
+
+        ```
+
+        ```ts [src/Boot/Container.ts]
+        import { Container } from '@vercube/core';
+        import { FooController } from '@/Controllers/FooController';
+        
+        export const useContainer = () => {
+          return Container.bind(FooController);
+        }
+        ```
+
+        ```ts [src/Controllers/FooController.ts]
+        import { Controller, Get } from '@vercube/core';
+
+        @Controller('/foo')
+        export class FooController {
+          @Get('/')
+          async getFoo() {
+            return 'Hello World';
+          }
+        }
+        ```
+
+        ```json [package.json]
+        {
+          "name": "vercube-app",
+          "private": true,
+          "type": "module",
+          "scripts": {
+            "dev": "vercube dev",
+            "build": "vercube build"
+          },
+          "dependencies": {
+            "@vercube/core": "latest",
+            "@vercube/di": "latest",
+          },
+          "devDependencies": {
+            "@vercube/cli": "latest"
+          }
+        }
+        ```
+
+        ```ts [vercube.config.ts]
+        import { defineConfig } from '@vercube/core'
+
+        export default defineConfig({
+          server: {
+            port: 3000,
+          }
+        });
+        ```
+        ::
+    - title: Serverless
+      content: |
+        ::code-tree{defaultValue="src/index.ts"}
+        ```ts [src/index.ts]
+        import { createApp } from '@vercube/core';
+        import { toServerlessHandler } from '@vercube/serverless/aws-lambda';
+        import { useContainer } from '@/Boot/Container';
+        import type { ServerlessHandler } from '@vercube/serverless';
+
+        const app = await createApp();
+        app.container.expand(useContainer);
+
+        export const handler: ServerlessHandler = toServerlessHandler(app);
+
+        ```
+
+        ```ts [src/Boot/Container.ts]
+        import { Container } from '@vercube/core';
+        import { FooController } from '@/Controllers/FooController';
+        
+        export const useContainer = () => {
+          return Container.bind(FooController);
+        }
+        ```
+
+        ```ts [src/Controllers/FooController.ts]
+        import { Controller, Get } from '@vercube/core';
+
+        @Controller('/foo')
+        export class FooController {
+          @Get('/')
+          async getFoo() {
+            return 'Hello World';
+          }
+        }
+        ```
+
+        ```json [package.json]
+        {
+          "name": "vercube-app",
+          "private": true,
+          "type": "module",
+          "scripts": {
+            "dev": "vercube dev",
+            "build": "vercube build"
+          },
+          "dependencies": {
+            "@vercube/core": "latest",
+            "@vercube/di": "latest",
+          },
+          "devDependencies": {
+            "@vercube/cli": "latest"
+          }
+        }
+        ```
+
+        ```ts [vercube.config.ts]
+        import { defineConfig } from '@vercube/core'
+
+        export default defineConfig({
+          server: {
+            port: 3000,
+          }
+        });
+        ```
+        ::

@@ -1,0 +1,153 @@
+@import "tailwindcss";
+@import "@nuxt/ui";
+
+@font-face {
+  font-family: 'Sentient';
+  src: url('/Sentient-Extralight.woff') format('woff');
+  font-weight: 200;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Sentient';
+  src: url('/Sentient-LightItalic.woff') format('woff');
+  font-weight: 300;
+  font-style: italic;
+  font-display: swap;
+}
+
+@theme {
+  --font-sans: 'Geist', sans-serif;
+  --font-sentient: 'Sentient', sans-serif;
+
+  --animate-text-gradient: text 1.5s linear infinite;
+  --animate-bloom: bloom 2.4s ease infinite;
+  --shadow-glow: 0 0 8px 2px var(--tw-shadow-color);
+  --color-foreground: var(--foreground);
+}
+
+::-webkit-scrollbar {
+  width: 5px;
+  height: 2px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: varinverted;
+  border-radius: 5px;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+:root {
+  --foreground: #ffffff;
+  --ui-radius: 0.5rem;
+  --ui-primary: black;
+  --ui-bg: var(--color-white);
+  --ui-bg-muted: var(--color-neutral-50);
+  --ease-smooth: cubic-bezier(0.45, 0, 0.55, 1);
+  --font-geist-mono: 'Geist Mono', monospace;
+
+  ::selection {
+    color: #282a30;
+    background-color: #c8c8c8;
+  }
+
+  .default {
+    --ui-container: var(--container-5xl);
+  }
+}
+
+html, body, #__nuxt, #__layout {
+  width: 100%;
+  height: 100%;
+}
+
+.dark {
+  --ui-primary: white;
+  --ui-bg: #010101;
+  --ui-bg-muted: var(--color-neutral-900);
+
+  ::selection {
+    color: #ffffff;
+    background-color: #474747;
+  }
+}
+
+.main-gradient {
+  @apply bg-gradient-to-r from-inverted/45 to-inverted to-50% bg-clip-text text-transparent;
+}
+
+.bg-stripes {
+  @apply w-full [background-size:4px_4px];
+  @apply dark:[background-image:linear-gradient(-45deg,var(--color-neutral-700)_12.50%,transparent_12.50%,transparent_50%,var(--color-neutral-700)_50%,var(--color-neutral-700)_62.50%,transparent_62.50%,transparent_100%)];
+  @apply not-dark:[background-image:linear-gradient(-45deg,var(--color-neutral-200)_12.50%,transparent_12.50%,transparent_50%,var(--color-neutral-200)_50%,var(--color-neutral-200)_62.50%,transparent_62.50%,transparent_100%)];
+}
+
+.animated-text {
+  @apply animate-text-gradient bg-gradient-to-r from-inverted via-muted to-inverted bg-[200%_auto] bg-clip-text text-transparent
+}
+
+.bg-dotted {
+  background-image:
+    radial-gradient(transparent, Canvas),
+    radial-gradient(
+      color-mix(in oklch, Canvastext 33%, Canvas) 0.8px,
+      transparent 1.3px
+    );
+  background-size:
+    200px 200px,
+    40px 40px;
+  background-repeat:
+    round,
+    space;
+}
+
+.noise:after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  filter: url(#noiseFilter);
+  opacity: 0.1;
+  pointer-events: none;
+}
+
+.highlight-wrapper {
+  @apply size-fit p-px transition-all duration-200 ease-in-out;
+}
+
+.highlight-gradient {
+  @apply bg-gradient-to-br from-inverted/60 from-[3%] via-elevated via-40% to-default;
+}
+
+.navbar {
+  .highlight-wrapper {
+    @apply active:translate-y-[1px] hover:opacity-90 data-[active=true]:bg-gradient-to-br from-inverted from-[3%] via-elevated via-30% to-default;
+  }
+}
+
+.cross {
+  @apply before:absolute after:absolute;
+  @apply before:top-[-4px] before:bg-inverted before:content-[''] before:w-[1px] before:h-[9px];
+  @apply after:left-[-4px] after:bg-inverted after:content-[''] after:w-[9px] after:h-[1px];
+}
+
+@utility container {
+  margin-inline: auto;
+  padding-inline: 1rem;
+
+  @media (width >= 768px) {
+    padding-inline: 2rem;
+  }
+
+  @media (width >= 1280px) {
+    padding-inline: 3rem;
+  }
+}
