@@ -57,11 +57,10 @@ hero:
         ```
 
         ```ts [src/Boot/Container.ts]
-        import { Container } from '@vercube/core';
         import { FooController } from '@/Controllers/FooController';
         
-        export const useContainer = () => {
-          return Container.bind(FooController);
+        export const useContainer = (container) => {
+          return container.bind(FooController);
         }
         ```
 
@@ -123,11 +122,10 @@ hero:
         ```
 
         ```ts [src/Boot/Container.ts]
-        import { Container } from '@vercube/core';
         import { FooController } from '@/Controllers/FooController';
         
-        export const useContainer = () => {
-          return Container.bind(FooController);
+        export const useContainer = (container) => {
+          return container.bind(FooController);
         }
         ```
 
