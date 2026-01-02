@@ -40,6 +40,7 @@ const editThisPage = computed(() => ({
   to: `https://github.com/hugorcd/shelve/edit/main/apps/lp/content/${page?.value?.stem}.md`,
   target: '_blank'
 }))
+// oxlint-disable-next-line prefer-global-this
 const articleLink = computed(() => `${window.location}${page.value?.path}`)
 
 const formatDate = (dateString: string) => {
@@ -73,7 +74,9 @@ const formatDate = (dateString: string) => {
         }"
       >
         <template #title>
-          <h1 class="sm:text-4xl lg:text-5xl text-pretty tracking-tight text-highlighted text-left text-4xl font-(family-name:--font-geist-mono)">
+          <h1
+            class="sm:text-4xl lg:text-5xl text-pretty tracking-tight text-highlighted text-left text-4xl font-(family-name:--font-geist-mono)"
+          >
             {{ page.title }}
           </h1>
         </template>
@@ -91,38 +94,21 @@ const formatDate = (dateString: string) => {
               {{ formatDate(page.date) }}
             </span>
             -
-            <span>
-              {{ page.minRead }} MIN READ
-            </span>
+            <span> {{ page.minRead }} MIN READ </span>
           </div>
         </template>
 
         <template #default>
-          <UUser
-            v-if="page.author"
-            variant="outline"
-            v-bind="page.author"
-          />
+          <UUser v-if="page.author" variant="outline" v-bind="page.author" />
         </template>
       </UPageSection>
     </UContainer>
     <div class="bg-black border-t border-default">
       <UPageBody class="max-w-3xl mx-auto !mt-0 pt-5">
-        <ContentRenderer
-          v-if="page.body"
-          :value="page"
-        />
+        <ContentRenderer v-if="page.body" :value="page" />
 
         <AppDivider class="my-10">
           <div class="flex items-center gap-2 text-sm text-muted">
-            <UButton
-              size="sm"
-              variant="link"
-              color="neutral"
-              label="Copy link"
-              @click="copyToClipboard(articleLink, 'Article link copied to clipboard')"
-            />
-            -
             <UButton
               size="sm"
               variant="link"

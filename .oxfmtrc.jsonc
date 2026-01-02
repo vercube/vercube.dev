@@ -1,0 +1,35 @@
+{
+  "$schema": "./node_modules/oxfmt/configuration_schema.json",
+
+  // Ignore patterns
+  "ignorePatterns": [
+    "CODEOWNERS",
+    "Makefile",
+    "*.yml",
+    "*.yaml",
+    "pnpm-lock.yaml",
+    "*.json", // json files are not supported by oxfmt yet
+  ],
+
+  // Roles
+  "singleQuote": true,
+  "semi": true,
+  "trailingComma": "all",
+  "tabWidth": 2,
+  "printWidth": 130,
+
+  // Experimental: Sort imports
+  "experimentalSortImports": {
+    "groups": [
+      ["^node:", "value"], // node: imports first (regex pattern has priority)
+      ["builtin", "value"], // Builtin modules (without node: prefix)
+      ["external", "value"], // External packages (value imports only) - excludes @/ pattern
+      ["^@/", "value"], // Internal imports (@/ pattern) - after external, before type
+      ["type"], // All type imports at the end
+    ],
+    "ignoreCase": true,
+    "newlinesBetween": false,
+    "order": "asc",
+    "sortSideEffects": false,
+  },
+}

@@ -1,5 +1,5 @@
-@import "tailwindcss";
-@import "@nuxt/ui";
+@import 'tailwindcss';
+@import '@nuxt/ui';
 
 @font-face {
   font-family: 'Sentient';
@@ -65,7 +65,10 @@
   }
 }
 
-html, body, #__nuxt, #__layout {
+html,
+body,
+#__nuxt,
+#__layout {
   width: 100%;
   height: 100%;
 }
@@ -92,26 +95,20 @@ html, body, #__nuxt, #__layout {
 }
 
 .animated-text {
-  @apply animate-text-gradient bg-gradient-to-r from-inverted via-muted to-inverted bg-[200%_auto] bg-clip-text text-transparent
+  @apply animate-text-gradient bg-gradient-to-r from-inverted via-muted to-inverted bg-[200%_auto] bg-clip-text text-transparent;
 }
 
 .bg-dotted {
   background-image:
-    radial-gradient(transparent, Canvas),
-    radial-gradient(
-      color-mix(in oklch, Canvastext 33%, Canvas) 0.8px,
-      transparent 1.3px
-    );
+    radial-gradient(transparent, Canvas), radial-gradient(color-mix(in oklch, Canvastext 33%, Canvas) 0.8px, transparent 1.3px);
   background-size:
     200px 200px,
     40px 40px;
-  background-repeat:
-    round,
-    space;
+  background-repeat: round, space;
 }
 
 .noise:after {
-  content: "";
+  content: '';
   position: absolute;
   inset: 0;
   filter: url(#noiseFilter);

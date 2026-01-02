@@ -73,12 +73,7 @@ async function copyPage() {
         content: 'w-48'
       }"
     >
-      <UButton
-        icon="i-lucide-chevron-down"
-        size="sm"
-        color="neutral"
-        variant="outline"
-      />
+      <UButton icon="i-lucide-chevron-down" size="sm" color="neutral" variant="outline" />
     </UDropdownMenu>
   </UButtonGroup>
 </template>

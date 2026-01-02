@@ -1,7 +1,6 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   modules: [
-    '@nuxt/eslint',
     '@nuxt/image',
     '@nuxt/ui',
     '@nuxt/content',
@@ -9,16 +8,19 @@ export default defineNuxtConfig({
     'nuxt-llms',
     '@nuxt/scripts',
     '@tresjs/nuxt',
-    ['@nuxtjs/google-fonts', {
-      subsets: ['latin'],
-      families: {
-        'Geist+Mono': true
-      }
-    }]
+    [
+      '@nuxtjs/google-fonts',
+      {
+        subsets: ['latin'],
+        families: {
+          'Geist+Mono': true,
+        },
+      },
+    ],
   ],
 
   devtools: {
-    enabled: true
+    enabled: true,
   },
 
   css: ['~/assets/css/main.css'],
@@ -27,46 +29,35 @@ export default defineNuxtConfig({
     build: {
       markdown: {
         toc: {
-          searchDepth: 1
-        }
-      }
-    }
+          searchDepth: 1,
+        },
+      },
+    },
   },
 
   mdc: {
     highlight: {
-      noApiRoute: false
-    }
+      noApiRoute: false,
+    },
   },
 
   routeRules: {
     '/': { prerender: true },
-    '/docs': { redirect: { statusCode: 301, to: '/docs/getting-started' } }
+    '/docs': { redirect: { statusCode: 301, to: '/docs/getting-started' } },
   },
 
   compatibilityDate: '2025-10-01',
 
   nitro: {
     prerender: {
-      routes: [
-        '/'
-      ],
+      routes: ['/'],
       crawlLinks: true,
-      autoSubfolderIndex: false
-    }
-  },
-
-  eslint: {
-    config: {
-      stylistic: {
-        commaDangle: 'never',
-        braceStyle: '1tbs'
-      }
-    }
+      autoSubfolderIndex: false,
+    },
   },
 
   icon: {
-    provider: 'iconify'
+    provider: 'iconify',
   },
 
   llms: {
@@ -75,8 +66,8 @@ export default defineNuxtConfig({
     description: 'Unleash your server development with an ultra-efficient JavaScript framework',
     full: {
       title: 'Vercube - Full Documentation',
-      description: 'This is the full documentation for Vercube.'
-    }
+      description: 'This is the full documentation for Vercube.',
+    },
   },
 
   ogImage: {
@@ -86,8 +77,8 @@ export default defineNuxtConfig({
         name: 'Geist Mono',
         path: '/fonts/GeistMono-Regular.ttf',
         weight: 400,
-        style: 'normal'
-      }
-    ]
-  }
-})
+        style: 'normal',
+      },
+    ],
+  },
+});

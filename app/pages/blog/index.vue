@@ -34,10 +34,7 @@ useSeoMeta({
 
 <template>
   <UPage v-if="page">
-    <BlogHeader
-      :title="page.title"
-      :description="page.description"
-    />
+    <BlogHeader :title="page.title" :description="page.description" />
 
     <UPageSection
       class="p-10"
@@ -47,12 +44,7 @@ useSeoMeta({
     >
       <UBlogPosts orientation="vertical">
         <div class="flex flex-col gap-4">
-          <BlogPost
-            v-for="(post, index) in posts"
-            :key="index"
-            :post
-            :to="post.path"
-          />
+          <BlogPost v-for="(post, index) in posts" :key="index" :post :to="post.path" />
         </div>
       </UBlogPosts>
     </UPageSection>

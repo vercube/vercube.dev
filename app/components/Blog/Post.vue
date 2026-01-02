@@ -17,10 +17,7 @@ const formatDate = (dateString: string) => {
 
 <template>
   <article class="p-4 cursor-pointer rounded-lg relative hover:bg-muted/10 transition-colors duration-200">
-    <NuxtLink
-      :to
-      class="absolute inset-0"
-    />
+    <NuxtLink :to class="absolute inset-0" />
     <div class="flex md:flex-row flex-col gap-4 sm:gap-6">
       <NuxtImg
         :src="post.shortImage"
@@ -40,15 +37,6 @@ const formatDate = (dateString: string) => {
           <p class="text-muted">
             {{ post.description }}
           </p>
-        </div>
-        <div class="flex items-center gap-2 mt-2">
-          <UUser
-            v-for="(author, index) in post.authors"
-            :key="index"
-            color="neutral"
-            variant="outline"
-            v-bind="author"
-          />
         </div>
       </div>
     </div>

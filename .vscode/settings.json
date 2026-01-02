@@ -1,6 +1,15 @@
 {
   "editor.tabSize": 2,
+  "typescript.enablePromptUseWorkspaceTsdk": true,
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/dist": true,
+    "packages/**/dist": true
+  },
+  "oxc.fmt.experimental": true,
+  "editor.defaultFormatter": "oxc.oxc-vscode",
+  "editor.formatOnSave": true,
   "editor.codeActionsOnSave": {
-      "source.fixAll.eslint": "explicit"
+    "source.fixAll.oxc": "explicit"
   }
 }

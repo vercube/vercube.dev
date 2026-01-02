@@ -4,9 +4,7 @@
       <div class="text-center mb-20 z-10 relative">
         <h2 class="text-5xl md:text-6xl mb-6 font-(family-name:--font-geist-mono)">
           <span class="text-foreground">Built for </span>
-          <span class="bg-gradient-to-r from-[#bc4eff] to-purple-400 bg-clip-text text-transparent">
-            modern development
-          </span>
+          <span class="bg-gradient-to-r from-[#bc4eff] to-purple-400 bg-clip-text text-transparent"> modern development </span>
         </h2>
 
         <p class="text-balance text-foreground/60 font-(family-name:--font-geist-mono) mmax-w-2xl mx-auto">
@@ -64,7 +62,7 @@ import WebNativeHTTPIcon from './Features/WebNativeHTTPIcon.vue'
 interface Feature {
   title: string
   description: string
-  icon: any // eslint-disable-line @typescript-eslint/no-explicit-any
+  icon: any
   accentColor: string
 }
 
@@ -103,11 +101,16 @@ const setHoveredIndex = (index: number | null) => {
 
 const getGridClass = (index: number) => {
   switch (index) {
-    case 0: return 'md:col-span-2'
-    case 1: return 'md:col-span-1'
-    case 2: return 'md:col-span-1'
-    case 3: return 'md:col-span-2'
-    default: return ''
+    case 0: { return 'md:col-span-2'
+    }
+    case 1: { return 'md:col-span-1'
+    }
+    case 2: { return 'md:col-span-1'
+    }
+    case 3: { return 'md:col-span-2'
+    }
+    default: { return ''
+    }
   }
 }
 
@@ -122,7 +125,9 @@ const getHoverStyle = (accentColor: string) => {
 
   return {
     background: `radial-gradient(400px circle at 50% 0%, ${rgbToRgba(accentColor, 0.5)}, transparent 70%)`,
+    // oxlint-disable-next-line no-negated-condition
     opacity: hoveredIndex.value !== null ? 1 : 0,
+    // oxlint-disable-next-line no-negated-condition
     transform: hoveredIndex.value !== null ? 'scale(1)' : 'scale(0.3)',
     transformOrigin: '50% 0%',
     maskImage: 'linear-gradient(black, black) content-box, linear-gradient(black, black)',

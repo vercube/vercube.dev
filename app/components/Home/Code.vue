@@ -1,8 +1,5 @@
 <template>
-  <UPageCard
-    class="bg-transparent shadow-none border-none overflow-hidden font-mono text-sm"
-    variant="soft"
-  >
+  <UPageCard class="bg-transparent shadow-none border-none overflow-hidden font-mono text-sm" variant="soft">
     <UTabs
       :items="tabs"
       :unmount-on-hide="false"
@@ -14,12 +11,7 @@
       }"
     >
       <template #content="{ item, index }">
-        <LazyMDC
-          class="bg-[#0a0a0a]"
-          :value="item.content"
-          :cache-key="`index-hero-tab-${index}`"
-          hydrate-on-idle
-        />
+        <LazyMDC class="bg-[#0a0a0a]" :value="item.content" :cache-key="`index-hero-tab-${index}`" hydrate-on-idle />
       </template>
     </UTabs>
   </UPageCard>

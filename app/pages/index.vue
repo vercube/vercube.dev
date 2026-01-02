@@ -1,4 +1,3 @@
-<!-- eslint-disable vue/no-multiple-template-root -->
 <template>
   <ClientOnly>
     <template #fallback>

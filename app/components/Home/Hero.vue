@@ -1,14 +1,13 @@
 <template>
-  <div
-    v-if="page"
-    class="flex flex-col min-h-[90vh] justify-between"
-  >
+  <div v-if="page" class="flex flex-col min-h-[90vh] justify-between">
     <div class="flex-1 flex items-center relative">
       <div class="container mx-auto px-6 relative z-10">
         <div class="grid lg:grid-cols-2 gap-12 items-center">
           <div class="text-left">
             <AppVersion class="mb-6" />
-            <p class="font-(family-name:--font-geist-mono) text-sm sm:text-base text-foreground/60 text-balance mt-2 mb-4 max-w-[440px]">
+            <p
+              class="font-(family-name:--font-geist-mono) text-sm sm:text-base text-foreground/60 text-balance mt-2 mb-4 max-w-[440px]"
+            >
               {{ page.hero.slug }}
             </p>
             <h1 class="text-5xl sm:text-6xl font-(family-name:--font-geist-mono)">

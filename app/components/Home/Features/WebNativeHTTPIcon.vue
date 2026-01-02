@@ -3,11 +3,7 @@
     <div class="relative w-full h-full flex items-center justify-center">
       <!-- Background grid lines -->
       <div class="absolute inset-0 flex flex-col justify-center gap-4 px-8">
-        <div
-          v-for="i in 7"
-          :key="i"
-          class="h-px bg-gradient-to-r from-transparent via-border/20 to-transparent"
-        />
+        <div v-for="i in 7" :key="i" class="h-px bg-gradient-to-r from-transparent via-border/20 to-transparent" />
       </div>
 
       <!-- Request arrow 1 - GET -->
@@ -91,11 +87,10 @@
       <!-- Center server icon with glow -->
       <div class="relative z-10">
         <div class="absolute inset-0 bg-blue-500/20 blur-2xl scale-150" />
-        <div class="relative w-24 h-24 rounded-2xl bg-gradient-to-br from-blue-500/30 to-cyan-500/20 border border-blue-500/40 backdrop-blur-sm flex items-center justify-center">
-          <UIcon
-            name="i-lucide-server"
-            class="text-blue-400 size-12"
-          />
+        <div
+          class="relative w-24 h-24 rounded-2xl bg-gradient-to-br from-blue-500/30 to-cyan-500/20 border border-blue-500/40 backdrop-blur-sm flex items-center justify-center"
+        >
+          <UIcon name="i-lucide-server" class="text-blue-400 size-12" />
         </div>
       </div>
     </div>

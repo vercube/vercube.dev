@@ -16,11 +16,11 @@
       </div>
 
       <!-- Ready message with glow -->
-      <div class="absolute bottom-0 left-0 right-0 p-4 border-t-2 border-green-500/50 bg-gradient-to-t from-green-500/10 to-transparent">
+      <div
+        class="absolute bottom-0 left-0 right-0 p-4 border-t-2 border-green-500/50 bg-gradient-to-t from-green-500/10 to-transparent"
+      >
         <div class="absolute inset-0 bg-green-500/20 blur-xl" />
-        <p class="relative text-green-400 font-mono text-lg font-semibold">
-          Ready in 47ms
-        </p>
+        <p class="relative text-green-400 font-mono text-lg font-semibold">Ready in 47ms</p>
       </div>
     </div>
   </div>

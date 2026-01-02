@@ -5,8 +5,8 @@ import { findPageBreadcrumb } from '@nuxt/content/utils'
 import { mapContentNavigation } from '@nuxt/ui/utils/content'
 
 interface BreadcrumbLink {
-  label: string
-  to: string
+  label?: string
+  to?: string
 }
 
 definePageMeta({
@@ -105,10 +105,7 @@ const communityLinks = computed(() => [
     </UPageHeader>
 
     <UPageBody>
-      <ContentRenderer
-        v-if="page.body"
-        :value="page"
-      />
+      <ContentRenderer v-if="page.body" :value="page" />
       <div>
         <AppDivider class="my-10">
           <div class="flex items-center gap-2 text-sm text-muted">
@@ -122,13 +119,7 @@ const communityLinks = computed(() => [
               Report an issue
             </UButton>
             or
-            <UButton
-              size="sm"
-              variant="link"
-              color="neutral"
-              :to="editThisPage.to"
-              target="_blank"
-            >
+            <UButton size="sm" variant="link" color="neutral" :to="editThisPage.to" target="_blank">
               Edit this page on GitHub
             </UButton>
           </div>
@@ -137,28 +128,12 @@ const communityLinks = computed(() => [
       </div>
     </UPageBody>
 
-    <template
-      v-if="page?.body?.toc?.links?.length"
-      #right
-    >
-      <UContentToc
-        :links="page.body?.toc?.links"
-        highlight
-        class="lg:backdrop-blur-none"
-      >
+    <template v-if="page?.body?.toc?.links?.length" #right>
+      <UContentToc :links="page.body?.toc?.links" highlight class="lg:backdrop-blur-none">
         <template #bottom>
-          <div
-            class="hidden lg:block space-y-6"
-            :class="{ '!mt-6': page.body?.toc?.links?.length }"
-          >
-            <USeparator
-              v-if="page.body?.toc?.links?.length"
-              type="dashed"
-            />
-            <UPageLinks
-              title="Community"
-              :links="communityLinks"
-            />
+          <div class="hidden lg:block space-y-6" :class="{ '!mt-6': page.body?.toc?.links?.length }">
+            <USeparator v-if="page.body?.toc?.links?.length" type="dashed" />
+            <UPageLinks title="Community" :links="communityLinks" />
           </div>
         </template>
       </UContentToc>

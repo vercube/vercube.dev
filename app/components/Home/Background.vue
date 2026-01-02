@@ -1,9 +1,5 @@
 <template>
-  <div
-    id="webgl"
-    ref="container"
-    :class="props.class"
-  />
+  <div id="webgl" ref="container" :class="props.class" />
 </template>
 
 <script setup lang="ts">
@@ -25,16 +21,16 @@ const props = withDefaults(defineProps<Props>(), {
 
 // Controls (formerly Leva)
 const controls = reactive({
-  speed: 1.0,
+  speed: 1,
   focus: 3.8,
   aperture: 1.79,
   size: 512,
   noiseScale: 0.6,
   noiseIntensity: 0.52,
   timeScale: 1,
-  pointSize: 10.0,
+  pointSize: 10,
   opacity: 0.8,
-  planeScale: 10.0,
+  planeScale: 10,
   useManualTime: false,
   manualTime: 0
 })
@@ -85,13 +81,13 @@ function init() {
   renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false })
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
   renderer.setSize(width, height)
-  renderer.setClearColor(0x000000, 1)
-  container.value.appendChild(renderer.domElement)
+  renderer.setClearColor(0x00_00_00, 1)
+  container.value.append(renderer.domElement)
 
   scene = new THREE.Scene()
 
   camera = new THREE.PerspectiveCamera(50, width / height, 0.01, 300)
-  camera.position.set(1.2629783123314589, 2.664606471394044, -1.8178993743288914)
+  camera.position.set(1.262_978_312_331_458_9, 2.664_606_471_394_044, -1.817_899_374_328_891_4)
   camera.lookAt(0, 0, 0)
 
   // Simulation setup
@@ -175,10 +171,10 @@ function loop(nowMs: number) {
   // Reveal timing
   if (revealStartTime.value === null) revealStartTime.value = now
   const revealElapsed = now - (revealStartTime.value || 0)
-  const revealProgress = Math.min(revealElapsed / revealDuration, 1.0)
+  const revealProgress = Math.min(revealElapsed / revealDuration, 1)
   const easedProgress = 1 - Math.pow(1 - revealProgress, 3)
-  const revealFactor = easedProgress * 4.0
-  if (revealProgress >= 1.0 && isRevealing.value) isRevealing.value = false
+  const revealFactor = easedProgress * 4
+  if (revealProgress >= 1 && isRevealing.value) isRevealing.value = false
 
   // Update sim uniforms
   const simMat = simMesh.material
@@ -203,7 +199,7 @@ function loop(nowMs: number) {
     easing.damp(
       pointsMat.uniforms.uTransition,
       'value',
-      props.hovering ? 1.0 : 0.0,
+      props.hovering ? 1 : 0,
       props.hovering ? 0.35 : 0.2,
       1 / 60
     )
@@ -232,6 +228,7 @@ onBeforeUnmount(() => {
     if ((obj as THREE.Mesh).geometry) (obj as THREE.Mesh).geometry.dispose()
     if ((obj as THREE.Mesh).material) {
       const mat = (obj as THREE.Mesh).material as THREE.Material | THREE.Material[]
+      // oxlint-disable-next-line no-array-for-each
       if (Array.isArray(mat)) mat.forEach(m => m.dispose())
       else mat.dispose()
     }
@@ -240,6 +237,7 @@ onBeforeUnmount(() => {
   renderTarget?.dispose()
   renderer?.dispose()
   if (renderer?.domElement && renderer.domElement.parentNode) {
+    // oxlint-disable-next-line prefer-dom-node-remove
     renderer.domElement.parentNode.removeChild(renderer.domElement)
   }
 

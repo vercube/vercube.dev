@@ -2,7 +2,9 @@
   <div class="relative w-full h-48 flex items-center justify-center overflow-hidden">
     <div class="relative w-full max-w-sm h-40 rounded-xl border border-blue-500/30 bg-black/40 backdrop-blur-sm overflow-hidden">
       <!-- Browser header -->
-      <div class="h-10 bg-gradient-to-b from-blue-500/20 to-blue-400/10 border-b border-blue-500/30 flex items-center px-3 gap-2" />
+      <div
+        class="h-10 bg-gradient-to-b from-blue-500/20 to-blue-400/10 border-b border-blue-500/30 flex items-center px-3 gap-2"
+      />
 
       <!-- Code lines with line numbers -->
       <div class="p-4 space-y-2 font-mono text-xs">

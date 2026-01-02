@@ -7,9 +7,10 @@
     "build": "nuxt build",
     "dev": "nuxt dev",
     "preview": "nuxt preview",
-    "postinstall": "nuxt prepare",
-    "lint": "eslint .",
-    "typecheck": "nuxt typecheck"
+    "test:lint": "oxlint . && oxfmt --check",
+    "test:tscheck": "nuxt typecheck",
+    "lint:fix": "oxlint --fix . && oxfmt --no-error-on-unmatched-pattern",
+    "postinstall": "nuxt prepare"
   },
   "dependencies": {
     "@googlemaps/markerclusterer": "2.6.2",
@@ -31,9 +32,9 @@
     "three": "0.182.0"
   },
   "devDependencies": {
-    "@nuxt/eslint": "1.12.1",
     "@types/three": "0.182.0",
-    "eslint": "9.39.2",
+    "oxfmt": "0.21.0",
+    "oxlint": "1.36.0",
     "typescript": "5.9.3",
     "vue-tsc": "3.2.1"
   },
