@@ -61,7 +61,7 @@ export default defineAppConfig({
       { label: 'Docs', to: '/docs' },
       { label: 'Examples', to: '/docs/getting-started/examples' },
       { label: 'Changelog', to: '/changelog' },
-      { label: 'Blog', to: '/blog' },
+      // { label: 'Blog', to: '/blog' },
     ],
   },
   footer: {
