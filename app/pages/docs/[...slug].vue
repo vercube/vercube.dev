@@ -4,6 +4,11 @@ import type { ContentNavigationItem } from '@nuxt/content'
 import { findPageBreadcrumb } from '@nuxt/content/utils'
 import { mapContentNavigation } from '@nuxt/ui/utils/content'
 
+interface BreadcrumbLink {
+  label: string
+  to: string
+}
+
 definePageMeta({
   layout: 'docs'
 })
@@ -23,13 +28,13 @@ const { data: surround } = await useAsyncData(`${kebabCase(route.path)}-surround
   })
 })
 
-const breadcrumb = computed(() => mapContentNavigation(findPageBreadcrumb(navigation.value, page.value?.path)).map(link => ({
+const breadcrumb: ComputedRef<BreadcrumbLink[]> = computed(() => mapContentNavigation(findPageBreadcrumb(navigation.value, page.value?.path)).map(link => ({
   label: link.label,
   to: link.to
 })))
 
 defineOgImageComponent('Docs', {
-  headline: breadcrumb.value.map(item => item.label).join(' > ')
+  headline: breadcrumb.value.map((item: BreadcrumbLink) => item.label).join(' > ')
 }, {
   fonts: ['Geist:400', 'Geist:600']
 })
@@ -47,7 +52,7 @@ useSeoMeta({
 })
 
 defineOgImageComponent('Docs', {
-  headline: breadcrumb.value.length ? breadcrumb.value.map(link => link.label).join(' > ') : '',
+  headline: breadcrumb.value.length ? breadcrumb.value.map((link: BreadcrumbLink) => link.label).join(' > ') : '',
   title,
   description
 }, {
@@ -57,11 +62,17 @@ defineOgImageComponent('Docs', {
 const editThisPage = computed(() => ({
   icon: 'i-heroicons-pencil-square-solid',
   label: 'Edit this page',
-  to: `https://github.com/vercube/vercube.dev/edit/main/content/${page?.value?.stem}.md`,
+  to: `https://github.com/vercube/vercube/edit/main/content/${page?.value?.stem}.md`,
   target: '_blank'
 }))
 
 const communityLinks = computed(() => [
+  {
+    icon: 'i-lucide-heart',
+    label: 'Become a Sponsor',
+    to: 'https://github.com/sponsors/vercube',
+    target: '_blank'
+  },
   {
     icon: 'lucide:bot',
     label: 'llms.txt',

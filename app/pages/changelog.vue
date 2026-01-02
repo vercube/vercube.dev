@@ -16,17 +16,20 @@ useHead({
   }
 })
 
-const title = 'Vercube Changelog'
+const title = 'Changelog - Vercube'
 const description = 'Track our journey with a detailed history of updates, improvements, and new features.'
 
 useSeoMeta({
   title,
   description,
   ogTitle: title,
-  ogDescription: description,
-  ogImage: 'https://ui.nuxt.com/assets/templates/nuxt/changelog-light.png',
-  twitterImage: 'https://ui.nuxt.com/assets/templates/nuxt/changelog-light.png',
-  twitterCard: 'summary_large_image'
+  ogDescription: description
+})
+
+defineOgImageComponent('Docs', {
+  headline: 'Vercube',
+  title: 'Changelog',
+  description: 'Track our journey with a detailed history of updates, improvements, and new features.'
 })
 
 const appConfig = useAppConfig()

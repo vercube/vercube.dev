@@ -1,5 +1,27 @@
 import { defineContentConfig, defineCollection, z } from '@nuxt/content'
 
+const createAuthorSchema = () => z.object({
+  name: z.string(),
+  description: z.string().optional(),
+  username: z.string().optional(),
+  twitter: z.string().optional(),
+  to: z.string().optional(),
+  avatar: createImageSchema().optional()
+})
+
+const createImageSchema = () => z.object({
+  src: z.string().editor({ input: 'media' }),
+  alt: z.string()
+})
+
+const docsSource = {
+  cwd: process.env.NUXT_V4_PATH ?? undefined,
+  repository: !process.env.NUXT_V4_PATH ? 'https://github.com/vercube/vercube/tree/main' : undefined,
+  include: 'docs/**/*',
+  exclude: ['docs/**/*.json'],
+  prefix: '/docs'
+}
+
 export default defineContentConfig({
   collections: {
     index: defineCollection({
@@ -23,10 +45,7 @@ export default defineContentConfig({
     }),
     docs: defineCollection({
       type: 'page',
-      source: {
-        include: 'docs/**',
-        exclude: ['index.md']
-      },
+      source: [docsSource],
       schema: z.object({
         links: z.array(z.object({
           label: z.string(),
@@ -34,6 +53,23 @@ export default defineContentConfig({
           to: z.string(),
           target: z.string().optional()
         })).optional()
+      })
+    }),
+    pages: defineCollection({
+      type: 'page',
+      source: [
+        { include: 'blog.yml' }
+      ]
+    }),
+    blog: defineCollection({
+      type: 'page',
+      source: 'blog/*.md',
+      schema: z.object({
+        minRead: z.number(),
+        date: z.date(),
+        image: z.string().nonempty().editor({ input: 'media' }).optional(),
+        shortImage: z.string().nonempty().editor({ input: 'media' }).optional(),
+        author: createAuthorSchema()
       })
     })
   }

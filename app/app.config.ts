@@ -55,7 +55,7 @@ export default defineAppConfig({
     links,
     nav: [
       { label: 'Docs', to: '/docs' },
-      { label: 'Examples', to: '/examples' },
+      { label: 'Examples', to: '/docs/getting-started/examples' },
       { label: 'Changelog', to: '/changelog' },
       { label: 'Blog', to: '/blog' }
     ]

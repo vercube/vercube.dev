@@ -70,29 +70,24 @@ export default defineNuxtConfig({
   },
 
   llms: {
-    domain: 'https://docs-template.nuxt.dev/',
-    title: 'Nuxt Docs Template',
-    description: 'A template for building documentation with Nuxt UI and Nuxt Content.',
+    domain: 'https://vercube.dev/',
+    title: 'Vercube',
+    description: 'Unleash your server development with an ultra-efficient JavaScript framework',
     full: {
-      title: 'Nuxt Docs Template - Full Documentation',
-      description: 'This is the full documentation for the Nuxt Docs Template.'
-    },
-    sections: [
+      title: 'Vercube - Full Documentation',
+      description: 'This is the full documentation for Vercube.'
+    }
+  },
+
+  ogImage: {
+    debug: true,
+    fonts: [
       {
-        title: 'Getting Started',
-        contentCollection: 'docs',
-        contentFilters: [
-          { field: 'path', operator: 'LIKE', value: '/getting-started%' }
-        ]
-      },
-      {
-        title: 'Essentials',
-        contentCollection: 'docs',
-        contentFilters: [
-          { field: 'path', operator: 'LIKE', value: '/essentials%' }
-        ]
+        name: 'Geist Mono',
+        path: '/fonts/GeistMono-Regular.ttf',
+        weight: 400,
+        style: 'normal'
       }
     ]
   }
-
 })
