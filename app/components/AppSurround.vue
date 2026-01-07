@@ -22,7 +22,7 @@ const next = computed(() => props.surround[1])
       </div>
       <USeparator v-if="!next" orientation="vertical" class="w-2 h-[24px]" />
       <div v-if="!next" class="flex flex-col truncate">
-        <p class="font-medium main-gradient brightness-150 text-sm">
+        <p class="font-medium brightness-150 text-sm">
           {{ prev.title }}
         </p>
         <p class="max-sm:hidden text-muted line-clamp-1 text-sm">
@@ -36,7 +36,7 @@ const next = computed(() => props.surround[1])
     >
       <NuxtLink :to="next.path" class="absolute inset-0 z-10" />
       <div class="flex flex-col text-right truncate">
-        <p class="font-medium main-gradient brightness-150 text-sm">
+        <p class="font-medium brightness-150 text-sm">
           {{ next.title }}
         </p>
         <p class="max-sm:hidden text-muted line-clamp-1 text-sm">

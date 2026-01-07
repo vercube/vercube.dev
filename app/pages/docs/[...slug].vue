@@ -62,7 +62,7 @@ defineOgImageComponent('Docs', {
 const editThisPage = computed(() => ({
   icon: 'i-heroicons-pencil-square-solid',
   label: 'Edit this page',
-  to: `https://github.com/vercube/vercube/edit/main/content/${page?.value?.stem}.md`,
+  to: `https://github.com/vercube/vercube/edit/main/${page?.value?.stem}.md`,
   target: '_blank'
 }))
 
