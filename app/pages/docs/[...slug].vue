@@ -1,95 +1,105 @@
 <script setup lang="ts">
-import { kebabCase } from 'scule'
-import type { ContentNavigationItem } from '@nuxt/content'
-import { findPageBreadcrumb } from '@nuxt/content/utils'
-import { mapContentNavigation } from '@nuxt/ui/utils/content'
+import { kebabCase } from 'scule';
+import type { ContentNavigationItem } from '@nuxt/content';
+import { findPageBreadcrumb } from '@nuxt/content/utils';
+import { mapContentNavigation } from '@nuxt/ui/utils/content';
 
 interface BreadcrumbLink {
-  label?: string
-  to?: string
+  label?: string;
+  to?: string;
 }
 
 definePageMeta({
-  layout: 'docs'
-})
+  layout: 'docs',
+});
 
-const navigation = inject<Ref<ContentNavigationItem[]>>('navigation', ref([]))
+const navigation = inject<Ref<ContentNavigationItem[]>>('navigation', ref([]));
 
-const route = useRoute()
+const route = useRoute();
 
-const { data: page } = await useAsyncData(kebabCase(route.path), () => queryCollection('docs').path(route.path).first())
+const { data: page } = await useAsyncData(kebabCase(route.path), () => queryCollection('docs').path(route.path).first());
 if (!page.value) {
-  throw createError({ statusCode: 404, statusMessage: 'Page not found', fatal: true })
+  throw createError({ statusCode: 404, statusMessage: 'Page not found', fatal: true });
 }
 
 const { data: surround } = await useAsyncData(`${kebabCase(route.path)}-surround`, () => {
   return queryCollectionItemSurroundings('docs', route.path, {
-    fields: ['description']
-  })
-})
+    fields: ['description'],
+  });
+});
 
-const breadcrumb: ComputedRef<BreadcrumbLink[]> = computed(() => mapContentNavigation(findPageBreadcrumb(navigation.value, page.value?.path)).map(link => ({
-  label: link.label,
-  to: link.to
-})))
+const breadcrumb: ComputedRef<BreadcrumbLink[]> = computed(() =>
+  mapContentNavigation(findPageBreadcrumb(navigation.value, page.value?.path)).map((link) => ({
+    label: link.label,
+    to: link.to,
+  })),
+);
 
-defineOgImageComponent('Docs', {
-  headline: breadcrumb.value.map((item: BreadcrumbLink) => item.label).join(' > ')
-}, {
-  fonts: ['Geist:400', 'Geist:600']
-})
+defineOgImageComponent(
+  'Docs',
+  {
+    headline: breadcrumb.value.map((item: BreadcrumbLink) => item.label).join(' > '),
+  },
+  {
+    fonts: ['Geist:400', 'Geist:600'],
+  },
+);
 
-const title = page.value.seo?.title || page.value.title
-const description = page.value.seo?.description || page.value.description
-const titleTemplate = ref('%s - Vercube Docs')
+const title = page.value.seo?.title || page.value.title;
+const description = page.value.seo?.description || page.value.description;
+const titleTemplate = ref('%s - Vercube Docs');
 
 useSeoMeta({
   title,
   titleTemplate,
   description,
   ogDescription: description,
-  ogTitle: titleTemplate.value?.includes('%s') ? titleTemplate.value.replace('%s', title) : title
-})
+  ogTitle: titleTemplate.value?.includes('%s') ? titleTemplate.value.replace('%s', title) : title,
+});
 
-defineOgImageComponent('Docs', {
-  headline: breadcrumb.value.length ? breadcrumb.value.map((link: BreadcrumbLink) => link.label).join(' > ') : '',
-  title,
-  description
-}, {
-  fonts: ['Geist:400', 'Geist:600']
-})
+defineOgImageComponent(
+  'Docs',
+  {
+    headline: breadcrumb.value.length ? breadcrumb.value.map((link: BreadcrumbLink) => link.label).join(' > ') : '',
+    title,
+    description,
+  },
+  {
+    fonts: ['Geist:400', 'Geist:600'],
+  },
+);
 
 const editThisPage = computed(() => ({
   icon: 'i-heroicons-pencil-square-solid',
   label: 'Edit this page',
   to: `https://github.com/vercube/vercube/edit/main/${page?.value?.stem}.md`,
-  target: '_blank'
-}))
+  target: '_blank',
+}));
 
 const communityLinks = computed(() => [
   {
     icon: 'i-lucide-heart',
     label: 'Become a Sponsor',
     to: 'https://github.com/sponsors/vercube',
-    target: '_blank'
+    target: '_blank',
   },
   {
     icon: 'lucide:bot',
     label: 'llms.txt',
-    to: 'https://vercube.dev/llms.txt'
+    to: 'https://vercube.dev/llms.txt',
   },
   {
     icon: 'i-heroicons-star-solid',
     label: 'Star on GitHub',
     to: `https://github.com/vercube/vercube`,
-    target: '_blank'
+    target: '_blank',
   },
   {
     icon: 'i-heroicons-lifebuoy-solid',
     label: 'Contributing',
-    to: '/docs/contributing'
-  }
-])
+    to: '/docs/contributing',
+  },
+]);
 </script>
 
 <template>
@@ -124,7 +134,7 @@ const communityLinks = computed(() => [
             </UButton>
           </div>
         </AppDivider>
-        <AppSurround :surround="(surround as any)" />
+        <AppSurround :surround="surround as any" />
       </div>
     </UPageBody>
 
