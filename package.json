@@ -40,6 +40,6 @@
     "vue-tsc": "3.2.4"
   },
   "resolutions": {
-    "unimport": "4.2.0"
+    "unimport": "5.6.0"
   }
 }
