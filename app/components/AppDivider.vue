@@ -1,11 +1,11 @@
 <script setup lang="ts">
 defineProps<{
-  text?: string;
-}>();
+  text?: string
+}>()
 
 const slot = defineSlots<{
-  default: () => void;
-}>();
+  default: () => void
+}>()
 </script>
 
 <template>

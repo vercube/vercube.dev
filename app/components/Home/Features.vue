@@ -18,7 +18,7 @@
           :key="index"
           :class="[
             'group relative rounded-2xl border border-muted/30 border-border/50 bg-background/50 backdrop-blur-sm p-8 transition-all duration-300 hover:border-accent/50 hover:bg-background/80 overflow-hidden',
-            getGridClass(index),
+            getGridClass(index)
           ]"
           @mouseenter="setHoveredIndex(index)"
           @mouseleave="setHoveredIndex(null)"
@@ -32,7 +32,7 @@
           <div
             :class="[
               'mb-6 transition-transform duration-300 relative z-10',
-              hoveredIndex === index && index !== 3 ? 'scale-110' : 'scale-100',
+              hoveredIndex === index && index !== 3 ? 'scale-110' : 'scale-100'
             ]"
           >
             <component :is="feature.icon" />
@@ -53,80 +53,75 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
-import BlazingFastIcon from './Features/BlazingFastIcon.vue';
-import ESMFirstIcon from './Features/ESMFirstIcon.vue';
-import DependencyInjectionIcon from './Features/DependencyInjectionIcon.vue';
-import WebNativeHTTPIcon from './Features/WebNativeHTTPIcon.vue';
+import { ref } from 'vue'
+import BlazingFastIcon from './Features/BlazingFastIcon.vue'
+import ESMFirstIcon from './Features/ESMFirstIcon.vue'
+import DependencyInjectionIcon from './Features/DependencyInjectionIcon.vue'
+import WebNativeHTTPIcon from './Features/WebNativeHTTPIcon.vue'
 
 interface Feature {
-  title: string;
-  description: string;
-  icon: any;
-  accentColor: string;
+  title: string
+  description: string
+  icon: any
+  accentColor: string
 }
 
-const hoveredIndex = ref<number | null>(null);
+const hoveredIndex = ref<number | null>(null)
 
 const features: Feature[] = [
   {
     title: 'Blazing Fast',
     description: 'Powered by Rolldown for minimal overhead and maximum speed.',
     accentColor: 'rgb(34, 197, 94)', // green-500
-    icon: BlazingFastIcon,
+    icon: BlazingFastIcon
   },
   {
     title: 'ESM-First',
     description: 'Modern architecture built fully around native ESM.',
     accentColor: 'rgb(59, 130, 246)', // blue-500
-    icon: ESMFirstIcon,
+    icon: ESMFirstIcon
   },
   {
     title: 'Dependency Injection Everywhere',
     description: 'Clean, testable, and scalable apps thanks to built-in DI.',
     accentColor: 'rgb(168, 85, 247)', // purple-500
-    icon: DependencyInjectionIcon,
+    icon: DependencyInjectionIcon
   },
   {
     title: 'Web-Native HTTP',
     description: 'Create servers directly on the platform APIs you know: Fetch, Request, and Response.',
     accentColor: 'rgb(6, 182, 212)', // cyan-500
-    icon: WebNativeHTTPIcon,
-  },
-];
+    icon: WebNativeHTTPIcon
+  }
+]
 
 const setHoveredIndex = (index: number | null) => {
-  hoveredIndex.value = index;
-};
+  hoveredIndex.value = index
+}
 
 const getGridClass = (index: number) => {
   switch (index) {
-    case 0: {
-      return 'md:col-span-2';
+    case 0: { return 'md:col-span-2'
     }
-    case 1: {
-      return 'md:col-span-1';
+    case 1: { return 'md:col-span-1'
     }
-    case 2: {
-      return 'md:col-span-1';
+    case 2: { return 'md:col-span-1'
     }
-    case 3: {
-      return 'md:col-span-2';
+    case 3: { return 'md:col-span-2'
     }
-    default: {
-      return '';
+    default: { return ''
     }
   }
-};
+}
 
 const getHoverStyle = (accentColor: string) => {
   const rgbToRgba = (rgb: string, opacity: number) => {
-    const match = rgb.match(/\d+/g);
+    const match = rgb.match(/\d+/g)
     if (match) {
-      return `rgba(${match[0]}, ${match[1]}, ${match[2]}, ${opacity})`;
+      return `rgba(${match[0]}, ${match[1]}, ${match[2]}, ${opacity})`
     }
-    return rgb;
-  };
+    return rgb
+  }
 
   return {
     background: `radial-gradient(400px circle at 50% 0%, ${rgbToRgba(accentColor, 0.5)}, transparent 70%)`,
@@ -138,7 +133,7 @@ const getHoverStyle = (accentColor: string) => {
     maskImage: 'linear-gradient(black, black) content-box, linear-gradient(black, black)',
     maskComposite: 'exclude',
     WebkitMaskComposite: 'xor',
-    padding: '1px',
-  };
-};
+    padding: '1px'
+  }
+}
 </script>

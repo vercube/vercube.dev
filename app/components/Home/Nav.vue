@@ -33,5 +33,5 @@
 </template>
 
 <script setup lang="ts">
-const { header } = useAppConfig();
+const { header } = useAppConfig()
 </script>

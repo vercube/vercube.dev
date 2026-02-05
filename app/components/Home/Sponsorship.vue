@@ -19,13 +19,13 @@
             class="absolute top-1/2 left-1/2 w-2 h-2 -translate-x-1/2 -translate-y-1/2"
             :style="{
               animation: 'float 3s ease-in-out infinite',
-              animationDelay: `${particle.delay}s`,
+              animationDelay: `${particle.delay}s`
             }"
           >
             <div
               class="w-2 h-2 rounded-full bg-gradient-to-br from-purple-400 to-pink-400 blur-sm"
               :style="{
-                transform: `translate(${particle.x}px, ${particle.y}px)`,
+                transform: `translate(${particle.x}px, ${particle.y}px)`
               }"
             />
           </div>
@@ -37,7 +37,7 @@
               fill="url(#heartGradient)"
               viewBox="0 0 24 24"
               :style="{
-                filter: 'drop-shadow(0 0 20px rgba(168, 85, 247, 0.6))',
+                filter: 'drop-shadow(0 0 20px rgba(168, 85, 247, 0.6))'
               }"
             >
               <defs>
@@ -102,47 +102,43 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted } from 'vue'
 
 interface Particle {
-  id: number;
-  x: number;
-  y: number;
-  delay: number;
+  id: number
+  x: number
+  y: number
+  delay: number
 }
 
-const particles = ref<Array<Particle>>([]);
+const particles = ref<Array<Particle>>([])
 
 onMounted(() => {
   const newParticles = Array.from({ length: 8 }, (_, i) => ({
     id: i,
     x: Math.cos((i * Math.PI * 2) / 8) * 60,
     y: Math.sin((i * Math.PI * 2) / 8) * 60,
-    delay: i * 0.2,
-  }));
-  particles.value = newParticles;
-});
+    delay: i * 0.2
+  }))
+  particles.value = newParticles
+})
 </script>
 
 <style scoped>
 @keyframes heartbeat {
-  0%,
-  100% {
+  0%, 100% {
     transform: scale(1);
   }
-  10%,
-  30% {
+  10%, 30% {
     transform: scale(1.1);
   }
-  20%,
-  40% {
+  20%, 40% {
     transform: scale(1.05);
   }
 }
 
 @keyframes float {
-  0%,
-  100% {
+  0%, 100% {
     opacity: 0;
     transform: scale(0);
   }

@@ -1,23 +1,19 @@
 <script setup lang="ts">
-import type { ContentNavigationItem } from '@nuxt/content';
+import type { ContentNavigationItem } from '@nuxt/content'
 
 const props = defineProps<{
-  surround: ContentNavigationItem[];
-}>();
+  surround: ContentNavigationItem[]
+}>()
 
-const prev = computed(() => props.surround[0]);
-const next = computed(() => props.surround[1]);
+const prev = computed(() => props.surround[0])
+const next = computed(() => props.surround[1])
 </script>
 
 <template>
   <div class="bg-muted p-1 rounded-lg flex items-center justify-between w-full gap-2">
     <div
       v-if="prev"
-      :class="
-        next
-          ? 'relative group flex items-center gap-1 text-muted sm:p-3 hover:text-highlighted'
-          : 'overflow-hidden relative group flex items-center gap-2 w-full bg-default/90 p-3 rounded-md hover:ring-2 ring-default'
-      "
+      :class="next ? 'relative group flex items-center gap-1 text-muted sm:p-3 hover:text-highlighted' : 'overflow-hidden relative group flex items-center gap-2 w-full bg-default/90 p-3 rounded-md hover:ring-2 ring-default'"
     >
       <NuxtLink :to="prev.path" class="absolute inset-0 z-10" />
       <div class="flex items-center gap-1 text-muted group-hover:text-highlighted">

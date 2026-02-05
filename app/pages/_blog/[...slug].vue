@@ -1,15 +1,15 @@
 <script setup lang="ts">
-import { kebabCase } from 'scule';
+import { kebabCase } from 'scule'
 
 definePageMeta({
-  layout: 'blog',
-});
+  layout: 'blog'
+})
 
-const route = useRoute();
+const route = useRoute()
 
-const { data: page } = await useAsyncData(kebabCase(route.path), () => queryCollection('blog').path(route.path).first());
+const { data: page } = await useAsyncData(kebabCase(route.path), () => queryCollection('blog').path(route.path).first())
 if (!page.value) {
-  throw createError({ statusCode: 404, statusMessage: 'Page not found', fatal: true });
+  throw createError({ statusCode: 404, statusMessage: 'Page not found', fatal: true })
 }
 
 // if (page.value.image) {
@@ -22,34 +22,34 @@ if (!page.value) {
 //   })
 // }
 
-const title = page.value.seo?.title || page.value.title;
-const description = page.value.seo?.description || page.value.description;
-const titleTemplate = ref('%s - Vercube Blog');
+const title = page.value.seo?.title || page.value.title
+const description = page.value.seo?.description || page.value.description
+const titleTemplate = ref('%s - Vercube Blog')
 
 useSeoMeta({
   title,
   titleTemplate,
   description,
   ogDescription: description,
-  ogTitle: titleTemplate.value?.includes('%s') ? titleTemplate.value.replace('%s', title) : title,
-});
+  ogTitle: titleTemplate.value?.includes('%s') ? titleTemplate.value.replace('%s', title) : title
+})
 
 const editThisPage = computed(() => ({
   icon: 'i-heroicons-pencil-square-solid',
   label: 'Edit this page',
   to: `https://github.com/hugorcd/shelve/edit/main/apps/lp/content/${page?.value?.stem}.md`,
-  target: '_blank',
-}));
+  target: '_blank'
+}))
 // oxlint-disable-next-line prefer-global-this
-const articleLink = computed(() => `${window.location}${page.value?.path}`);
+const articleLink = computed(() => `${window.location}${page.value?.path}`)
 
 const formatDate = (dateString: string) => {
   return new Date(dateString).toLocaleDateString('en-US', {
     year: 'numeric',
     month: 'short',
-    day: 'numeric',
-  });
-};
+    day: 'numeric'
+  })
+}
 </script>
 
 <template>
@@ -70,7 +70,7 @@ const formatDate = (dateString: string) => {
           wrapper: 'relative flex flex-col',
           title: 'text-left text-4xl font-(family-name:--font-geist-mono)',
           description: 'text-left font-(family-name:--font-geist-mono)',
-          links: 'gap-1 justify-start -ms-2.5',
+          links: 'gap-1 justify-start -ms-2.5'
         }"
       >
         <template #title>

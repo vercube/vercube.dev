@@ -13,39 +13,32 @@
 </template>
 
 <script setup lang="ts">
-const { data: page } = await useAsyncData('index', () => queryCollection('landing').path('/').first());
+const { data: page } = await useAsyncData('index', () => queryCollection('landing').path('/').first())
 if (!page.value) {
-  throw createError({ statusCode: 404, statusMessage: 'Page not found', fatal: true });
+  throw createError({ statusCode: 404, statusMessage: 'Page not found', fatal: true })
 }
 
 definePageMeta({
-  colorMode: 'dark',
-});
+  colorMode: 'dark'
+})
 
-const route = useRoute();
-const site = useSiteConfig();
+const route = useRoute()
+const site = useSiteConfig()
 
-const title = page.value.seo?.title || page.value.title || 'Vercube - Unleash your server development';
-const description =
-  page.value.seo?.description ||
-  page.value.description ||
-  'An ultra-efficient JavaScript server framework that runs anywhere - Node.js, Bun, or Deno - with unmatched flexibility and complete configurability for developers who refuse to sacrifice speed or control.';
+const title = page.value.seo?.title || page.value.title || 'Vercube - Unleash your server development'
+const description = page.value.seo?.description || page.value.description || 'An ultra-efficient JavaScript server framework that runs anywhere - Node.js, Bun, or Deno - with unmatched flexibility and complete configurability for developers who refuse to sacrifice speed or control.'
 
-const siteUrl = site.url || 'https://vercube.dev';
-const canonicalUrl = `${siteUrl}${route.path}`;
+const siteUrl = site.url || 'https://vercube.dev'
+const canonicalUrl = `${siteUrl}${route.path}`
 
 // Define OG Image component for homepage
-defineOgImageComponent(
-  'Docs',
-  {
-    headline: 'Next generation server framework',
-    title: 'Vercube',
-    description: 'Unleash your server development with an ultra-efficient JavaScript framework',
-  },
-  {
-    fonts: ['Geist:400', 'Geist:600'],
-  },
-);
+defineOgImageComponent('Docs', {
+  headline: 'Next generation server framework',
+  title: 'Vercube',
+  description: 'Unleash your server development with an ultra-efficient JavaScript framework'
+}, {
+  fonts: ['Geist:400', 'Geist:600']
+})
 
 // Homepage-specific SEO (overrides global defaults)
 useSeoMeta({
@@ -58,16 +51,16 @@ useSeoMeta({
   ogImageAlt: title,
   twitterTitle: title,
   twitterDescription: description,
-  twitterImageAlt: title,
-});
+  twitterImageAlt: title
+})
 
 // Canonical URL for homepage
 useHead({
   link: [
     {
       rel: 'canonical',
-      href: canonicalUrl,
-    },
-  ],
-});
+      href: canonicalUrl
+    }
+  ]
+})
 </script>
