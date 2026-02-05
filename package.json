@@ -34,10 +34,10 @@
   },
   "devDependencies": {
     "@types/three": "0.182.0",
-    "oxfmt": "0.21.0",
-    "oxlint": "1.36.0",
+    "oxfmt": "0.28.0",
+    "oxlint": "1.43.0",
     "typescript": "5.9.3",
-    "vue-tsc": "3.2.1"
+    "vue-tsc": "3.2.4"
   },
   "resolutions": {
     "unimport": "4.2.0"
