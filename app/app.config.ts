@@ -1,7 +1,7 @@
 const links = [
   {
     icon: 'i-simple-icons-discord',
-    to: 'https://discord.vercube.dev',
+    to: 'https://discord.gg/vercube',
     target: '_blank',
     'aria-label': 'Vercube on Discord',
   },
