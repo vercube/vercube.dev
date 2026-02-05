@@ -15,12 +15,12 @@ jobs:
           node-version: "22"
       - run: pnpm install --frozen-lockfile
       - run: pnpm build --preset github_pages
-        env:
-          VERCUBE_PATH: ${{ secrets.VERCUBE_PATH }}
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
           path: ./.output/public
+      env:
+        VERCUBE_PATH: ${{ secrets.VERCUBE_PATH }}
 
   deploy:
     needs: build
