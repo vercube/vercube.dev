@@ -1,6 +1,6 @@
 {
   "name": "@vercube/homepage",
-  "packageManager": "pnpm@10.27.0",
+  "packageManager": "pnpm@10.29.1",
   "private": true,
   "type": "module",
   "scripts": {
