@@ -1,7 +1,7 @@
 <template>
   <div v-if="page" class="flex flex-col min-h-[90vh] justify-between">
     <div class="flex-1 flex items-center relative">
-      <div class="container mx-auto px-6 relative z-10">
+      <div class="container mx-auto px-6 relative z-10 [@media(max-height:850px)]:pt-20">
         <div class="grid lg:grid-cols-2 gap-12 items-center">
           <div class="text-left">
             <AppVersion class="mb-6" />
