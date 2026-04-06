@@ -18,15 +18,9 @@
   "tabWidth": 2,
   "printWidth": 130,
 
-  // Experimental: Sort imports
-  "experimentalSortImports": {
-    "groups": [
-      ["^node:", "value"], // node: imports first (regex pattern has priority)
-      ["builtin", "value"], // Builtin modules (without node: prefix)
-      ["external", "value"], // External packages (value imports only) - excludes @/ pattern
-      ["^@/", "value"], // Internal imports (@/ pattern) - after external, before type
-      ["type"], // All type imports at the end
-    ],
+  // oxfmt ≥0.43: `sortImports` (perfectionist-style); selector+modifier is a single token, e.g. `value-builtin`.
+  "sortImports": {
+    "groups": ["value-builtin", "value-external", "value-internal", "type"],
     "ignoreCase": true,
     "newlinesBetween": false,
     "order": "asc",

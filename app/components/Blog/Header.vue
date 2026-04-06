@@ -1,8 +1,8 @@
 <script setup lang="ts">
 const { title, description } = defineProps<{
-  title: string
-  description: string
-}>()
+  title: string;
+  description: string;
+}>();
 </script>
 
 <template>
@@ -18,7 +18,7 @@ const { title, description } = defineProps<{
       headline: 'mb-6',
       title: 'text-left text-4xl font-(family-name:--font-geist-mono)',
       description: 'text-left max-w-lg font-(family-name:--font-geist-mono)',
-      links: 'gap-1 justify-start -ms-2.5'
+      links: 'gap-1 justify-start -ms-2.5',
     }"
   >
     <template #top>

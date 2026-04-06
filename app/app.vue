@@ -1,30 +1,28 @@
 <script setup lang="ts">
-const { seo } = useAppConfig()
-const site = useSiteConfig()
+const { seo } = useAppConfig();
+const site = useSiteConfig();
 
-const { data: navigation } = await useAsyncData('navigation', () => queryCollectionNavigation('docs'))
+const { data: navigation } = await useAsyncData('navigation', () => queryCollectionNavigation('docs'));
 const { data: files } = useLazyAsyncData('search', () => queryCollectionSearchSections('docs'), {
-  server: false
-})
+  server: false,
+});
 
-const siteUrl = site.url || 'https://vercube.dev'
-const siteName = seo?.siteName || 'Vercube'
+const siteUrl = site.url || 'https://vercube.dev';
+const siteName = seo?.siteName || 'Vercube';
 
 useHead({
-  meta: [
-    { name: 'viewport', content: 'width=device-width, initial-scale=1' }
-  ],
+  meta: [{ name: 'viewport', content: 'width=device-width, initial-scale=1' }],
   link: [
     { rel: 'icon', type: 'image/png', href: '/favicon-96x96.png', sizes: '96x96' },
     { rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg' },
     { rel: 'shortcut icon', href: '/favicon.ico' },
     { rel: 'apple-touch-icon', sizes: '180x180', href: '/apple-touch-icon.png' },
-    { rel: 'manifest', href: '/site.webmanifest' }
+    { rel: 'manifest', href: '/site.webmanifest' },
   ],
   htmlAttrs: {
-    lang: 'en'
-  }
-})
+    lang: 'en',
+  },
+});
 
 useSeoMeta({
   // Global defaults
@@ -76,9 +74,9 @@ useSeoMeta({
     'api framework',
     'modern javascript',
     'type-safe',
-    'zero-config'
-  ].join(', ')
-})
+    'zero-config',
+  ].join(', '),
+});
 
 // Global JSON-LD structured data
 useHead({
@@ -88,48 +86,48 @@ useHead({
       innerHTML: JSON.stringify({
         '@context': 'https://schema.org',
         '@type': 'WebSite',
-        'name': 'Vercube',
-        'url': siteUrl,
-        'potentialAction': {
+        name: 'Vercube',
+        url: siteUrl,
+        potentialAction: {
           '@type': 'SearchAction',
-          'target': {
+          target: {
             '@type': 'EntryPoint',
-            'urlTemplate': `${siteUrl}/docs?q={search_term_string}`
+            urlTemplate: `${siteUrl}/docs?q={search_term_string}`,
           },
-          'query-input': 'required name=search_term_string'
-        }
-      })
+          'query-input': 'required name=search_term_string',
+        },
+      }),
     },
     {
       type: 'application/ld+json',
       innerHTML: JSON.stringify({
         '@context': 'https://schema.org',
         '@type': 'SoftwareApplication',
-        'name': 'Vercube',
-        'applicationCategory': 'DeveloperApplication',
-        'operatingSystem': 'Node.js, Bun, Deno',
-        'url': siteUrl,
-        'author': {
+        name: 'Vercube',
+        applicationCategory: 'DeveloperApplication',
+        operatingSystem: 'Node.js, Bun, Deno',
+        url: siteUrl,
+        author: {
           '@type': 'Organization',
-          'name': 'Vercube',
-          'url': 'https://github.com/vercube'
+          name: 'Vercube',
+          url: 'https://github.com/vercube',
         },
-        'offers': {
+        offers: {
           '@type': 'Offer',
-          'price': '0',
-          'priceCurrency': 'USD'
+          price: '0',
+          priceCurrency: 'USD',
         },
-        'aggregateRating': {
+        aggregateRating: {
           '@type': 'AggregateRating',
-          'ratingValue': '5',
-          'ratingCount': '1'
-        }
-      })
-    }
-  ]
-})
+          ratingValue: '5',
+          ratingCount: '1',
+        },
+      }),
+    },
+  ],
+});
 
-provide('navigation', navigation)
+provide('navigation', navigation);
 </script>
 
 <template>

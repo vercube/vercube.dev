@@ -7,7 +7,7 @@
         list: 'rounded-full bg-[#262626]/80',
         trigger: 'group data-[state=active]:text-highlighted',
         indicator: 'bg-default rounded-full',
-        content: 'border-none bg-transparent/50'
+        content: 'border-none bg-transparent/50',
       }"
     >
       <template #content="{ item, index }">
@@ -18,14 +18,16 @@
 </template>
 
 <script setup lang="ts">
-const { data: page } = await useAsyncData('hero', () => queryCollection('index').first())
+const { data: page } = await useAsyncData('hero', () => queryCollection('index').first());
 
 if (!page.value) {
-  throw createError({ statusCode: 404, statusMessage: 'Page not found', fatal: true })
+  throw createError({ statusCode: 404, statusMessage: 'Page not found', fatal: true });
 }
 
-const tabs = computed(() => page.value?.hero.tabs.map(tab => ({
-  label: tab.title,
-  content: tab.content
-})))
+const tabs = computed(() =>
+  page.value?.hero.tabs.map((tab) => ({
+    label: tab.title,
+    content: tab.content,
+  })),
+);
 </script>

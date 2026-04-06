@@ -1,18 +1,18 @@
 <script setup lang="ts">
-import type { Collections } from '@nuxt/content'
+import type { Collections } from '@nuxt/content';
 
 const { post } = defineProps<{
-  post: Collections['blog']
-  to: string
-}>()
+  post: Collections['blog'];
+  to: string;
+}>();
 
 const formatDate = (dateString: string) => {
   return new Date(dateString).toLocaleDateString('en-US', {
     year: 'numeric',
     month: 'short',
-    day: 'numeric'
-  })
-}
+    day: 'numeric',
+  });
+};
 </script>
 
 <template>

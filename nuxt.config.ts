@@ -1,4 +1,5 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
+// @ts-nocheck — `.nuxt/schema/nuxt.schema.d.ts` can merge `NuxtConfig` as `{}` when only `appConfig` keys are customized; runtime config stays valid.
 export default defineNuxtConfig({
   modules: [
     '@nuxt/image',
@@ -45,6 +46,12 @@ export default defineNuxtConfig({
     '/': { prerender: true },
     '/docs': { redirect: { statusCode: 301, to: '/docs/getting-started' } },
     '/docs/**': { prerender: false },
+    // Always SSR: prerender crawl would freeze GitHub releases at build time.
+    '/changelog': { prerender: false },
+    // nuxt-og-image browser renderer needs a real browser at build time; generate at runtime instead.
+    '/_og/**': { prerender: false },
+    // Crawled from /; some upstream docs AST breaks minimark stringify during static generation.
+    '/raw/**': { prerender: false },
   },
 
   compatibilityDate: '2025-10-01',
@@ -61,6 +68,12 @@ export default defineNuxtConfig({
     provider: 'iconify',
   },
 
+  // GitHub Pages is static-only: there is no Nitro server for `/_ipx/*`. Use direct asset URLs when
+  // `DEPLOY_TARGET=github-pages` (set in deploy workflow). Local dev keeps default `ipx`.
+  image: {
+    provider: process.env.DEPLOY_TARGET === 'github-pages' ? 'none' : 'ipx',
+  },
+
   llms: {
     domain: 'https://vercube.dev/',
     title: 'Vercube',
@@ -72,14 +85,7 @@ export default defineNuxtConfig({
   },
 
   ogImage: {
-    debug: true,
-    fonts: [
-      {
-        name: 'Geist Mono',
-        path: '/fonts/GeistMono-Regular.ttf',
-        weight: 400,
-        style: 'normal',
-      },
-    ],
+    // v6: avoid exposing /_og/debug.json in production
+    debug: false,
   },
 });
