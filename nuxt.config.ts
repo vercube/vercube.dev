@@ -45,8 +45,10 @@ export default defineNuxtConfig({
   routeRules: {
     '/': { prerender: true },
     '/docs': { redirect: { statusCode: 301, to: '/docs/getting-started' } },
-    '/docs/**': { prerender: false },
-    // Always SSR: prerender crawl would freeze GitHub releases at build time.
+    // Static hosting (GitHub Pages): docs must be prerendered so crawlers and OG validators get real
+    // HTML with meta tags. Client-only shells look “empty” to bots.
+    '/docs/**': { prerender: true },
+    // Fresh GitHub releases: keep SSR-only (no frozen HTML at build).
     '/changelog': { prerender: false },
     // nuxt-og-image browser renderer needs a real browser at build time; generate at runtime instead.
     '/_og/**': { prerender: false },
@@ -58,9 +60,14 @@ export default defineNuxtConfig({
 
   nitro: {
     prerender: {
-      routes: ['/'],
+      // Seed docs so the crawler can follow sidebar/nav links to every page.
+      routes: ['/', '/docs/getting-started'],
       crawlLinks: true,
       autoSubfolderIndex: false,
+      // Nav includes parent paths without a markdown file (e.g. /docs/modules); crawlers still 404 those.
+      failOnError: false,
+      // IPX URLs are not static files; skip prerendering them (images use `none` provider on GitHub Pages).
+      ignore: ['/_ipx'],
     },
   },
 

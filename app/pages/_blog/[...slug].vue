@@ -15,7 +15,7 @@ if (!page.value) {
 // if (page.value.image) {
 //   defineOgImage({ url: page.value.image })
 // } else {
-//   defineOgImageComponent('Docs', {
+//   defineOgImage('Docs', {
 //     headline: breadcrumb.value.map(item => item.label).join(' > ')
 //   }, {
 //     fonts: ['Geist:400', 'Geist:600']

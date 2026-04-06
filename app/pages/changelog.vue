@@ -22,7 +22,7 @@ useSeoMeta({
   ogDescription: description,
 });
 
-defineOgImageComponent('DocsBrowser', {
+defineOgImage('DocsBrowser', {
   headline: 'Vercube',
   title: 'Changelog',
   description: 'Track our journey with a detailed history of updates, improvements, and new features.',

@@ -35,7 +35,7 @@ const siteUrl = site.url || 'https://vercube.dev';
 const canonicalUrl = `${siteUrl}${route.path}`;
 
 // Define OG Image component for homepage
-defineOgImageComponent(
+defineOgImage(
   'DocsBrowser',
   {
     headline: 'Next generation server framework',

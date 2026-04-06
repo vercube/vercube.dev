@@ -35,7 +35,7 @@ const breadcrumb: ComputedRef<BreadcrumbLink[]> = computed(() =>
   })),
 );
 
-defineOgImageComponent(
+defineOgImage(
   'DocsBrowser',
   {
     headline: breadcrumb.value.map((item: BreadcrumbLink) => item.label).join(' > '),
@@ -57,7 +57,7 @@ useSeoMeta({
   ogTitle: titleTemplate.value?.includes('%s') ? titleTemplate.value.replace('%s', title) : title,
 });
 
-defineOgImageComponent(
+defineOgImage(
   'DocsBrowser',
   {
     headline: breadcrumb.value.length ? breadcrumb.value.map((link: BreadcrumbLink) => link.label).join(' > ') : '',
