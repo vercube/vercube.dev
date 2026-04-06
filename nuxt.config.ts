@@ -1,5 +1,10 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 // @ts-nocheck — `.nuxt/schema/nuxt.schema.d.ts` can merge `NuxtConfig` as `{}` when only `appConfig` keys are customized; runtime config stays valid.
+
+// Set early so nuxt-og-image resolves `nitro-prerender` compatibility instead of the unknown
+// `github-pages` preset (the preset applies `static: true` after some module hooks run).
+const isGithubPagesDeploy = process.env.DEPLOY_TARGET === 'github-pages';
+
 export default defineNuxtConfig({
   modules: [
     '@nuxt/image',
@@ -59,6 +64,7 @@ export default defineNuxtConfig({
   compatibilityDate: '2025-10-01',
 
   nitro: {
+    ...(isGithubPagesDeploy ? { static: true } : {}),
     prerender: {
       // Seed docs so the crawler can follow sidebar/nav links to every page.
       routes: ['/', '/docs/getting-started'],
