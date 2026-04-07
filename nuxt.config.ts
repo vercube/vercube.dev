@@ -50,6 +50,18 @@ export default defineNuxtConfig({
   routeRules: {
     '/': { prerender: true },
     '/docs': { redirect: { statusCode: 301, to: '/docs/getting-started' } },
+    '/docs/contributing': {
+      redirect: { statusCode: 301, to: 'https://github.com/vercube/vercube/blob/main/CONTRIBUTING.md' },
+    },
+    '/docs/core-features': { redirect: { statusCode: 301, to: '/docs/core-features/configuration' } },
+    '/docs/modules': { redirect: { statusCode: 301, to: '/docs/modules/mcp' } },
+    '/docs/advanced': { redirect: { statusCode: 301, to: '/docs/advanced/custom-decorator' } },
+    '/docs/modules/web-sockets': { redirect: { statusCode: 301, to: '/docs/modules/web-sockets/overview' } },
+    '/docs/modules/auth': { redirect: { statusCode: 301, to: '/docs/modules/auth/overview' } },
+    '/docs/modules/storage': { redirect: { statusCode: 301, to: '/docs/modules/storage/overview' } },
+    '/docs/modules/logger': { redirect: { statusCode: 301, to: '/docs/modules/logger/overview' } },
+    '/docs/modules/serverless': { redirect: { statusCode: 301, to: '/docs/modules/serverless/overview' } },
+    '/docs/core/validation': { redirect: { statusCode: 301, to: '/docs/core-features/validation' } },
     // Static hosting (GitHub Pages): docs must be prerendered so crawlers and OG validators get real
     // HTML with meta tags. Client-only shells look “empty” to bots.
     '/docs/**': { prerender: true },

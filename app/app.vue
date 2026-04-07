@@ -1,8 +1,17 @@
 <script setup lang="ts">
+import { stripFolderOnlyNavPaths } from '~/utils/sanitize-docs-navigation';
+
 const { seo } = useAppConfig();
 const site = useSiteConfig();
 
 const { data: navigation } = await useAsyncData('navigation', () => queryCollectionNavigation('docs'));
+const { data: docsPathRows } = await useAsyncData('docs-path-index', () => queryCollection('docs').select('path').all());
+
+const docsPathSet = computed(
+  () => new Set((docsPathRows.value ?? []).map((row) => row.path).filter(Boolean) as string[]),
+);
+
+const navigationDisplay = computed(() => stripFolderOnlyNavPaths(navigation.value ?? [], docsPathSet.value));
 const { data: files } = useLazyAsyncData('search', () => queryCollectionSearchSections('docs'), {
   server: false,
 });
@@ -128,6 +137,7 @@ useHead({
 });
 
 provide('navigation', navigation);
+provide('navigationDisplay', navigationDisplay);
 </script>
 
 <template>
@@ -143,7 +153,7 @@ provide('navigation', navigation);
     <AppFooter />
 
     <ClientOnly>
-      <LazyUContentSearch :files="files" :navigation="navigation" />
+      <LazyUContentSearch :files="files" :navigation="navigationDisplay" />
     </ClientOnly>
   </UApp>
 </template>

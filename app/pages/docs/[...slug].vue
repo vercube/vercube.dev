@@ -17,6 +17,11 @@ const navigation = inject<Ref<ContentNavigationItem[]>>('navigation', ref([]));
 
 const route = useRoute();
 
+const { data: docsPathRows } = await useAsyncData('docs-path-index', () => queryCollection('docs').select('path').all());
+const docsPathSet = computed(
+  () => new Set((docsPathRows.value ?? []).map((row) => row.path).filter(Boolean) as string[]),
+);
+
 const { data: page } = await useAsyncData(kebabCase(route.path), () => queryCollection('docs').path(route.path).first());
 if (!page.value) {
   throw createError({ statusCode: 404, statusMessage: 'Page not found', fatal: true });
@@ -28,10 +33,14 @@ const { data: surround } = await useAsyncData(`${kebabCase(route.path)}-surround
   });
 });
 
+const surroundDisplay = computed(() =>
+  (surround.value ?? []).filter((item) => item?.path && docsPathSet.value.has(item.path)),
+);
+
 const breadcrumb: ComputedRef<BreadcrumbLink[]> = computed(() =>
   mapContentNavigation(findPageBreadcrumb(navigation.value, page.value?.path)).map((link) => ({
     label: link.label,
-    to: link.to,
+    to: link.to && docsPathSet.value.has(link.to) ? link.to : undefined,
   })),
 );
 
@@ -97,7 +106,8 @@ const communityLinks = computed(() => [
   {
     icon: 'i-heroicons-lifebuoy-solid',
     label: 'Contributing',
-    to: '/docs/contributing',
+    to: 'https://github.com/vercube/vercube/blob/main/CONTRIBUTING.md',
+    target: '_blank',
   },
 ]);
 </script>
@@ -134,7 +144,7 @@ const communityLinks = computed(() => [
             </UButton>
           </div>
         </AppDivider>
-        <AppSurround :surround="surround as any" />
+        <AppSurround :surround="surroundDisplay as any" />
       </div>
     </UPageBody>
 

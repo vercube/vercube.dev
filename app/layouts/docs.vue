@@ -1,8 +1,13 @@
 <script setup lang="ts">
 import type { ContentNavigationItem } from '@nuxt/content';
 
-const navigation = inject<Ref<ContentNavigationItem[]>>('navigation', ref([]));
-const docsNavigation = computed(() => navigation.value.find((item) => item.path === '/docs')?.children || []);
+const navigationDisplay = inject<ComputedRef<ContentNavigationItem[]>>(
+  'navigationDisplay',
+  computed(() => []),
+);
+const docsNavigation = computed(
+  () => navigationDisplay.value.find((item) => item.path === '/docs')?.children || [],
+);
 </script>
 
 <template>

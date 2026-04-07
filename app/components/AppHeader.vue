@@ -33,7 +33,7 @@
     </template>
 
     <template #body>
-      <UContentNavigation highlight :navigation="navigation" />
+      <UContentNavigation highlight :navigation="mobileNavigation" />
     </template>
   </UHeader>
 </template>
@@ -41,7 +41,12 @@
 <script setup lang="ts">
 import type { ContentNavigationItem } from '@nuxt/content';
 
-const navigation = inject<Ref<ContentNavigationItem[]>>('navigation');
+const navigation = inject<Ref<ContentNavigationItem[]>>('navigation', ref([]));
+const navigationDisplay = inject<ComputedRef<ContentNavigationItem[]>>('navigationDisplay');
+
+const mobileNavigation = computed(
+  () => navigationDisplay?.value ?? navigation.value,
+);
 
 const { header } = useAppConfig();
 </script>

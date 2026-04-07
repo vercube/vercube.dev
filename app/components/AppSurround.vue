@@ -5,8 +5,8 @@ const props = defineProps<{
   surround: ContentNavigationItem[];
 }>();
 
-const prev = computed(() => props.surround[0]);
-const next = computed(() => props.surround[1]);
+const prev = computed(() => (props.surround[0]?.path ? props.surround[0] : null));
+const next = computed(() => (props.surround[1]?.path ? props.surround[1] : null));
 </script>
 
 <template>
