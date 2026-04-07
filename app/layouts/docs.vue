@@ -6,7 +6,10 @@ const navigationDisplay = inject<ComputedRef<ContentNavigationItem[]>>(
   computed(() => []),
 );
 const docsNavigation = computed(
-  () => navigationDisplay.value.find((item) => item.path === '/docs')?.children || [],
+  () =>
+    navigationDisplay.value.find((item) => item.path === '/docs')?.children ||
+    navigationDisplay.value.find((item) => item.children?.length)?.children ||
+    [],
 );
 </script>
 
