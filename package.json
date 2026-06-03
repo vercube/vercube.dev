@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "build": "nuxt build",
-    "dev": "nuxt dev",
+    "dev": "TMPDIR=/tmp nuxt dev",
     "preview": "nuxt preview",
     "start": "node .output/server/index.mjs",
     "test:lint": "oxlint . && oxfmt --check",
@@ -15,29 +15,30 @@
   },
   "dependencies": {
     "@googlemaps/markerclusterer": "2.6.2",
-    "@iconify-json/lucide": "1.2.101",
-    "@iconify-json/simple-icons": "1.2.76",
-    "@iconify-json/vscode-icons": "1.2.45",
-    "@nuxt/content": "3.12.0",
+    "@iconify-json/lucide": "1.2.111",
+    "@iconify-json/simple-icons": "1.2.85",
+    "@iconify-json/vscode-icons": "1.2.53",
+    "@nuxt/content": "3.14.0",
     "@nuxt/image": "2.0.0",
-    "@nuxt/scripts": "0.13.2",
-    "@nuxt/ui": "4.6.1",
+    "@nuxt/scripts": "1.2.1",
+    "@nuxt/ui": "4.8.1",
     "@nuxtjs/google-fonts": "3.2.0",
-    "@tresjs/nuxt": "5.6.0",
-    "@unhead/vue": "2.1.13",
-    "better-sqlite3": "12.8.0",
+    "@tresjs/nuxt": "5.6.1",
+    "@unhead/vue": "3.1.1",
+    "better-sqlite3": "12.10.0",
     "maath": "0.10.8",
-    "nuxt": "4.4.2",
+    "nuxt": "4.4.7",
     "nuxt-llms": "0.2.0",
-    "nuxt-og-image": "6.3.2",
-    "three": "0.183.2"
+    "nuxt-og-image": "6.5.1",
+    "three": "0.184.0"
   },
   "devDependencies": {
-    "@types/three": "0.183.1",
-    "oxfmt": "0.43.0",
-    "oxlint": "1.58.0",
-    "typescript": "6.0.2",
-    "vue-tsc": "3.2.6"
+    "@nuxt/fonts": "^0.14.0",
+    "@types/three": "0.184.1",
+    "oxfmt": "0.53.0",
+    "oxlint": "1.68.0",
+    "typescript": "6.0.3",
+    "vue-tsc": "3.3.3"
   },
   "resolutions": {
     "unimport": "4.2.0"

@@ -69,7 +69,7 @@ const formatDate = (dateString: string) => {
           container: 'z-[10] !p-4 !gap-8',
           wrapper: 'relative flex flex-col',
           title: 'text-left text-4xl font-(family-name:--font-geist-mono)',
-          description: 'text-left font-(family-name:--font-geist-mono)',
+          description: 'max-w-3xl text-left font-(family-name:--font-geist-mono)',
           links: 'gap-1 justify-start -ms-2.5',
         }"
       >
@@ -99,7 +99,7 @@ const formatDate = (dateString: string) => {
         </template>
 
         <template #default>
-          <UUser v-if="page.author" variant="outline" v-bind="page.author" />
+          <UUser v-bind="page.author" :description="page.author.to ? `@${page.author.to.split('/').pop()}` : undefined" />
         </template>
       </UPageSection>
     </UContainer>
@@ -110,6 +110,7 @@ const formatDate = (dateString: string) => {
         <AppDivider class="my-10">
           <div class="flex items-center gap-2 text-sm text-muted">
             <UButton
+              v-if="editThisPage && editThisPage.to"
               size="sm"
               variant="link"
               color="neutral"

@@ -8,6 +8,7 @@
     "*.yml",
     "*.yaml",
     "pnpm-lock.yaml",
+    "*.md",
     "*.json", // json files are not supported by oxfmt yet
   ],
 

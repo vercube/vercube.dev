@@ -14,15 +14,7 @@ export default defineNuxtConfig({
     'nuxt-llms',
     '@nuxt/scripts',
     '@tresjs/nuxt',
-    [
-      '@nuxtjs/google-fonts',
-      {
-        subsets: ['latin'],
-        families: {
-          'Geist+Mono': true,
-        },
-      },
-    ],
+    '@nuxt/fonts',
   ],
 
   devtools: {
@@ -87,6 +79,25 @@ export default defineNuxtConfig({
       // IPX URLs are not static files; skip prerendering them (images use `none` provider on GitHub Pages).
       ignore: ['/_ipx'],
     },
+  },
+
+  fonts: {
+    families: [
+      { name: 'Geist', weights: [400, 500, 600, 700], global: true },
+      { name: 'Geist Mono', weights: [400, 500, 600, 700], global: true },
+      {
+        name: 'Geist Pixel Line',
+        src: '/fonts/GeistPixel-Line.woff2',
+        weights: [400, 500, 600, 700],
+        global: true,
+      },
+      {
+        name: 'Geist Pixel Circle',
+        src: '/fonts/GeistPixel-Circle.woff2',
+        weights: [400, 500, 600, 700],
+        global: true,
+      },
+    ],
   },
 
   icon: {
