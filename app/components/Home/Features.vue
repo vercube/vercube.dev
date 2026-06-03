@@ -1,144 +1,139 @@
 <template>
-  <section class="w-full py-32 px-4">
-    <div class="max-w-7xl mx-auto">
-      <div class="text-center mb-20 z-10 relative">
-        <h2 class="text-5xl md:text-6xl mb-6 font-(family-name:--font-geist-mono)">
+  <section class="w-full px-6 py-32">
+    <div class="mx-auto max-w-6xl">
+      <div class="reveal mx-auto mb-16 max-w-2xl text-center">
+        <h2 class="text-4xl sm:text-5xl font-(family-name:--font-geist-pixel-circle)">
           <span class="text-foreground">Built for </span>
-          <span class="bg-gradient-to-r from-[#bc4eff] to-purple-400 bg-clip-text text-transparent"> modern development </span>
+          <span class="text-[#bc4eff]">modern development</span>
         </h2>
-
-        <p class="text-balance text-foreground/60 font-(family-name:--font-geist-mono) mmax-w-2xl mx-auto">
-          Vercube makes building server applications simple, fast, and enjoyable
+        <p class="mt-5 text-foreground/60 font-(family-name:--font-geist-mono) text-balance">
+          Everything you need to ship fast, type-safe servers, and nothing you don't.
         </p>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div
-          v-for="(feature, index) in features"
-          :key="index"
-          :class="[
-            'group relative rounded-2xl border border-muted/30 border-border/50 bg-background/50 backdrop-blur-sm p-8 transition-all duration-300 hover:border-accent/50 hover:bg-background/80 overflow-hidden',
-            getGridClass(index),
-          ]"
-          @mouseenter="setHoveredIndex(index)"
-          @mouseleave="setHoveredIndex(null)"
-        >
-          <div
-            v-if="hoveredIndex === index"
-            class="absolute inset-0 pointer-events-none rounded-2xl z-0 transition-all duration-[1500ms] ease-out"
-            :style="getHoverStyle(feature.accentColor)"
-          />
-
-          <div
-            :class="[
-              'mb-6 transition-transform duration-300 relative z-10',
-              hoveredIndex === index && index !== 3 ? 'scale-110' : 'scale-100',
-            ]"
-          >
-            <component :is="feature.icon" />
+      <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <!-- Routing (wide) -->
+        <article class="reveal tile md:col-span-2">
+          <div class="tile-visual">
+            <HomeFeaturesRoutingVisual class="w-full max-w-xs" />
           </div>
+          <h3 class="tile-title">Decorator-based routing</h3>
+          <p class="tile-desc">Declarative controllers and method decorators map requests to handlers, with zero boilerplate.</p>
+        </article>
 
-          <div class="relative z-10">
-            <h3 class="text-2xl font-bold mb-3 text-foreground font-mono">
-              {{ feature.title }}
-            </h3>
-            <p class="text-muted leading-relaxed font-mono">
-              {{ feature.description }}
-            </p>
+        <!-- Blazing Fast -->
+        <article class="reveal tile">
+          <div class="tile-visual">
+            <HomeFeaturesSpeedVisual />
           </div>
-        </div>
+          <h3 class="tile-title">Blazing fast</h3>
+          <p class="tile-desc">Powered by Rolldown for minimal overhead and instant cold starts.</p>
+        </article>
+
+        <!-- Dependency Injection -->
+        <article class="reveal tile">
+          <div class="tile-visual">
+            <HomeFeaturesInjectionVisual class="w-full" />
+          </div>
+          <h3 class="tile-title">Dependency injection</h3>
+          <p class="tile-desc">Clean, testable, scalable apps thanks to first-class built-in DI.</p>
+        </article>
+
+        <!-- Web-Native HTTP (wide) -->
+        <article class="reveal tile md:col-span-2">
+          <div class="tile-visual">
+            <HomeFeaturesHttpVisual class="w-full max-w-lg" />
+          </div>
+          <h3 class="tile-title">Web-native HTTP</h3>
+          <p class="tile-desc">Build on the platform APIs you already know: Fetch, Request, and Response.</p>
+        </article>
+
+        <!-- ESM-First -->
+        <article class="reveal tile">
+          <div class="tile-visual">
+            <HomeFeaturesEsmVisual />
+          </div>
+          <h3 class="tile-title">ESM-First</h3>
+          <p class="tile-desc">A modern architecture built fully around native ECMAScript modules.</p>
+        </article>
+
+        <!-- Fully Configurable -->
+        <article class="reveal tile">
+          <div class="tile-visual">
+            <HomeFeaturesConfigVisual class="max-w-[220px]" />
+          </div>
+          <h3 class="tile-title">Fully Configurable</h3>
+          <p class="tile-desc">Sensible defaults out of the box, with complete control when you need it.</p>
+        </article>
+
+        <!-- Type-Safe -->
+        <article class="reveal tile md:col-span-2 lg:col-span-1">
+          <div class="tile-visual">
+            <HomeFeaturesTypeVisual />
+          </div>
+          <h3 class="tile-title">Type-Safe by Design</h3>
+          <p class="tile-desc">End-to-end TypeScript with decorators and full type inference.</p>
+        </article>
       </div>
     </div>
   </section>
 </template>
 
-<script setup lang="ts">
-import { ref } from 'vue';
-import BlazingFastIcon from './Features/BlazingFastIcon.vue';
-import DependencyInjectionIcon from './Features/DependencyInjectionIcon.vue';
-import ESMFirstIcon from './Features/ESMFirstIcon.vue';
-import WebNativeHTTPIcon from './Features/WebNativeHTTPIcon.vue';
-
-interface Feature {
-  title: string;
-  description: string;
-  icon: any;
-  accentColor: string;
+<style scoped>
+.tile {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 1.75rem;
+  border: 1px solid rgb(255 255 255 / 0.08);
+  border-radius: 1rem;
+  background: rgb(255 255 255 / 0.02);
+  transition:
+    border-color 0.3s ease,
+    background 0.3s ease;
 }
 
-const hoveredIndex = ref<number | null>(null);
+.tile:hover {
+  border-color: rgb(188 78 255 / 0.3);
+  background: rgb(188 78 255 / 0.03);
+}
 
-const features: Feature[] = [
-  {
-    title: 'Blazing Fast',
-    description: 'Powered by Rolldown for minimal overhead and maximum speed.',
-    accentColor: 'rgb(34, 197, 94)', // green-500
-    icon: BlazingFastIcon,
-  },
-  {
-    title: 'ESM-First',
-    description: 'Modern architecture built fully around native ESM.',
-    accentColor: 'rgb(59, 130, 246)', // blue-500
-    icon: ESMFirstIcon,
-  },
-  {
-    title: 'Dependency Injection Everywhere',
-    description: 'Clean, testable, and scalable apps thanks to built-in DI.',
-    accentColor: 'rgb(168, 85, 247)', // purple-500
-    icon: DependencyInjectionIcon,
-  },
-  {
-    title: 'Web-Native HTTP',
-    description: 'Create servers directly on the platform APIs you know: Fetch, Request, and Response.',
-    accentColor: 'rgb(6, 182, 212)', // cyan-500
-    icon: WebNativeHTTPIcon,
-  },
-];
+.tile::before {
+  content: '';
+  position: absolute;
+  inset-inline: 0;
+  top: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgb(188 78 255 / 0.6), transparent);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
 
-const setHoveredIndex = (index: number | null) => {
-  hoveredIndex.value = index;
-};
+.tile:hover::before {
+  opacity: 1;
+}
 
-const getGridClass = (index: number) => {
-  switch (index) {
-    case 0: {
-      return 'md:col-span-2';
-    }
-    case 1: {
-      return 'md:col-span-1';
-    }
-    case 2: {
-      return 'md:col-span-1';
-    }
-    case 3: {
-      return 'md:col-span-2';
-    }
-    default: {
-      return '';
-    }
-  }
-};
+.tile-visual {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  min-height: 168px;
+  padding-bottom: 1.5rem;
+}
 
-const getHoverStyle = (accentColor: string) => {
-  const rgbToRgba = (rgb: string, opacity: number) => {
-    const match = rgb.match(/\d+/g);
-    if (match) {
-      return `rgba(${match[0]}, ${match[1]}, ${match[2]}, ${opacity})`;
-    }
-    return rgb;
-  };
+.tile-title {
+  margin-bottom: 0.5rem;
+  font-family: var(--font-geist-mono);
+  font-size: 1.05rem;
+  color: var(--foreground);
+}
 
-  return {
-    background: `radial-gradient(400px circle at 50% 0%, ${rgbToRgba(accentColor, 0.5)}, transparent 70%)`,
-    // oxlint-disable-next-line no-negated-condition
-    opacity: hoveredIndex.value !== null ? 1 : 0,
-    // oxlint-disable-next-line no-negated-condition
-    transform: hoveredIndex.value !== null ? 'scale(1)' : 'scale(0.3)',
-    transformOrigin: '50% 0%',
-    maskImage: 'linear-gradient(black, black) content-box, linear-gradient(black, black)',
-    maskComposite: 'exclude',
-    WebkitMaskComposite: 'xor',
-    padding: '1px',
-  };
-};
-</script>
+.tile-desc {
+  font-family: var(--font-geist-mono);
+  font-size: 0.85rem;
+  line-height: 1.6;
+  color: rgb(255 255 255 / 0.55);
+}
+</style>

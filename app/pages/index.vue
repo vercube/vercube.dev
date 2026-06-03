@@ -1,14 +1,8 @@
 <template>
-  <ClientOnly>
-    <template #fallback>
-      <div class="fixed inset-0 bg-black" />
-    </template>
-    <HomeBackground />
-  </ClientOnly>
-  <div class="fixed inset-0 bg-gradient-to-r from-[#000] via-[#000]/50 to-transparent pointer-events-none" />
   <HomeNav />
   <HomeHero />
   <HomeFeatures />
+  <HomeBenchmarks />
   <HomeSponsorship />
 </template>
 

@@ -37,6 +37,7 @@ export default defineContentConfig({
           tabs: z.array(
             z.object({
               title: z.string(),
+              file: z.string(),
               content: z.string(),
             }),
           ),
