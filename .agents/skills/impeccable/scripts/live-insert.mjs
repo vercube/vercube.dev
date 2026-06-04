@@ -123,7 +123,7 @@ Output (JSON):
   }
 
   const id = argVal(args, '--id');
-  const count = parseInt(argVal(args, '--count') || '3', 10);
+  const count = Number.parseInt(argVal(args, '--count') || '3', 10);
   const position = argVal(args, '--position');
   const elementId = argVal(args, '--element-id');
   const classes = argVal(args, '--classes');
@@ -171,7 +171,7 @@ Output (JSON):
     process.exit(1);
   }
 
-  const content = fs.readFileSync(targetFile, 'utf-8');
+  const content = fs.readFileSync(targetFile, 'utf8');
   const lines = content.split('\n');
   const resolved = resolveElementMatch({ lines, queries, tag, text });
 
@@ -249,7 +249,7 @@ Output (JSON):
     ...wrapperLines,
     ...lines.slice(spliceIndex),
   ];
-  fs.writeFileSync(targetFile, newLines.join('\n'), 'utf-8');
+  fs.writeFileSync(targetFile, newLines.join('\n'), 'utf8');
 
   const insertLine = spliceIndex + 3;
 

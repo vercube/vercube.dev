@@ -79,7 +79,7 @@ if (IS_BROWSER) {
       display: none !important;
     }
   `;
-  (document.head || document.documentElement).appendChild(styleEl);
+  (document.head || document.documentElement).append(styleEl);
 
   // Spotlight backdrop element (created lazily on first use)
   let spotlightBackdrop = null;
@@ -89,7 +89,7 @@ if (IS_BROWSER) {
     if (!spotlightBackdrop) {
       spotlightBackdrop = document.createElement('div');
       spotlightBackdrop.className = 'impeccable-spotlight-backdrop';
-      document.body.appendChild(spotlightBackdrop);
+      document.body.append(spotlightBackdrop);
     }
     return spotlightBackdrop;
   }
@@ -241,7 +241,7 @@ if (IS_BROWSER) {
       delete overlay._targetEl._impeccableOverlay;
     }
     const idx = overlays.indexOf(overlay);
-    if (idx >= 0) overlays.splice(idx, 1);
+    if (idx !== -1) overlays.splice(idx, 1);
     overlay.remove();
   }
 
@@ -300,7 +300,7 @@ if (IS_BROWSER) {
     const textSpan = document.createElement('span');
     textSpan.style.padding = '3px 8px';
     textSpan.textContent = allText;
-    label.appendChild(textSpan);
+    label.append(textSpan);
 
     // State for cycling mode
     let cycleMode = false;
@@ -349,14 +349,14 @@ if (IS_BROWSER) {
         updateCycleText();
       });
 
-      navGroup.appendChild(prevBtn);
-      navGroup.appendChild(nextBtn);
+      navGroup.append(prevBtn);
+      navGroup.append(nextBtn);
       label.insertBefore(navGroup, textSpan);
       textSpan.style.padding = '3px 8px 3px 4px';
       updateCycleText();
     }
 
-    outline.appendChild(label);
+    outline.append(label);
 
     // Start hidden; the IntersectionObserver will show it once the target is rendered
     outline.style.display = 'none';
@@ -401,12 +401,12 @@ if (IS_BROWSER) {
       el.removeEventListener('mouseleave', onMouseLeave);
     };
 
-    document.body.appendChild(outline);
+    document.body.append(outline);
     overlays.push(outline);
   };
 
   const showPageBanner = function(findings) {
-    if (!findings.length) return;
+    if (findings.length === 0) return;
     const banner = document.createElement('div');
     banner.className = 'impeccable-overlay impeccable-banner';
     Object.assign(banner.style, {
@@ -439,9 +439,9 @@ if (IS_BROWSER) {
         borderRadius: '3px', fontSize: '12px', fontFamily: 'ui-monospace, monospace',
         whiteSpace: 'nowrap', flexShrink: '0', scrollSnapAlign: 'start',
       });
-      scrollArea.appendChild(tag);
+      scrollArea.append(tag);
     }
-    banner.appendChild(scrollArea);
+    banner.append(scrollArea);
 
     // Controls area (only in standalone mode, not extension)
     if (!EXTENSION_MODE) {
@@ -467,22 +467,22 @@ if (IS_BROWSER) {
         toggle.textContent = overlaysVisible ? '\u25C9' : '\u25CB'; // filled vs empty circle
         toggle.style.opacity = overlaysVisible ? '0.85' : '0.5';
       });
-      controls.appendChild(toggle);
+      controls.append(toggle);
 
       // Close button
       const close = document.createElement('button');
-      close.textContent = '\u00d7';
+      close.textContent = '\u00D7';
       close.title = 'Dismiss banner';
       Object.assign(close.style, {
         background: 'none', border: 'none',
         color: 'white', fontSize: '18px', cursor: 'pointer', padding: '0 4px',
       });
       close.addEventListener('click', () => banner.remove());
-      controls.appendChild(close);
+      controls.append(close);
 
-      banner.appendChild(controls);
+      banner.append(controls);
     }
-    document.body.appendChild(banner);
+    document.body.append(banner);
     overlays.push(banner);
   };
 
@@ -617,7 +617,7 @@ if (IS_BROWSER) {
         if (/url\s*\(/i.test(bgImage)) reasons.add('image background');
         if (/gradient/i.test(bgImage)) reasons.add('gradient background');
       }
-      if (parseFloat(currentStyle.opacity) < 0.99) reasons.add('opacity stack');
+      if (Number.parseFloat(currentStyle.opacity) < 0.99) reasons.add('opacity stack');
       if (currentStyle.mixBlendMode && currentStyle.mixBlendMode !== 'normal') reasons.add('blend mode');
       if (currentStyle.filter && currentStyle.filter !== 'none') reasons.add('filter');
       if (currentStyle.backdropFilter && currentStyle.backdropFilter !== 'none') reasons.add('backdrop filter');
@@ -638,7 +638,7 @@ if (IS_BROWSER) {
         if (x < 0 || y < 0 || x > window.innerWidth || y > window.innerHeight) continue;
         const stack = document.elementsFromPoint(x, y);
         const selfIndex = stack.findIndex(node => node === el || el.contains(node) || node.contains?.(el));
-        if (selfIndex < 0) continue;
+        if (selfIndex === -1) continue;
         for (const node of stack.slice(selfIndex + 1)) {
           const nodeTag = node.tagName?.toLowerCase();
           if (nodeTag === 'img' || nodeTag === 'picture' || nodeTag === 'video' || nodeTag === 'canvas' || nodeTag === 'svg') {
@@ -680,10 +680,10 @@ if (IS_BROWSER) {
       if (reasons.length === 0) continue;
 
       const textColor = parseRgb(style.color);
-      const fontSize = parseFloat(style.fontSize) || 16;
-      const fontWeight = parseInt(style.fontWeight) || 400;
+      const fontSize = Number.parseFloat(style.fontSize) || 16;
+      const fontWeight = Number.parseInt(style.fontWeight) || 400;
       const isLargeText = fontSize >= WCAG_LARGE_TEXT_PX || (fontSize >= WCAG_LARGE_BOLD_TEXT_PX && fontWeight >= 700);
-      const threshold = isLargeText ? 3.0 : 4.5;
+      const threshold = isLargeText ? 3 : 4.5;
       const clip = {
         x: Math.max(0, Math.floor(rect.left + window.scrollX - 2)),
         y: Math.max(0, Math.floor(rect.top + window.scrollY - 2)),
@@ -735,7 +735,7 @@ if (IS_BROWSER) {
 
   function pickWorstContrastColor(textColor, colors) {
     const usable = (colors || []).filter(Boolean);
-    if (!usable.length) return null;
+    if (usable.length === 0) return null;
     let worst = usable[0];
     let worstRatio = contrastRatio(textColor, worst);
     for (const color of usable.slice(1)) {
@@ -762,11 +762,11 @@ if (IS_BROWSER) {
     if (!token || token === 'center') return (container - painted) / 2;
     if (token === 'left' || token === 'top') return 0;
     if (token === 'right' || token === 'bottom') return container - painted;
-    if (/%$/.test(token)) {
-      const pct = parseFloat(token) / 100;
+    if (token.endsWith('%')) {
+      const pct = Number.parseFloat(token) / 100;
       return (container - painted) * pct;
     }
-    if (/px$/.test(token)) return parseFloat(token) || 0;
+    if (token.endsWith('px')) return Number.parseFloat(token) || 0;
     return (container - painted) / 2;
   }
 
@@ -797,11 +797,11 @@ if (IS_BROWSER) {
       const parts = size.split(/\s+/);
       const widthToken = parts[0];
       const heightToken = parts[1] || 'auto';
-      if (/%$/.test(widthToken)) paintedWidth = containerRect.width * (parseFloat(widthToken) / 100);
-      else if (/px$/.test(widthToken)) paintedWidth = parseFloat(widthToken) || paintedWidth;
+      if (widthToken.endsWith('%')) paintedWidth = containerRect.width * (Number.parseFloat(widthToken) / 100);
+      else if (widthToken.endsWith('px')) paintedWidth = Number.parseFloat(widthToken) || paintedWidth;
       if (heightToken === 'auto') paintedHeight = paintedWidth * (intrinsicHeight / intrinsicWidth);
-      else if (/%$/.test(heightToken)) paintedHeight = containerRect.height * (parseFloat(heightToken) / 100);
-      else if (/px$/.test(heightToken)) paintedHeight = parseFloat(heightToken) || paintedHeight;
+      else if (heightToken.endsWith('%')) paintedHeight = containerRect.height * (Number.parseFloat(heightToken) / 100);
+      else if (heightToken.endsWith('px')) paintedHeight = Number.parseFloat(heightToken) || paintedHeight;
     }
 
     const [xToken, yToken] = parsePositionPair(positionValue);
@@ -908,10 +908,10 @@ if (IS_BROWSER) {
           status: 'sampled',
           color: { r: data[0], g: data[1], b: data[2], a: data[3] / 255 },
         };
-      } catch (err) {
+      } catch (error) {
         return {
           status: 'unresolved',
-          reason: /taint|cross-origin|Security/i.test(err?.message || '') ? 'tainted image' : 'image sample failed',
+          reason: /taint|cross-origin|Security/i.test(error?.message || '') ? 'tainted image' : 'image sample failed',
         };
       }
     }
@@ -942,8 +942,8 @@ if (IS_BROWSER) {
         status: 'sampled',
         color: { r: data[0], g: data[1], b: data[2], a: data[3] / 255 },
       };
-    } catch (err) {
-      const reason = /taint|cross-origin|Security/i.test(err?.message || '') ? 'tainted image' : 'image sample failed';
+    } catch (error) {
+      const reason = /taint|cross-origin|Security/i.test(error?.message || '') ? 'tainted image' : 'image sample failed';
       visualContrastRasterCache.set(drawable, { ctx: null, reason });
       return {
         status: 'unresolved',
@@ -1030,7 +1030,7 @@ if (IS_BROWSER) {
       ? document.elementsFromPoint(point.x, point.y)
       : [];
     const selfIndex = stack.findIndex(node => node === el || el.contains(node));
-    const nodes = selfIndex >= 0 ? stack.slice(selfIndex) : [el, ...stack];
+    const nodes = selfIndex !== -1 ? stack.slice(selfIndex) : [el, ...stack];
     const unresolved = [];
 
     for (const node of nodes) {
@@ -1261,7 +1261,7 @@ if (IS_BROWSER) {
   function collectBrowserFindings() {
     const groupMap = new Map();
     const _disabled = EXTENSION_MODE ? (window.__IMPECCABLE_CONFIG__?.disabledRules || []) : [];
-    const _ruleOk = (id) => !_disabled.length || !_disabled.includes(id);
+    const _ruleOk = (id) => _disabled.length === 0 || !_disabled.includes(id);
     // Note: provider-gated rules (--gpt / --gemini) are NOT filtered here. In a
     // real browser env (detector page, live overlay, extension) running every
     // check is free, so we always surface them; the gating is purely a CLI
@@ -1403,7 +1403,7 @@ if (IS_BROWSER) {
       return;
     }
     const idx = lastVisualContrastAnalyses.findIndex(item => item.selector === result.selector);
-    if (idx >= 0) lastVisualContrastAnalyses[idx] = result;
+    if (idx !== -1) lastVisualContrastAnalyses[idx] = result;
     else lastVisualContrastAnalyses.push(result);
   }
 
@@ -1514,8 +1514,8 @@ if (IS_BROWSER) {
               }));
             }
           })
-          .catch(err => {
-            reportVisualContrastError(err, { selector: candidate.selector });
+          .catch(error => {
+            reportVisualContrastError(error, { selector: candidate.selector });
           })
           .finally(() => {
             lazyVisualContrastResolving.delete(el);
@@ -1613,8 +1613,8 @@ if (IS_BROWSER) {
         .then(() => {
           if (generation === scanGeneration) postSerializedFindings(collected.groupMap, options);
         })
-        .catch(err => {
-          reportVisualContrastError(err);
+        .catch(error => {
+          reportVisualContrastError(error);
         });
     }
     return allFindings;
@@ -1656,8 +1656,8 @@ if (IS_BROWSER) {
         if (e.data.config) window.__IMPECCABLE_CONFIG__ = e.data.config;
         try {
           scan(e.data.config || {});
-        } catch (err) {
-          postExtensionError(err);
+        } catch (error) {
+          postExtensionError(error);
         }
       }
       if (e.data.action === 'toggle-overlays') {
@@ -1711,8 +1711,8 @@ if (IS_BROWSER) {
       const runAutoScan = () => {
         try {
           scan();
-        } catch (err) {
-          console.warn('[impeccable] scan failed', err);
+        } catch (error) {
+          console.warn('[impeccable] scan failed', error);
         }
       };
       if (document.readyState === 'loading') {
@@ -1729,5 +1729,5 @@ if (IS_BROWSER) {
   window.impeccableScanAsync = scanAsync;
   window.impeccableCollectVisualContrastCandidates = collectVisualContrastCandidates;
   window.impeccableAnalyzeVisualContrast = analyzeVisualContrast;
-  window.impeccableGetLastVisualContrastAnalyses = () => lastVisualContrastAnalyses.slice();
+  window.impeccableGetLastVisualContrastAnalyses = () => [...lastVisualContrastAnalyses];
 }

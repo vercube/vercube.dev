@@ -83,7 +83,7 @@ function firstExisting(dir, names) {
 
 function safeRead(p) {
   try {
-    return fs.readFileSync(p, 'utf-8');
+    return fs.readFileSync(p, 'utf8');
   } catch {
     return null;
   }
@@ -120,7 +120,7 @@ function readLocalSkillVersion() {
   try {
     const here = path.dirname(fileURLToPath(import.meta.url));
     const skillMd = path.join(here, '..', 'SKILL.md');
-    const content = fs.readFileSync(skillMd, 'utf-8');
+    const content = fs.readFileSync(skillMd, 'utf8');
     const match = content.match(/^version:\s*(.+)$/m);
     return match ? match[1].trim().replace(/^["']|["']$/g, '') : null;
   } catch {
@@ -130,7 +130,7 @@ function readLocalSkillVersion() {
 
 function readUpdateCache() {
   try {
-    return JSON.parse(fs.readFileSync(UPDATE_CACHE_PATH, 'utf-8'));
+    return JSON.parse(fs.readFileSync(UPDATE_CACHE_PATH, 'utf8'));
   } catch {
     return {};
   }
@@ -147,8 +147,8 @@ function writeUpdateCache(cache) {
 
 /** Compare dotted numeric versions. Returns >0 when a is newer than b. */
 function compareSemver(a, b) {
-  const pa = String(a).split('.').map(n => parseInt(n, 10) || 0);
-  const pb = String(b).split('.').map(n => parseInt(n, 10) || 0);
+  const pa = String(a).split('.').map(n => Number.parseInt(n, 10) || 0);
+  const pb = String(b).split('.').map(n => Number.parseInt(n, 10) || 0);
   for (let i = 0; i < Math.max(pa.length, pb.length); i++) {
     const diff = (pa[i] || 0) - (pb[i] || 0);
     if (diff !== 0) return diff;

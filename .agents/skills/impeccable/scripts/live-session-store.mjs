@@ -131,7 +131,7 @@ function rebuildSnapshotFromJournal(journalPath, id) {
   let nextSeq = 1;
   if (!fs.existsSync(journalPath)) return { snapshot, diagnostics, nextSeq };
 
-  const lines = fs.readFileSync(journalPath, 'utf-8').split('\n');
+  const lines = fs.readFileSync(journalPath, 'utf8').split('\n');
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
     if (!line.trim()) continue;
@@ -140,11 +140,11 @@ function rebuildSnapshotFromJournal(journalPath, id) {
       if (!entry || typeof entry !== 'object') throw new Error('entry is not object');
       if (Number.isInteger(entry.seq)) nextSeq = Math.max(nextSeq, entry.seq + 1);
       snapshot = applyEvent(snapshot, entry);
-    } catch (err) {
+    } catch (error) {
       diagnostics.push({
         error: 'journal_parse_failed',
         line: i + 1,
-        message: err.message,
+        message: error.message,
       });
     }
   }
@@ -156,19 +156,19 @@ function applyEvent(snapshot, entry, inheritedDiagnostics = []) {
   const event = entry.event || entry;
   const next = {
     ...snapshot,
-    paramValues: { ...(snapshot.paramValues || {}) },
-    sourceMarkers: { ...(snapshot.sourceMarkers || {}) },
+    paramValues: { ...snapshot.paramValues },
+    sourceMarkers: { ...snapshot.sourceMarkers },
     annotationArtifacts: [...(snapshot.annotationArtifacts || [])],
     diagnostics: [...(snapshot.diagnostics || [])],
     updatedAt: entry.ts || new Date().toISOString(),
   };
 
-  if (inheritedDiagnostics.length && next.diagnostics.length === 0) {
+  if (inheritedDiagnostics.length > 0 && next.diagnostics.length === 0) {
     next.diagnostics = [...inheritedDiagnostics];
   }
 
   switch (event.type) {
-    case 'generate':
+    case 'generate': {
       next.phase = 'generate_requested';
       next.pageUrl = event.pageUrl ?? next.pageUrl;
       next.expectedVariants = event.count ?? next.expectedVariants;
@@ -176,8 +176,9 @@ function applyEvent(snapshot, entry, inheritedDiagnostics = []) {
       next.pendingEvent = toPendingEvent(event);
       if (event.screenshotPath) upsertArtifact(next.annotationArtifacts, { type: 'screenshot', path: event.screenshotPath });
       break;
+    }
     case 'variants_ready':
-    case 'agent_done':
+    case 'agent_done': {
       next.phase = event.carbonize === true ? 'carbonize_required' : 'variants_ready';
       next.sourceFile = event.sourceFile ?? event.file ?? next.sourceFile;
       next.previewFile = event.previewFile ?? next.previewFile;
@@ -193,7 +194,8 @@ function applyEvent(snapshot, entry, inheritedDiagnostics = []) {
         });
       }
       break;
-    case 'checkpoint':
+    }
+    case 'checkpoint': {
       if (COMPLETED_PHASES.has(next.phase)) {
         next.diagnostics.push({ error: 'checkpoint_after_terminal_ignored', phase: event.phase ?? null, revision: event.revision ?? null });
         break;
@@ -212,27 +214,31 @@ function applyEvent(snapshot, entry, inheritedDiagnostics = []) {
         next.diagnostics.push({ error: 'stale_checkpoint_ignored', revision: event.revision });
       }
       break;
+    }
     case 'accept':
-    case 'accept_intent':
+    case 'accept_intent': {
       next.phase = 'accept_requested';
       next.visibleVariant = Number(event.variantId ?? next.visibleVariant);
       if (event.paramValues) next.paramValues = { ...event.paramValues };
       next.pendingEventSeq = entry.seq ?? next.pendingEventSeq;
       next.pendingEvent = toPendingEvent(event);
       break;
-    case 'manual_edit_apply':
+    }
+    case 'manual_edit_apply': {
       next.phase = 'manual_edit_apply_requested';
       next.pageUrl = event.pageUrl ?? next.pageUrl;
       next.pendingEventSeq = entry.seq ?? next.pendingEventSeq;
       next.pendingEvent = toPendingEvent(event);
       break;
-    case 'steer':
+    }
+    case 'steer': {
       next.phase = 'steer_requested';
       next.pageUrl = event.pageUrl ?? next.pageUrl;
       next.pendingEventSeq = entry.seq ?? next.pendingEventSeq;
       next.pendingEvent = toPendingEvent(event);
       break;
-    case 'steer_done':
+    }
+    case 'steer_done': {
       next.phase = 'steer_done';
       next.sourceFile = event.sourceFile ?? event.file ?? next.sourceFile;
       next.previewFile = event.previewFile ?? next.previewFile;
@@ -241,17 +247,20 @@ function applyEvent(snapshot, entry, inheritedDiagnostics = []) {
       next.pendingEventSeq = null;
       next.pendingEvent = null;
       break;
-    case 'discard':
+    }
+    case 'discard': {
       next.phase = 'discard_requested';
       next.pendingEventSeq = entry.seq ?? next.pendingEventSeq;
       next.pendingEvent = toPendingEvent(event);
       break;
-    case 'discarded':
+    }
+    case 'discarded': {
       next.phase = 'discarded';
       next.pendingEventSeq = null;
       next.pendingEvent = null;
       break;
-    case 'complete':
+    }
+    case 'complete': {
       next.phase = 'completed';
       next.sourceFile = event.sourceFile ?? event.file ?? next.sourceFile;
       next.previewFile = event.previewFile ?? next.previewFile;
@@ -259,15 +268,18 @@ function applyEvent(snapshot, entry, inheritedDiagnostics = []) {
       next.pendingEventSeq = null;
       next.pendingEvent = null;
       break;
-    case 'agent_error':
+    }
+    case 'agent_error': {
       next.phase = 'agent_error';
       next.pendingEventSeq = null;
       next.pendingEvent = null;
       next.diagnostics.push({ error: 'agent_error', message: event.message || 'unknown agent error' });
       break;
-    default:
+    }
+    default: {
       next.diagnostics.push({ error: 'unknown_event_type', type: event.type });
       break;
+    }
   }
   return next;
 }

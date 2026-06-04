@@ -86,15 +86,15 @@ Output (JSON):
     }
     let cfg;
     try {
-      cfg = JSON.parse(fs.readFileSync(CONFIG_PATH, 'utf-8'));
-    } catch (err) {
-      console.log(JSON.stringify({ ok: false, error: 'config_invalid', message: err.message, path: CONFIG_PATH }));
+      cfg = JSON.parse(fs.readFileSync(CONFIG_PATH, 'utf8'));
+    } catch (error) {
+      console.log(JSON.stringify({ ok: false, error: 'config_invalid', message: error.message, path: CONFIG_PATH }));
       return;
     }
     try {
       validateConfig(cfg);
-    } catch (err) {
-      console.log(JSON.stringify({ ok: false, error: 'config_invalid', message: err.message, path: CONFIG_PATH }));
+    } catch (error) {
+      console.log(JSON.stringify({ ok: false, error: 'config_invalid', message: error.message, path: CONFIG_PATH }));
       return;
     }
     console.log(JSON.stringify({ ok: true, config: cfg, path: CONFIG_PATH }));
@@ -106,7 +106,7 @@ Output (JSON):
     console.error(JSON.stringify({ ok: false, error: 'config_missing', path: CONFIG_PATH }));
     process.exit(1);
   }
-  const config = JSON.parse(fs.readFileSync(CONFIG_PATH, 'utf-8'));
+  const config = JSON.parse(fs.readFileSync(CONFIG_PATH, 'utf8'));
   validateConfig(config);
 
   const resolvedFiles = resolveFiles(process.cwd(), config);
@@ -121,11 +121,11 @@ Output (JSON):
     const results = resolvedFiles.map((relFile) => {
       const absFile = path.resolve(process.cwd(), relFile);
       if (!fs.existsSync(absFile)) return { file: relFile, error: 'file_not_found' };
-      const content = fs.readFileSync(absFile, 'utf-8');
+      const content = fs.readFileSync(absFile, 'utf8');
       const detagged = removeTag(content, config.commentSyntax);
       const updated = revertCspMeta(detagged);
       if (updated === content) return { file: relFile, removed: false, note: 'no tag present' };
-      fs.writeFileSync(absFile, updated, 'utf-8');
+      fs.writeFileSync(absFile, updated, 'utf8');
       return {
         file: relFile,
         removed: detagged !== content,
@@ -138,7 +138,7 @@ Output (JSON):
 
   // Insert mode — need --port
   const portIdx = args.indexOf('--port');
-  const port = portIdx !== -1 ? parseInt(args[portIdx + 1], 10) : NaN;
+  const port = portIdx !== -1 ? Number.parseInt(args[portIdx + 1], 10) : Number.NaN;
   if (!Number.isFinite(port)) {
     console.error(JSON.stringify({ ok: false, error: 'missing_port' }));
     process.exit(1);
@@ -154,14 +154,14 @@ Output (JSON):
   const results = resolvedFiles.map((relFile) => {
     const absFile = path.resolve(process.cwd(), relFile);
     if (!fs.existsSync(absFile)) return { file: relFile, error: 'file_not_found' };
-    const content = fs.readFileSync(absFile, 'utf-8');
+    const content = fs.readFileSync(absFile, 'utf8');
     const withoutOld = revertCspMeta(removeTag(content, config.commentSyntax));
     const withTag = insertTag(withoutOld, config, port, relFile);
     if (withTag === withoutOld) {
       return { file: relFile, error: 'insertion_point_not_found', anchor: config.insertBefore || config.insertAfter };
     }
     const updated = patchCspMeta(withTag, port);
-    fs.writeFileSync(absFile, updated, 'utf-8');
+    fs.writeFileSync(absFile, updated, 'utf8');
     return {
       file: relFile,
       inserted: true,
@@ -175,7 +175,7 @@ Output (JSON):
 
 export function ensureLiveGitIgnores(cwd = process.cwd()) {
   const target = resolveIgnoreTarget(cwd);
-  const existing = fs.existsSync(target.path) ? fs.readFileSync(target.path, 'utf-8') : '';
+  const existing = fs.existsSync(target.path) ? fs.readFileSync(target.path, 'utf8') : '';
   const block = [
     IGNORE_MARKER_OPEN,
     ...LIVE_IGNORE_PATTERNS,
@@ -187,13 +187,13 @@ export function ensureLiveGitIgnores(cwd = process.cwd()) {
   if (markerRe.test(existing)) {
     updated = existing.replace(markerRe, block);
   } else {
-    const prefix = existing.length === 0 ? '' : existing.endsWith('\n') ? existing : existing + '\n';
+    const prefix = existing.length === 0 ? '' : (existing.endsWith('\n') ? existing : existing + '\n');
     updated = `${prefix}${prefix.endsWith('\n\n') || prefix === '' ? '' : '\n'}${block}\n`;
   }
 
   if (updated !== existing) {
     fs.mkdirSync(path.dirname(target.path), { recursive: true });
-    fs.writeFileSync(target.path, updated, 'utf-8');
+    fs.writeFileSync(target.path, updated, 'utf8');
   }
 
   return {
@@ -220,7 +220,7 @@ function resolveGitInfoExcludePath(cwd) {
   if (stat.isDirectory()) return path.join(dotGit, 'info', 'exclude');
   if (!stat.isFile()) return null;
 
-  const body = fs.readFileSync(dotGit, 'utf-8').trim();
+  const body = fs.readFileSync(dotGit, 'utf8').trim();
   const match = body.match(/^gitdir:\s*(.+)$/i);
   if (!match) return null;
   const gitDir = path.isAbsolute(match[1]) ? match[1] : path.resolve(cwd, match[1]);
@@ -228,7 +228,7 @@ function resolveGitInfoExcludePath(cwd) {
 }
 
 function escapeRegExp(value) {
-  return String(value).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return String(value).replace(/[.*+?^${}()|[\]\\]/g, String.raw`\$&`);
 }
 
 /**
@@ -334,14 +334,14 @@ function validateConfig(cfg) {
   }
   if (cfg.exclude !== undefined) {
     if (!Array.isArray(cfg.exclude)) {
-      throw new Error('config.exclude, if present, must be a string array');
+      throw new TypeError('config.exclude, if present, must be a string array');
     }
     if (!cfg.exclude.every((f) => typeof f === 'string' && f.length > 0)) {
       throw new Error('config.exclude must contain only non-empty strings');
     }
   }
   if (typeof cfg.insertBefore !== 'string' && typeof cfg.insertAfter !== 'string') {
-    throw new Error('config.insertBefore or config.insertAfter (string) required');
+    throw new TypeError('config.insertBefore or config.insertAfter (string) required');
   }
   if (cfg.commentSyntax !== 'html' && cfg.commentSyntax !== 'jsx') {
     throw new Error("config.commentSyntax must be 'html' or 'jsx'");
@@ -499,7 +499,7 @@ export function patchCspMeta(content, port) {
     if (patched === original) continue;
 
     const newContentAttr = `content=${contentAttr.quote}${patched}${contentAttr.quote}`;
-    const marker = `${CSP_MARKER_ATTR}="${Buffer.from(original, 'utf-8').toString('base64')}"`;
+    const marker = `${CSP_MARKER_ATTR}="${Buffer.from(original, 'utf8').toString('base64')}"`;
     // The tagRe captures any whitespace between the last attribute and the
     // closing `/>` as part of `attrs`. Naively appending ` ${marker}` after
     // a replace would land it BEFORE that trailing space, leaving a double
@@ -530,7 +530,7 @@ export function revertCspMeta(content) {
     if (!contentAttr) continue;
 
     let originalValue;
-    try { originalValue = Buffer.from(origAttr.value, 'base64').toString('utf-8'); }
+    try { originalValue = Buffer.from(origAttr.value, 'base64').toString('utf8'); }
     catch { continue; }
 
     const newContentAttr = `content=${contentAttr.quote}${originalValue}${contentAttr.quote}`;

@@ -39,9 +39,9 @@ export async function statusCli() {
     activeSessions: server?.activeSessions || activeSessions,
     recoveryHint: manualApply
       ? manualApplyResumeHint(manualApply)
-      : server
+      : (server
         ? 'Run live-poll.mjs to continue pending work, or live-complete.mjs --id <session> after manual cleanup.'
-        : 'Start live-server.mjs to requeue pending durable events, then run live-poll.mjs.',
+        : 'Start live-server.mjs to requeue pending durable events, then run live-poll.mjs.'),
   };
   console.log(JSON.stringify(payload, null, 2));
 }

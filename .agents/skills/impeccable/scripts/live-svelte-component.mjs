@@ -34,7 +34,7 @@ export function ensureRuntimeHelper(cwd = process.cwd()) {
   const file = path.join(cwd, SVELTE_RUNTIME_FILE);
   if (fs.existsSync(file)) return file;
   fs.mkdirSync(path.dirname(file), { recursive: true });
-  fs.writeFileSync(file, `export { mount, unmount } from 'svelte';\n`, 'utf-8');
+  fs.writeFileSync(file, `export { mount, unmount } from 'svelte';\n`, 'utf8');
   return file;
 }
 
@@ -166,12 +166,12 @@ export function scaffoldSvelteComponentSession({
     runtimeModule: `/${SVELTE_RUNTIME_FILE}`,
   };
 
-  fs.writeFileSync(path.join(dir, 'manifest.json'), JSON.stringify(manifest, null, 2) + '\n', 'utf-8');
+  fs.writeFileSync(path.join(dir, 'manifest.json'), JSON.stringify(manifest, null, 2) + '\n', 'utf8');
 
   for (let n = 1; n <= count; n++) {
     const variantFile = path.join(dir, `v${n}.svelte`);
     if (!fs.existsSync(variantFile)) {
-      fs.writeFileSync(variantFile, buildVariantStub(n, originalWithProps, contract), 'utf-8');
+      fs.writeFileSync(variantFile, buildVariantStub(n, originalWithProps, contract), 'utf8');
     }
   }
 
@@ -216,12 +216,12 @@ export function scaffoldSvelteComponentInsertSession({
     runtimeModule: `/${SVELTE_RUNTIME_FILE}`,
   };
 
-  fs.writeFileSync(path.join(dir, 'manifest.json'), JSON.stringify(manifest, null, 2) + '\n', 'utf-8');
+  fs.writeFileSync(path.join(dir, 'manifest.json'), JSON.stringify(manifest, null, 2) + '\n', 'utf8');
 
   for (let n = 1; n <= count; n++) {
     const variantFile = path.join(dir, `v${n}.svelte`);
     if (!fs.existsSync(variantFile)) {
-      fs.writeFileSync(variantFile, buildInsertVariantStub(n), 'utf-8');
+      fs.writeFileSync(variantFile, buildInsertVariantStub(n), 'utf8');
     }
   }
 
@@ -253,7 +253,7 @@ export function findSvelteComponentManifest(id, cwd = process.cwd()) {
 }
 
 export function readManifest(manifestPath) {
-  const data = JSON.parse(fs.readFileSync(manifestPath, 'utf-8'));
+  const data = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
   return {
     ...data,
     manifestPath,
@@ -494,7 +494,7 @@ function formatCssRule(selector, body) {
 }
 
 function escapeRegExp(value) {
-  return String(value).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return String(value).replace(/[.*+?^${}()|[\]\\]/g, String.raw`\$&`);
 }
 
 export function inlineSvelteComponentAccept(manifest, variantNum, paramValues = null, cwd = process.cwd()) {
@@ -511,7 +511,7 @@ export function inlineSvelteComponentAccept(manifest, variantNum, paramValues = 
     return { handled: false, error: `Variant ${variantNum} not found`, ...resultBase };
   }
 
-  const { markup, cssLines } = parseSvelteComponentFile(fs.readFileSync(variantPath, 'utf-8'));
+  const { markup, cssLines } = parseSvelteComponentFile(fs.readFileSync(variantPath, 'utf8'));
   if (manifest.mode === 'insert') {
     return inlineSvelteComponentInsertAccept({
       manifest,
@@ -532,7 +532,7 @@ export function inlineSvelteComponentAccept(manifest, variantNum, paramValues = 
     .split('\n')
     .map((line) => line.trimEnd());
 
-  const sourceContent = fs.readFileSync(sourceFile, 'utf-8');
+  const sourceContent = fs.readFileSync(sourceFile, 'utf8');
   const sourceLines = sourceContent.split('\n');
   const start = Number(manifest.sourceStartLine) - 1;
   const end = Number(manifest.sourceEndLine) - 1;
@@ -559,9 +559,9 @@ export function inlineSvelteComponentAccept(manifest, variantNum, paramValues = 
   }
 
   try {
-    fs.writeFileSync(sourceFile, newLines.join('\n'), 'utf-8');
-  } catch (err) {
-    return { handled: false, error: 'Failed to write Svelte source: ' + err.message, ...resultBase };
+    fs.writeFileSync(sourceFile, newLines.join('\n'), 'utf8');
+  } catch (error) {
+    return { handled: false, error: 'Failed to write Svelte source: ' + error.message, ...resultBase };
   }
   removeSvelteComponentSession(manifest.id, cwd);
 
@@ -592,7 +592,7 @@ function inlineSvelteComponentInsertAccept({
   const restoredMarkup = String(markup || '')
     .split('\n')
     .map((line) => line.trimEnd());
-  const sourceContent = fs.readFileSync(sourceFile, 'utf-8');
+  const sourceContent = fs.readFileSync(sourceFile, 'utf8');
   const sourceLines = sourceContent.split('\n');
   const insertIndex = Number(manifest.insertLine) - 1;
   if (!Number.isInteger(insertIndex) || insertIndex < 0 || insertIndex > sourceLines.length) {
@@ -619,9 +619,9 @@ function inlineSvelteComponentInsertAccept({
   }
 
   try {
-    fs.writeFileSync(sourceFile, newLines.join('\n'), 'utf-8');
-  } catch (err) {
-    return { handled: false, error: 'Failed to write Svelte source: ' + err.message, ...resultBase };
+    fs.writeFileSync(sourceFile, newLines.join('\n'), 'utf8');
+  } catch (error) {
+    return { handled: false, error: 'Failed to write Svelte source: ' + error.message, ...resultBase };
   }
   removeSvelteComponentSession(manifest.id, cwd);
 
@@ -749,7 +749,7 @@ export function deferredAcceptsPath(cwd = process.cwd()) {
 export function readDeferredAccepts(cwd = process.cwd()) {
   const file = deferredAcceptsPath(cwd);
   try {
-    return JSON.parse(fs.readFileSync(file, 'utf-8'));
+    return JSON.parse(fs.readFileSync(file, 'utf8'));
   } catch {
     return { accepts: [] };
   }
@@ -761,7 +761,7 @@ export function writeDeferredAccept(entry, cwd = process.cwd()) {
   const data = readDeferredAccepts(cwd);
   data.accepts = (data.accepts || []).filter((item) => item.id !== entry.id);
   data.accepts.push({ ...entry, createdAt: new Date().toISOString() });
-  fs.writeFileSync(file, JSON.stringify(data, null, 2) + '\n', 'utf-8');
+  fs.writeFileSync(file, JSON.stringify(data, null, 2) + '\n', 'utf8');
 }
 
 export function applyDeferredSvelteComponentAccepts(cwd = process.cwd()) {
@@ -786,13 +786,13 @@ export function applyDeferredSvelteComponentAccepts(cwd = process.cwd()) {
       );
       results.push({ id: entry.id, ok: result.handled !== false, result });
       if (result.handled === false) remaining.push(entry);
-    } catch (err) {
-      results.push({ id: entry.id, ok: false, error: err.message });
+    } catch (error) {
+      results.push({ id: entry.id, ok: false, error: error.message });
       remaining.push(entry);
     }
   }
   if (remaining.length > 0) {
-    fs.writeFileSync(file, JSON.stringify({ accepts: remaining }, null, 2) + '\n', 'utf-8');
+    fs.writeFileSync(file, JSON.stringify({ accepts: remaining }, null, 2) + '\n', 'utf8');
   } else {
     try { fs.rmSync(file, { force: true }); } catch {}
   }

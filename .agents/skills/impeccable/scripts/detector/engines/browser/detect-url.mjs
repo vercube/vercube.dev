@@ -118,7 +118,7 @@ async function detectUrl(url, options = {}) {
       phase: 'setup',
       ruleId: 'read-browser-script',
       target: url,
-    }, () => fs.readFileSync(browserScriptPath, 'utf-8'));
+    }, () => fs.readFileSync(browserScriptPath, 'utf8'));
   } catch {
     throw new Error(`Browser script not found at ${browserScriptPath}`);
   }
@@ -152,7 +152,7 @@ async function detectUrl(url, options = {}) {
       phase: 'load',
       ruleId: `goto:${waitUntil}`,
       target: url,
-    }, () => page.goto(url, { waitUntil, timeout: 30000 }));
+    }, () => page.goto(url, { waitUntil, timeout: 30_000 }));
     if (settleMs > 0) {
       await profileStepAsync(profile, {
         engine: 'browser',
@@ -170,7 +170,7 @@ async function detectUrl(url, options = {}) {
       target: url,
     }, () => page.evaluate(() => {
       window.__IMPECCABLE_CONFIG__ = {
-        ...(window.__IMPECCABLE_CONFIG__ || {}),
+        ...window.__IMPECCABLE_CONFIG__,
         autoScan: false,
       };
     }));

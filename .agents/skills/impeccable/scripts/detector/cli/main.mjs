@@ -44,13 +44,13 @@ function formatFindings(findings, jsonMode) {
 async function handleStdin(options = {}) {
   const chunks = [];
   for await (const chunk of process.stdin) chunks.push(chunk);
-  const input = Buffer.concat(chunks).toString('utf-8');
+  const input = Buffer.concat(chunks).toString('utf8');
   try {
     const parsed = JSON.parse(input);
     const fp = parsed?.tool_input?.file_path;
     if (fp && fs.existsSync(fp)) {
       return HTML_EXTENSIONS.has(path.extname(fp).toLowerCase())
-        ? detectHtml(fp, options) : detectText(fs.readFileSync(fp, 'utf-8'), fp, options);
+        ? detectHtml(fp, options) : detectText(fs.readFileSync(fp, 'utf8'), fp, options);
     }
   } catch { /* not JSON */ }
   return detectText(input, '<stdin>', options);
@@ -139,7 +139,7 @@ async function detectCli() {
               ? (url) => browserDetector.detectUrl(url, scanOptions)
               : (url) => detectUrl(url, scanOptions);
             allFindings.push(...await scanner(target));
-          } catch (e) { process.stderr.write(`Error: ${e.message}\n`); }
+          } catch (error) { process.stderr.write(`Error: ${error.message}\n`); }
           continue;
         }
 
@@ -206,7 +206,7 @@ async function detectCli() {
             if (HTML_EXTENSIONS.has(ext)) {
               fileFindings = await detectHtml(file, scanOptions);
             } else {
-              fileFindings = detectText(fs.readFileSync(file, 'utf-8'), file, scanOptions);
+              fileFindings = detectText(fs.readFileSync(file, 'utf8'), file, scanOptions);
             }
             // Annotate findings with import context
             const importers = importedByMap.get(file);
@@ -223,7 +223,7 @@ async function detectCli() {
           if (HTML_EXTENSIONS.has(ext)) {
             allFindings.push(...await detectHtml(resolved, scanOptions));
           } else {
-            allFindings.push(...detectText(fs.readFileSync(resolved, 'utf-8'), resolved, scanOptions));
+            allFindings.push(...detectText(fs.readFileSync(resolved, 'utf8'), resolved, scanOptions));
           }
         }
       }

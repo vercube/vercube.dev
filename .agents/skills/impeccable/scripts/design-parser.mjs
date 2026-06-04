@@ -178,7 +178,7 @@ function matchCanonicalSection(name) {
   // "Elevation & Depth" -> "Elevation", etc.
   for (const c of CANONICAL_SECTIONS) {
     const key = normalizeApostrophes(c).toLowerCase();
-    const pattern = new RegExp(`\\b${key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`);
+    const pattern = new RegExp(`\\b${key.replace(/[.*+?^${}()|[\]\\]/g, String.raw`\$&`)}\\b`);
     if (pattern.test(normalized)) return c;
   }
   return null;
@@ -210,7 +210,7 @@ function collectParagraphs(lines) {
   const paragraphs = [];
   let buf = [];
   const flush = () => {
-    if (buf.length) {
+    if (buf.length > 0) {
       paragraphs.push(buf.join(' ').trim());
       buf = [];
     }
@@ -382,7 +382,7 @@ function extractColors(section) {
     const flat = collectBullets(section.lines)
       .map((b) => parseColorBullet(b))
       .filter(Boolean);
-    if (flat.length) {
+    if (flat.length > 0) {
       for (const p of flat) {
         if (p.name && ROLE_KEYWORDS.test(p.name)) {
           groups.push({ role: p.name, colors: [p] });
@@ -426,7 +426,7 @@ function parseColorBullet(bullet) {
 
   // Case 3: bullet without bold, just hex/oklch inside.
   const values = collectColorValues(text);
-  if (values.length) {
+  if (values.length > 0) {
     return buildColor(null, values.join(' to '), text);
   }
   return null;
@@ -548,7 +548,7 @@ function extractTypography(section) {
     const paragraphs = collectParagraphs(section.lines).filter(
       (p) => !/^\*\*[\w\s/&]+Font/i.test(p) && !/^\*\*[\w\s/&]+\([^)]+\)/.test(p)
     );
-    if (paragraphs.length) character = paragraphs[0];
+    if (paragraphs.length > 0) character = paragraphs[0];
   }
 
   // Hierarchy bullets under ### Hierarchy
@@ -573,11 +573,11 @@ function normalizeFontRole(raw) {
   // Canonical roles the panel cares about: display, body, label, mono.
   // Stitch often writes compound roles like "display-&-headlines" or "ui-&-body"
   // — collapse them to the first canonical role present.
-  const tokens = raw.split(/[-/&\s]+/).filter(Boolean);
+  const tokens = new Set(raw.split(/[-/&\s]+/).filter(Boolean));
   const priority = ['display', 'headline', 'body', 'ui', 'label', 'mono'];
   const canonical = { headline: 'display', ui: 'body' };
   for (const p of priority) {
-    if (tokens.includes(p)) return canonical[p] || p;
+    if (tokens.has(p)) return canonical[p] || p;
   }
   return null;
 }

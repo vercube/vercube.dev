@@ -28,9 +28,9 @@ import { readLiveServerInfo } from './impeccable-paths.mjs';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 async function liveCli() {
-  const args = process.argv.slice(2);
+  const args = new Set(process.argv.slice(2));
 
-  if (args.includes('--help') || args.includes('-h')) {
+  if (args.has('--help') || args.has('-h')) {
     console.log(`Usage: node live.mjs
 
 Prepare everything for live variant mode in a single command:
@@ -205,10 +205,10 @@ function runScript(name, args) {
   const scriptPath = path.join(__dirname, name);
   const cmd = `node "${scriptPath}" ${args.map(a => `"${a}"`).join(' ')}`;
   try {
-    return execSync(cmd, { encoding: 'utf-8', cwd: process.cwd(), timeout: 15_000 });
-  } catch (err) {
+    return execSync(cmd, { encoding: 'utf8', cwd: process.cwd(), timeout: 15_000 });
+  } catch (error) {
     // execSync throws on non-zero exit; return stdout if any
-    return err.stdout || err.message || '';
+    return error.stdout || error.message || '';
   }
 }
 

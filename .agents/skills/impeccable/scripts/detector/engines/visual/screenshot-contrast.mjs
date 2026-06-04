@@ -42,7 +42,7 @@ async function compareScreenshotContrast(page, beforeBase64, afterBase64, candid
     const luminance = ({ r, g, b }) => {
       const convert = c => {
         const v = c / 255;
-        return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4;
+        return v <= 0.039_28 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4;
       };
       return 0.2126 * convert(r) + 0.7152 * convert(g) + 0.0722 * convert(b);
     };
@@ -123,7 +123,7 @@ async function captureVisualContrastCandidate(page, candidate, viewport) {
       return false;
     }
     if (!el) return false;
-    let style = document.getElementById('impeccable-visual-contrast-hide-style');
+    let style = document.querySelector('#impeccable-visual-contrast-hide-style');
     if (!style) {
       style = document.createElement('style');
       style.id = 'impeccable-visual-contrast-hide-style';
@@ -137,10 +137,10 @@ async function captureVisualContrastCandidate(page, candidate, viewport) {
         '  background-image: none !important;',
         '}',
       ].join('\n');
-      document.head.appendChild(style);
+      document.head.append(style);
     }
-    el.setAttribute('data-impeccable-visual-contrast-target', token);
-    if (backgroundClipText) el.setAttribute('data-impeccable-bgclip-text', 'true');
+    el.dataset.impeccableVisualContrastTarget = token;
+    if (backgroundClipText) el.dataset.impeccableBgclipText = 'true';
     return true;
   }, {
     selector: candidate.selector,
@@ -161,8 +161,8 @@ async function captureVisualContrastCandidate(page, candidate, viewport) {
       try {
         const el = document.querySelector(selector);
         if (el) {
-          el.removeAttribute('data-impeccable-visual-contrast-target');
-          el.removeAttribute('data-impeccable-bgclip-text');
+          delete el.dataset.impeccableVisualContrastTarget;
+          delete el.dataset.impeccableBgclipText;
         }
       } catch {
         // Ignore invalid or stale selectors during cleanup.

@@ -21,7 +21,7 @@ import {
   shouldUseSvelteComponentInjection,
 } from './live-svelte-component.mjs';
 
-const EXTENSIONS = ['.html', '.jsx', '.tsx', '.vue', '.svelte', '.astro'];
+const EXTENSIONS = new Set(['.html', '.jsx', '.tsx', '.vue', '.svelte', '.astro']);
 
 export async function wrapCli() {
   const args = process.argv.slice(2);
@@ -60,7 +60,7 @@ The agent should insert variant HTML at insertLine.`);
   }
 
   const id = argVal(args, '--id');
-  const count = parseInt(argVal(args, '--count') || '3');
+  const count = Number.parseInt(argVal(args, '--count') || '3');
   const elementId = argVal(args, '--element-id');
   const classes = argVal(args, '--classes');
   const tag = argVal(args, '--tag');
@@ -127,7 +127,7 @@ The agent should insert variant HTML at insertLine.`);
     matchedQuery = queries[0];
   }
 
-  const content = fs.readFileSync(targetFile, 'utf-8');
+  const content = fs.readFileSync(targetFile, 'utf8');
   const lines = content.split('\n');
 
   // Find the element, trying each query in priority order. When `--text` is
@@ -341,7 +341,7 @@ The agent should insert variant HTML at insertLine.`);
       ...wrapperLines,
       ...lines.slice(endLine + 1),
     ];
-    fs.writeFileSync(targetFile, newLines.join('\n'), 'utf-8');
+    fs.writeFileSync(targetFile, newLines.join('\n'), 'utf8');
 
     // Calculate insert line (the "insert below this line" comment).
     // 0-indexed file position. Both HTML and JSX wrappers have 6 lines above
@@ -481,13 +481,13 @@ function applyBufferedManualEditToLines(originalLines, selectionStartLine, op) {
 
 function lineMatchesManualEditLocator(line, op) {
   if (op.tag) {
-    const tagRe = new RegExp('<\\s*' + escapeRegExp(op.tag) + '(?=[\\s>/]|$)', 'i');
+    const tagRe = new RegExp(String.raw`<\s*` + escapeRegExp(op.tag) + String.raw`(?=[\s>/]|$)`, 'i');
     if (!tagRe.test(line)) return false;
   }
 
   if (op.elementId) {
     const id = escapeRegExp(op.elementId);
-    const idRe = new RegExp('\\bid\\s*=\\s*["\']' + id + '["\']');
+    const idRe = new RegExp(String.raw`\bid\s*=\s*["']` + id + '["\']');
     if (!idRe.test(line)) return false;
   }
 
@@ -518,7 +518,7 @@ function countOccurrences(value, needle) {
 }
 
 function escapeRegExp(value) {
-  return String(value).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return String(value).replace(/[.*+?^${}()|[\]\\]/g, String.raw`\$&`);
 }
 
 /**
@@ -678,12 +678,12 @@ function searchDir(dir, query, seen, depth, genOpts) {
   for (const entry of entries) {
     if (!entry.isFile()) continue;
     const ext = path.extname(entry.name).toLowerCase();
-    if (!EXTENSIONS.includes(ext)) continue;
+    if (!EXTENSIONS.has(ext)) continue;
 
     const filePath = path.join(dir, entry.name);
     if (!genOpts.includeGenerated && isGeneratedFile(filePath, genOpts)) continue;
     try {
-      const content = fs.readFileSync(filePath, 'utf-8');
+      const content = fs.readFileSync(filePath, 'utf8');
       if (content.includes(query)) return filePath;
     } catch { /* skip unreadable files */ }
   }
@@ -854,9 +854,9 @@ function findClosingLine(lines, start) {
 
   const tagName = openMatch[1];
   let depth = 0;
-  const openRe = new RegExp('<' + tagName + '(?=[\\s/>]|$)', 'g');
+  const openRe = new RegExp('<' + tagName + String.raw`(?=[\s/>]|$)`, 'g');
   const selfCloseRe = new RegExp('<' + tagName + '[^>]*/>', 'g');
-  const closeRe = new RegExp('</' + tagName + '\\s*>', 'g');
+  const closeRe = new RegExp('</' + tagName + String.raw`\s*>`, 'g');
 
   for (let i = start; i < lines.length; i++) {
     const line = lines[i];

@@ -19,7 +19,7 @@ function recordProfileEvent(profile, event) {
     findings: Number.isFinite(event.findings) ? event.findings : 0,
   };
   if (event.detail) normalized.detail = event.detail;
-  if (Array.isArray(event.findingIds) && event.findingIds.length) {
+  if (Array.isArray(event.findingIds) && event.findingIds.length > 0) {
     normalized.findingIds = event.findingIds;
   }
   if (typeof profile === 'function') {
@@ -93,7 +93,7 @@ async function profileStepAsync(profile, meta, callback) {
 }
 
 function percentile(sortedValues, pct) {
-  if (!sortedValues.length) return 0;
+  if (sortedValues.length === 0) return 0;
   const idx = Math.min(
     sortedValues.length - 1,
     Math.max(0, Math.ceil((pct / 100) * sortedValues.length) - 1),

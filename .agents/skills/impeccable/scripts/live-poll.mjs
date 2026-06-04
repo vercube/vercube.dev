@@ -66,8 +66,8 @@ export function parseReplyArgs(args) {
   if (dataIdx !== -1 && dataIdx + 1 < args.length) {
     try {
       data = JSON.parse(args[dataIdx + 1]);
-    } catch (err) {
-      const wrapped = new Error('--data must be valid JSON: ' + err.message);
+    } catch (error) {
+      const wrapped = new Error('--data must be valid JSON: ' + error.message);
       wrapped.code = 'INVALID_DATA_JSON';
       throw wrapped;
     }
@@ -190,11 +190,11 @@ export async function augmentEventWithAcceptHandling(event, base, token) {
     const out = execFileSync(
       'node',
       [acceptScript, ...scriptArgs],
-      { encoding: 'utf-8', cwd: process.cwd(), timeout: 30_000 },
+      { encoding: 'utf8', cwd: process.cwd(), timeout: 30_000 },
     );
     event._acceptResult = JSON.parse(out.trim());
-  } catch (err) {
-    event._acceptResult = { handled: false, mode: 'error', error: err.message };
+  } catch (error) {
+    event._acceptResult = { handled: false, mode: 'error', error: error.message };
   }
 
   const completionType = completionTypeForAcceptResult(event.type, event._acceptResult);
@@ -206,8 +206,8 @@ export async function augmentEventWithAcceptHandling(event, base, token) {
       file: event._acceptResult?.file,
       data: event._acceptResult?.carbonize === true ? { carbonize: true } : undefined,
     });
-  } catch (err) {
-    event._completionAck = { ok: false, error: err.message };
+  } catch (error) {
+    event._completionAck = { ok: false, error: error.message };
   }
   if (!event._completionAck) {
     event._completionAck = completionAckForAcceptResult(event.id, completionType, event._acceptResult);
@@ -336,18 +336,18 @@ Harness note:
     let reply;
     try {
       reply = parseReplyArgs(args);
-    } catch (err) {
-      console.error(err.message);
+    } catch (error) {
+      console.error(error.message);
       process.exit(1);
     }
 
     try {
       await postReply(base, info.token, reply);
-    } catch (err) {
-      if (err.cause?.code === 'ECONNREFUSED') {
+    } catch (error) {
+      if (error.cause?.code === 'ECONNREFUSED') {
         console.error('Live server not running. Start one with: npx impeccable live');
       } else {
-        console.error('Reply failed:', err.message);
+        console.error('Reply failed:', error.message);
       }
       process.exit(1);
     }
@@ -356,7 +356,7 @@ Harness note:
 
   const streamMode = args.includes('--stream');
   const ackTimeoutArg = args.find((a) => a.startsWith('--ack-timeout='));
-  const ackTimeoutMs = ackTimeoutArg ? parseInt(ackTimeoutArg.split('=')[1], 10) : 600_000;
+  const ackTimeoutMs = ackTimeoutArg ? Number.parseInt(ackTimeoutArg.split('=')[1], 10) : 600_000;
 
   try {
     if (streamMode) {
@@ -365,10 +365,10 @@ Harness note:
     }
 
     const timeoutArg = args.find((a) => a.startsWith('--timeout='));
-    const totalTimeout = timeoutArg ? parseInt(timeoutArg.split('=')[1], 10) : 600_000;
+    const totalTimeout = timeoutArg ? Number.parseInt(timeoutArg.split('=')[1], 10) : 600_000;
     await runPollOnce(base, info.token, { totalTimeout });
-  } catch (err) {
-    handlePollError(err);
+  } catch (error) {
+    handlePollError(error);
   }
 }
 

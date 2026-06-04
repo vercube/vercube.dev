@@ -57,7 +57,7 @@ function buildImportGraph(files) {
   const graph = new Map();
 
   for (const file of files) {
-    const content = fs.readFileSync(file, 'utf-8');
+    const content = fs.readFileSync(file, 'utf8');
     const dir = path.dirname(file);
     const imports = new Set();
 
@@ -128,9 +128,9 @@ function detectFrameworkConfig(dir) {
     const configPath = path.join(dir, match);
     let port = cfg.defaultPort;
     try {
-      const content = fs.readFileSync(configPath, 'utf-8');
+      const content = fs.readFileSync(configPath, 'utf8');
       const portMatch = content.match(cfg.portRe);
-      if (portMatch) port = parseInt(portMatch[1], 10);
+      if (portMatch) port = Number.parseInt(portMatch[1], 10);
     } catch { /* use default */ }
 
     return { name: cfg.name, port, configPath, fingerprint: cfg.fingerprint };

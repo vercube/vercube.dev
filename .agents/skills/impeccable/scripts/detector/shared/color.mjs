@@ -14,20 +14,20 @@ function isNeutralColor(color) {
   // lch chroma is ~0–150; >= 3 reads as tinted. jsdom emits both formats
   // literally (it does NOT convert them to rgb).
   const oklch = color.match(/oklch\(\s*[\d.]+%?\s*([\d.-]+)/i);
-  if (oklch) return parseFloat(oklch[1]) < 0.02;
+  if (oklch) return Number.parseFloat(oklch[1]) < 0.02;
   const lch = color.match(/lch\(\s*[\d.]+%?\s*([\d.-]+)/i);
-  if (lch) return parseFloat(lch[1]) < 3;
+  if (lch) return Number.parseFloat(lch[1]) < 3;
 
   // oklab()/lab() — a and b are signed axes; chroma = sqrt(a² + b²).
   // oklab a/b are ~-0.4..0.4, threshold 0.02. lab a/b are ~-128..127, threshold 3.
   const oklab = color.match(/oklab\(\s*[\d.]+%?\s*([\d.-]+)\s+([\d.-]+)/i);
   if (oklab) {
-    const a = parseFloat(oklab[1]), b = parseFloat(oklab[2]);
+    const a = Number.parseFloat(oklab[1]), b = Number.parseFloat(oklab[2]);
     return Math.hypot(a, b) < 0.02;
   }
   const lab = color.match(/lab\(\s*[\d.]+%?\s*([\d.-]+)\s+([\d.-]+)/i);
   if (lab) {
-    const a = parseFloat(lab[1]), b = parseFloat(lab[2]);
+    const a = Number.parseFloat(lab[1]), b = Number.parseFloat(lab[2]);
     return Math.hypot(a, b) < 3;
   }
 
@@ -35,13 +35,13 @@ function isNeutralColor(color) {
   // Modern jsdom usually converts hsl() to rgb, but handle it directly for
   // safety across versions and for any engine that preserves the format.
   const hsl = color.match(/hsla?\(\s*[\d.-]+\s*,?\s*([\d.]+)%/i);
-  if (hsl) return parseFloat(hsl[1]) < 10;
+  if (hsl) return Number.parseFloat(hsl[1]) < 10;
 
   // hwb(hue whiteness% blackness%) — a pixel is fully gray when
   // whiteness + blackness >= 100; chroma-like saturation = 1 - (w+b)/100.
   const hwb = color.match(/hwb\(\s*[\d.-]+\s+([\d.]+)%\s+([\d.]+)%/i);
   if (hwb) {
-    const w = parseFloat(hwb[1]), b = parseFloat(hwb[2]);
+    const w = Number.parseFloat(hwb[1]), b = Number.parseFloat(hwb[2]);
     return (1 - Math.min(100, w + b) / 100) < 0.1;
   }
 
@@ -60,7 +60,7 @@ function parseRgb(color) {
 
 function relativeLuminance({ r, g, b }) {
   const [rs, gs, bs] = [r / 255, g / 255, b / 255].map(c =>
-    c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4
+    c <= 0.039_28 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4
   );
   return 0.2126 * rs + 0.7152 * gs + 0.0722 * bs;
 }
@@ -81,9 +81,9 @@ function parseGradientColors(bgImage) {
   for (const m of bgImage.matchAll(/#([0-9a-f]{6}|[0-9a-f]{3})\b/gi)) {
     const h = m[1];
     if (h.length === 6) {
-      colors.push({ r: parseInt(h.slice(0,2),16), g: parseInt(h.slice(2,4),16), b: parseInt(h.slice(4,6),16), a: 1 });
+      colors.push({ r: Number.parseInt(h.slice(0,2),16), g: Number.parseInt(h.slice(2,4),16), b: Number.parseInt(h.slice(4,6),16), a: 1 });
     } else {
-      colors.push({ r: parseInt(h[0]+h[0],16), g: parseInt(h[1]+h[1],16), b: parseInt(h[2]+h[2],16), a: 1 });
+      colors.push({ r: Number.parseInt(h[0]+h[0],16), g: Number.parseInt(h[1]+h[1],16), b: Number.parseInt(h[2]+h[2],16), a: 1 });
     }
   }
   return colors;

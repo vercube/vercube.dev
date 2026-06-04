@@ -242,7 +242,7 @@ function sourceHintWindowFailure(cwd, op) {
   if (!relative) return null;
   const absolute = path.resolve(cwd, relative);
   let content;
-  try { content = fs.readFileSync(absolute, 'utf-8'); } catch { return null; }
+  try { content = fs.readFileSync(absolute, 'utf8'); } catch { return null; }
   const lines = content.split('\n');
   const line = Math.max(1, Number(hint.line) || 1);
   const lineText = lines[line - 1] || '';
@@ -315,11 +315,11 @@ function objectKeyCandidatesForOp(batch, op) {
 
 function lineHasObjectKey(line, text) {
   if (typeof text !== 'string' || text.length === 0) return false;
-  const quotedKey = new RegExp('(^|[\\s,{])([\'"`])' + escapeRegExp(text) + '\\2\\s*:');
+  const quotedKey = new RegExp('(^|[\\s,{])([\'"`])' + escapeRegExp(text) + String.raw`\2\s*:`);
   if (quotedKey.test(line)) return true;
   const identifierSafe = /^[A-Za-z_$][\w$]*$/.test(text);
   if (!identifierSafe) return false;
-  const bareKey = new RegExp('(^|[\\s,{])' + escapeRegExp(text) + '\\s*:');
+  const bareKey = new RegExp(String.raw`(^|[\s,{])` + escapeRegExp(text) + String.raw`\s*:`);
   return bareKey.test(line);
 }
 
@@ -328,7 +328,7 @@ function objectKeyMatchStillUsesOriginal(cwd, match, op) {
   const lineNumber = Number(match?.line);
   if (!relative || !Number.isFinite(lineNumber) || lineNumber < 1) return false;
   let lines;
-  try { lines = fs.readFileSync(path.resolve(cwd, relative), 'utf-8').split('\n'); } catch { return false; }
+  try { lines = fs.readFileSync(path.resolve(cwd, relative), 'utf8').split('\n'); } catch { return false; }
   const start = Math.max(0, lineNumber - 4);
   const end = Math.min(lines.length, lineNumber + 3);
   const windowLines = lines.slice(start, end);
@@ -366,7 +366,7 @@ function locatorTargetsInFile(cwd, relativeFile, op) {
   if (!opHasLocator(op)) return [];
   const absolute = path.resolve(cwd, relativeFile);
   let lines;
-  try { lines = fs.readFileSync(absolute, 'utf-8').split('\n'); } catch { return []; }
+  try { lines = fs.readFileSync(absolute, 'utf8').split('\n'); } catch { return []; }
   const out = [];
   for (let index = 0; index < lines.length; index += 1) {
     if (!lineMatchesManualEditLocator(lines[index], op)) continue;
@@ -378,7 +378,7 @@ function locatorTargetsInFile(cwd, relativeFile, op) {
 
 function verificationTargetPasses(cwd, target, op) {
   let lines;
-  try { lines = fs.readFileSync(path.resolve(cwd, target.file), 'utf-8').split('\n'); } catch { return false; }
+  try { lines = fs.readFileSync(path.resolve(cwd, target.file), 'utf8').split('\n'); } catch { return false; }
   return verificationTargetPassesLines(lines, target, op);
 }
 
@@ -438,12 +438,12 @@ function opHasLocator(op) {
 
 function lineMatchesManualEditLocator(line, op) {
   if (op.tag) {
-    const tagRe = new RegExp('<\\s*' + escapeRegExp(op.tag) + '(?=[\\s>/]|$)', 'i');
+    const tagRe = new RegExp(String.raw`<\s*` + escapeRegExp(op.tag) + String.raw`(?=[\s>/]|$)`, 'i');
     if (!tagRe.test(line)) return false;
   }
 
   if (op.elementId) {
-    const idRe = new RegExp('\\bid\\s*=\\s*["\']' + escapeRegExp(op.elementId) + '["\']');
+    const idRe = new RegExp(String.raw`\bid\s*=\s*["']` + escapeRegExp(op.elementId) + '["\']');
     if (!idRe.test(line)) return false;
   }
 
@@ -579,10 +579,10 @@ function snapshotRollbackFiles(cwd, files = null) {
     try {
       snapshot.set(relativeFile, {
         existed: true,
-        content: fs.readFileSync(absolute, 'utf-8'),
+        content: fs.readFileSync(absolute, 'utf8'),
       });
-    } catch (err) {
-      if (err?.code === 'ENOENT') {
+    } catch (error) {
+      if (error?.code === 'ENOENT') {
         snapshot.set(relativeFile, { existed: false });
       }
       // Other read failures are not safe to roll back.
@@ -646,7 +646,7 @@ function changedFilesSinceSnapshot(cwd, snapshot, scopeFiles = null) {
       continue;
     }
     let content;
-    try { content = fs.readFileSync(absolute, 'utf-8'); } catch { continue; }
+    try { content = fs.readFileSync(absolute, 'utf8'); } catch { continue; }
     if (content !== before.content) {
       changed.set(relativeFile, { file: relativeFile, kind: 'modified' });
     }
@@ -683,7 +683,7 @@ function rollbackChangedFiles(cwd, snapshot, extraFiles = [], scopeFiles = []) {
     try {
       if (before?.existed !== false && typeof before?.content === 'string') {
         fs.mkdirSync(path.dirname(absolute), { recursive: true });
-        fs.writeFileSync(absolute, before.content, 'utf-8');
+        fs.writeFileSync(absolute, before.content, 'utf8');
       } else if (before?.existed === false && item.kind === 'added' && fs.existsSync(absolute)) {
         fs.rmSync(absolute);
       } else {
@@ -691,8 +691,8 @@ function rollbackChangedFiles(cwd, snapshot, extraFiles = [], scopeFiles = []) {
         continue;
       }
       rolledBackFiles.push(item.file);
-    } catch (err) {
-      rollbackFailures.push({ file: item.file, reason: 'restore_failed', message: err.message || String(err) });
+    } catch (error) {
+      rollbackFailures.push({ file: item.file, reason: 'restore_failed', message: error.message || String(error) });
     }
   }
   return { rolledBackFiles, rollbackFailures };
@@ -808,10 +808,10 @@ async function repairPostApplyValidation({
         applyBatchToSource,
         chatAvailable,
       });
-    } catch (err) {
+    } catch (error) {
       currentFailures = [{
         reason: 'repair_agent_failed',
-        message: err.message || String(err),
+        message: error.message || String(error),
       }];
       continue;
     }
@@ -912,7 +912,7 @@ export async function commitManualEdits({
 } = {}) {
   try {
     readBufferStrict(cwd);
-  } catch (err) {
+  } catch (error) {
     return {
       applied: [],
       failed: [],
@@ -921,7 +921,7 @@ export async function commitManualEdits({
       count: 0,
       pageUrl,
       reason: 'manual_edit_buffer_invalid',
-      message: err.message || String(err),
+      message: error.message || String(error),
       ...countByPage(cwd),
     };
   }
@@ -961,13 +961,13 @@ export async function commitManualEdits({
           applyBatchToSource,
           chatAvailable,
         });
-  } catch (err) {
+  } catch (error) {
     const rollback = rollbackChangedFiles(cwd, rollbackSnapshot, [], baseRollbackScope);
     return {
       applied: [],
       failed: batch.entries.map((entry) => ({
         id: entry.id,
-        reason: err.message || String(err),
+        reason: error.message || String(error),
         candidates: candidatesForEntry(batch, entry.id),
       })),
       files: [],
@@ -1224,18 +1224,18 @@ async function main() {
     cwd: process.cwd(),
     pageUrl: argVal(args, '--page-url'),
     provider: argVal(args, '--provider') || undefined,
-    timeoutMs: Number(process.env.IMPECCABLE_LIVE_COPY_AGENT_TIMEOUT_MS || 120000),
+    timeoutMs: Number(process.env.IMPECCABLE_LIVE_COPY_AGENT_TIMEOUT_MS || 120_000),
   });
   console.log(JSON.stringify(result));
 }
 
 if (process.argv[1]?.endsWith('live-commit-manual-edits.mjs')) {
-  main().catch((err) => {
-    console.error(JSON.stringify({ error: 'commit_failed', message: err.message || String(err) }));
+  main().catch((error) => {
+    console.error(JSON.stringify({ error: 'commit_failed', message: error.message || String(error) }));
     process.exit(1);
   });
 }
 
 function escapeRegExp(value) {
-  return String(value).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return String(value).replace(/[.*+?^${}()|[\]\\]/g, String.raw`\$&`);
 }

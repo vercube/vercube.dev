@@ -134,7 +134,7 @@ function manualEditApplyChunkSize(env = process.env) {
 function countManualApplyOps(entriesOrBatch) {
   const entries = Array.isArray(entriesOrBatch)
     ? entriesOrBatch
-    : Array.isArray(entriesOrBatch?.entries) ? entriesOrBatch.entries : [];
+    : (Array.isArray(entriesOrBatch?.entries) ? entriesOrBatch.entries : []);
   let count = 0;
   for (const entry of entries) count += Array.isArray(entry.ops) ? entry.ops.length : 0;
   return count;
@@ -189,7 +189,7 @@ function writeManualApplyEvidence(eventId, batch) {
   const dir = manualApplyEvidenceDir(process.cwd());
   fs.mkdirSync(dir, { recursive: true });
   const evidencePath = path.join(dir, `${eventId}.json`);
-  fs.writeFileSync(evidencePath, JSON.stringify(batch, null, 2) + '\n', 'utf-8');
+  fs.writeFileSync(evidencePath, JSON.stringify(batch, null, 2) + '\n', 'utf8');
   return evidencePath;
 }
 
@@ -386,8 +386,8 @@ async function pushApplyBatchInChunksAndWait(batch, pageUrl, context = {}) {
     let result;
     try {
       result = normalizeApplyChunkResult(await pushApplyEventAndWait(chunk.batch, pageUrl, chunk.meta));
-    } catch (err) {
-      markChunkEntriesFailed(failedByEntry, chunk, err.message || 'chat_agent_error');
+    } catch (error) {
+      markChunkEntriesFailed(failedByEntry, chunk, error.message || 'chat_agent_error');
       aborted = true;
       continue;
     }
@@ -441,7 +441,7 @@ async function pushApplyBatchInChunksAndWait(batch, pageUrl, context = {}) {
 
   const failed = [...failedByEntry.values()];
   return {
-    status: failed.length === 0 ? 'done' : appliedEntryIds.length > 0 ? 'partial' : 'error',
+    status: failed.length === 0 ? 'done' : (appliedEntryIds.length > 0 ? 'partial' : 'error'),
     appliedEntryIds,
     failed,
     files: [...files],
@@ -450,7 +450,7 @@ async function pushApplyBatchInChunksAndWait(batch, pageUrl, context = {}) {
 }
 
 function normalizeApplyChunkResult(result) {
-  const status = result?.status === 'partial' ? 'partial' : result?.status === 'error' ? 'error' : 'done';
+  const status = result?.status === 'partial' ? 'partial' : (result?.status === 'error' ? 'error' : 'done');
   return {
     status,
     message: typeof result?.message === 'string' ? result.message : null,
@@ -620,7 +620,7 @@ function splitManualApplyBatch(batch, maxOps) {
       ops: chunk.ops,
       candidates: filterManualApplyChunkCandidates(batch, chunk.refsByEntry),
       context: {
-        ...(batch?.context || {}),
+        ...batch?.context,
         totalEntries: chunk.entries.length,
         totalOps: chunk.opCount,
         chunkIndex: index + 1,
@@ -703,7 +703,7 @@ function snapshotApplyEventFiles(batch) {
     try {
       snapshot.set(relativeFile, {
         exists: fs.existsSync(absolute),
-        content: fs.existsSync(absolute) ? fs.readFileSync(absolute, 'utf-8') : '',
+        content: fs.existsSync(absolute) ? fs.readFileSync(absolute, 'utf8') : '',
       });
     } catch {
       // If a file cannot be read before dispatch, do not attempt late rollback.
@@ -720,7 +720,7 @@ function readManualApplyTransaction(cwd = process.cwd()) {
   const file = manualApplyTransactionPath(cwd);
   if (!fs.existsSync(file)) return null;
   try {
-    return JSON.parse(fs.readFileSync(file, 'utf-8'));
+    return JSON.parse(fs.readFileSync(file, 'utf8'));
   } catch {
     return null;
   }
@@ -741,12 +741,12 @@ function writeManualApplyTransaction({ cwd = process.cwd(), pageUrl = null, batc
       return {
         file: relativeFile,
         exists,
-        content: exists ? fs.readFileSync(absolute, 'utf-8') : '',
+        content: exists ? fs.readFileSync(absolute, 'utf8') : '',
       };
     }),
   };
   fs.mkdirSync(path.dirname(file), { recursive: true });
-  fs.writeFileSync(`${file}.tmp`, JSON.stringify(transaction, null, 2) + '\n', 'utf-8');
+  fs.writeFileSync(`${file}.tmp`, JSON.stringify(transaction, null, 2) + '\n', 'utf8');
   fs.renameSync(`${file}.tmp`, file);
   return transaction;
 }
@@ -793,13 +793,13 @@ function rollbackManualApplyTransaction({ cwd = process.cwd(), pageUrl = null, r
     try {
       if (item.exists) {
         fs.mkdirSync(path.dirname(absolute), { recursive: true });
-        fs.writeFileSync(absolute, item.content || '', 'utf-8');
+        fs.writeFileSync(absolute, item.content || '', 'utf8');
       } else if (fs.existsSync(absolute)) {
         fs.rmSync(absolute);
       }
       rolledBackFiles.push(relativeFile);
-    } catch (err) {
-      rollbackFailures.push({ file: relativeFile, reason: 'restore_failed', message: err.message || String(err) });
+    } catch (error) {
+      rollbackFailures.push({ file: relativeFile, reason: 'restore_failed', message: error.message || String(error) });
     }
   }
   clearManualApplyTransaction(cwd, transaction.id);
@@ -851,13 +851,13 @@ function rollbackApplySnapshot(batch, rollbackSnapshot, extraFiles = [], reason 
     try {
       if (before.exists) {
         fs.mkdirSync(path.dirname(absolute), { recursive: true });
-        fs.writeFileSync(absolute, before.content, 'utf-8');
+        fs.writeFileSync(absolute, before.content, 'utf8');
       } else if (fs.existsSync(absolute)) {
         fs.rmSync(absolute);
       }
       rolledBackFiles.push(relativeFile);
-    } catch (err) {
-      rollbackFailures.push({ file: relativeFile, reason: 'restore_failed', message: err.message || String(err) });
+    } catch (error) {
+      rollbackFailures.push({ file: relativeFile, reason: 'restore_failed', message: error.message || String(error) });
     }
   }
   return { rolledBackFiles, rollbackFailures };
@@ -1127,12 +1127,12 @@ function getManualEditStatus() {
   try {
     const { totalCount, perPage } = countPendingByPage(process.cwd());
     return { totalCount, perPage, lastActivity: state.manualEditActivity };
-  } catch (err) {
+  } catch (error) {
     return {
       totalCount: null,
       perPage: {},
       lastActivity: state.manualEditActivity,
-      error: err.message,
+      error: error.message,
     };
   }
 }
@@ -1146,8 +1146,8 @@ function summarizePendingManualEditBatch(pageUrl = null) {
       pendingEntryCount: entries.length,
       pendingOpCount: entries.reduce((sum, entry) => sum + (entry.ops?.length || 0), 0),
     };
-  } catch (err) {
-    return { pendingSummaryError: err.message || String(err) };
+  } catch (error) {
+    return { pendingSummaryError: error.message || String(error) };
   }
 }
 
@@ -1208,7 +1208,7 @@ function loadBrowserScripts() {
   ];
   let detectScript = '';
   for (const p of detectPaths) {
-    try { detectScript = fs.readFileSync(p, 'utf-8'); break; } catch { /* try next */ }
+    try { detectScript = fs.readFileSync(p, 'utf8'); break; } catch { /* try next */ }
   }
 
   // live-browser.js: DO NOT cache. Return the path so the /live.js handler
@@ -1262,11 +1262,11 @@ function createRequestHandler({ detectScript, sessionPath, livePath }) {
       let sessionScript;
       let liveScript;
       try {
-        sessionScript = fs.readFileSync(sessionPath, 'utf-8');
-        liveScript = fs.readFileSync(livePath, 'utf-8');
-      } catch (err) {
+        sessionScript = fs.readFileSync(sessionPath, 'utf8');
+        liveScript = fs.readFileSync(livePath, 'utf8');
+      } catch (error) {
         res.writeHead(500, { 'Content-Type': 'text/plain' });
-        res.end('Error reading live browser scripts: ' + err.message);
+        res.end('Error reading live browser scripts: ' + error.message);
         return;
       }
       const body =
@@ -1349,9 +1349,9 @@ function createRequestHandler({ detectScript, sessionPath, livePath }) {
         const absPath = path.join(state.sessionDir, eventId + '.png');
         try {
           fs.writeFileSync(absPath, Buffer.concat(chunks));
-        } catch (err) {
+        } catch (error) {
           res.writeHead(500, { 'Content-Type': 'application/json' });
-          res.end(JSON.stringify({ error: 'Write failed: ' + err.message }));
+          res.end(JSON.stringify({ error: 'Write failed: ' + error.message }));
           return;
         }
         res.writeHead(200, { 'Content-Type': 'application/json' });
@@ -1417,7 +1417,7 @@ function createRequestHandler({ detectScript, sessionPath, livePath }) {
       if (p === '/design-system/raw') {
         if (!mdStat) { res.writeHead(404); res.end('Not found'); return; }
         res.writeHead(200, { 'Content-Type': 'text/markdown; charset=utf-8' });
-        res.end(fs.readFileSync(mdPath, 'utf-8'));
+        res.end(fs.readFileSync(mdPath, 'utf8'));
         return;
       }
 
@@ -1436,17 +1436,17 @@ function createRequestHandler({ detectScript, sessionPath, livePath }) {
 
       if (mdStat) {
         try {
-          response.parsed = parseDesignMd(fs.readFileSync(mdPath, 'utf-8'));
-        } catch (err) {
-          response.parseError = err.message;
+          response.parsed = parseDesignMd(fs.readFileSync(mdPath, 'utf8'));
+        } catch (error) {
+          response.parseError = error.message;
         }
       }
 
       if (jsonStat) {
         try {
-          response.sidecar = JSON.parse(fs.readFileSync(jsonPath, 'utf-8'));
-        } catch (err) {
-          response.sidecarError = 'Failed to parse .impeccable/design.json: ' + err.message;
+          response.sidecar = JSON.parse(fs.readFileSync(jsonPath, 'utf8'));
+        } catch (error) {
+          response.sidecarError = 'Failed to parse .impeccable/design.json: ' + error.message;
         }
       }
 
@@ -1464,7 +1464,7 @@ function createRequestHandler({ detectScript, sessionPath, livePath }) {
       const absPath = path.resolve(process.cwd(), filePath);
       if (!absPath.startsWith(process.cwd())) { res.writeHead(403); res.end('Forbidden'); return; }
       let content;
-      try { content = fs.readFileSync(absPath, 'utf-8'); }
+      try { content = fs.readFileSync(absPath, 'utf8'); }
       catch { res.writeHead(404); res.end('File not found'); return; }
       res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
       res.end(content);
@@ -1540,9 +1540,9 @@ function createRequestHandler({ detectScript, sessionPath, livePath }) {
             element: msg.element,
             ops: msg.ops,
           });
-        } catch (err) {
+        } catch (error) {
           res.writeHead(500, { 'Content-Type': 'application/json' });
-          res.end(JSON.stringify({ error: 'stash_write_failed', message: err.message }));
+          res.end(JSON.stringify({ error: 'stash_write_failed', message: error.message }));
           return;
         }
         const { totalCount, perPage } = countPendingByPage(process.cwd());
@@ -1646,7 +1646,7 @@ function createRequestHandler({ detectScript, sessionPath, livePath }) {
             || (requestedMode === 'auto' && chatAgentLikelyActive());
           if (useChatRoute) {
             routedProvider = 'chat';
-            const timeoutMs = Number(process.env.IMPECCABLE_LIVE_COPY_AGENT_TIMEOUT_MS || 120000);
+            const timeoutMs = Number(process.env.IMPECCABLE_LIVE_COPY_AGENT_TIMEOUT_MS || 120_000);
             result = await commitManualEdits({
               cwd: process.cwd(),
               pageUrl,
@@ -1660,7 +1660,7 @@ function createRequestHandler({ detectScript, sessionPath, livePath }) {
               batch: commitBatch,
             });
           } else {
-            const timeoutMs = Number(process.env.IMPECCABLE_LIVE_COPY_AGENT_TIMEOUT_MS || 120000);
+            const timeoutMs = Number(process.env.IMPECCABLE_LIVE_COPY_AGENT_TIMEOUT_MS || 120_000);
             const provider = ['codex', 'claude', 'mock'].includes(requestedMode) ? requestedMode : undefined;
             result = await commitManualEdits({
               cwd: process.cwd(),
@@ -1674,7 +1674,7 @@ function createRequestHandler({ detectScript, sessionPath, livePath }) {
               batch: commitBatch,
             });
           }
-        } catch (err) {
+        } catch (error) {
           if (transaction) {
             rollbackManualApplyTransaction({
               cwd: process.cwd(),
@@ -1682,7 +1682,7 @@ function createRequestHandler({ detectScript, sessionPath, livePath }) {
               reason: 'manual_edit_commit_exception',
             });
           }
-          const message = err.stderr?.toString?.() || err.message;
+          const message = error.stderr?.toString?.() || error.message;
           recordManualEditActivity('manual_edit_commit_failed', {
             pageUrl,
             provider: routedProvider,
@@ -1809,9 +1809,9 @@ function createRequestHandler({ detectScript, sessionPath, livePath }) {
           discarded = truncateManualEditsBuffer(process.cwd());
         }
         canceledApplyEvents = cancelPendingManualApplyEvents(pageUrl);
-      } catch (err) {
+      } catch (error) {
         res.writeHead(500, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ error: 'discard_failed', message: err.message }));
+        res.end(JSON.stringify({ error: 'discard_failed', message: error.message }));
         return;
       }
       const { totalCount, perPage } = countPendingByPage(process.cwd());
@@ -1876,9 +1876,9 @@ function createRequestHandler({ detectScript, sessionPath, livePath }) {
         if (state.sessionStore && msg.id) {
           try {
             state.sessionStore.appendEvent(msg);
-          } catch (err) {
+          } catch (error) {
             res.writeHead(500, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ error: 'session_store_append_failed', message: err.message }));
+            res.end(JSON.stringify({ error: 'session_store_append_failed', message: error.message }));
             return;
           }
         }
@@ -1930,8 +1930,8 @@ function handlePollGet(req, res, url) {
     return;
   }
   state.lastPollAt = Date.now();
-  const timeout = parseInt(url.searchParams.get('timeout') || DEFAULT_POLL_TIMEOUT, 10);
-  const leaseMs = parseInt(url.searchParams.get('leaseMs') || '30000', 10);
+  const timeout = Number.parseInt(url.searchParams.get('timeout') || DEFAULT_POLL_TIMEOUT, 10);
+  const leaseMs = Number.parseInt(url.searchParams.get('leaseMs') || '30000', 10);
   const available = findAvailablePendingEvent();
   if (available) {
     res.writeHead(200, { 'Content-Type': 'application/json' });
@@ -1980,7 +1980,7 @@ function sessionFileMetadataFromPollReply(file) {
   }
 
   try {
-    const manifest = JSON.parse(fs.readFileSync(full, 'utf-8'));
+    const manifest = JSON.parse(fs.readFileSync(full, 'utf8'));
     if (manifest?.previewMode !== 'svelte-component' || !manifest.sourceFile) return base;
     return {
       file: String(manifest.sourceFile).split(path.sep).join('/'),
@@ -2152,8 +2152,8 @@ function shutdown() {
 function cleanupSvelteComponentSessionsBeforeExit() {
   try {
     removeAllSvelteComponentSessions(process.cwd());
-  } catch (err) {
-    console.warn('[impeccable] Svelte component session cleanup failed:', err.message);
+  } catch (error) {
+    console.warn('[impeccable] Svelte component session cleanup failed:', error.message);
   }
 }
 
@@ -2163,8 +2163,8 @@ function applyLegacyDeferredAcceptsOnStartup() {
     if (result.applied > 0 || result.failed > 0) {
       console.log('[impeccable] applied legacy deferred Svelte component accepts:', JSON.stringify(result));
     }
-  } catch (err) {
-    console.warn('[impeccable] legacy deferred Svelte component accept apply failed:', err.message);
+  } catch (error) {
+    console.warn('[impeccable] legacy deferred Svelte component accept apply failed:', error.message);
   }
 }
 
@@ -2219,7 +2219,7 @@ if (args.includes('stop')) {
     const injectPath = path.join(__dirname, 'live-inject.mjs');
     try {
       const out = execFileSync(process.execPath, [injectPath, '--remove'], {
-        encoding: 'utf-8',
+        encoding: 'utf8',
         cwd: process.cwd(),
       });
       const line = out.trim().split('\n').filter(Boolean).pop();
@@ -2233,11 +2233,11 @@ if (args.includes('stop')) {
           /* ignore non-JSON lines */
         }
       }
-    } catch (err) {
-      const detail = err.stderr?.toString?.().trim?.()
-        || err.stdout?.toString?.().trim?.()
-        || err.message
-        || String(err);
+    } catch (error) {
+      const detail = error.stderr?.toString?.().trim?.()
+        || error.stdout?.toString?.().trim?.()
+        || error.message
+        || String(error);
       console.warn(`Note: could not remove live script tag (${detail.split('\n')[0]})`);
     }
   }
@@ -2297,7 +2297,7 @@ applyLegacyDeferredAcceptsOnStartup();
 restorePendingEventsFromStore();
 pruneStaleManualApplyEvidence(process.cwd());
 const portArg = args.find(a => a.startsWith('--port='));
-state.port = portArg ? parseInt(portArg.split('=')[1], 10) : await findOpenPort();
+state.port = portArg ? Number.parseInt(portArg.split('=')[1], 10) : await findOpenPort();
 // Annotation screenshots live in the project root so the agent's Read tool
 // doesn't trip a per-file permission prompt. Sessioned by token so concurrent
 // projects (or quick restarts) don't collide.

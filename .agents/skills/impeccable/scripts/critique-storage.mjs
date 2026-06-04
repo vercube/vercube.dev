@@ -107,7 +107,7 @@ export function writeSnapshot({ slug, meta, body, cwd = process.cwd(), now = new
   // IMPECCABLE_CRITIQUE_META env var) could clobber them, leaving the
   // filename in disagreement with its frontmatter and corrupting trends.
   const front = serializeFrontmatter({ ...meta, timestamp, slug });
-  fs.writeFileSync(filePath, `${front}\n${body.trim()}\n`, 'utf-8');
+  fs.writeFileSync(filePath, `${front}\n${body.trim()}\n`, 'utf8');
   return filePath;
 }
 
@@ -130,7 +130,7 @@ function parseFrontmatter(text) {
   const out = {};
   for (const line of match[1].split(/\r?\n/)) {
     const colon = line.indexOf(':');
-    if (colon < 0) continue;
+    if (colon === -1) continue;
     const key = line.slice(0, colon).trim();
     let value = line.slice(colon + 1).trim();
     if (/^".*"$/.test(value)) {
@@ -162,9 +162,9 @@ function listSnapshotsForSlug(slug, cwd) {
  */
 export function readLatestSnapshot(slug, { cwd = process.cwd() } = {}) {
   const all = listSnapshotsForSlug(slug, cwd);
-  if (!all.length) return null;
+  if (all.length === 0) return null;
   const latest = all[all.length - 1];
-  const body = fs.readFileSync(latest, 'utf-8');
+  const body = fs.readFileSync(latest, 'utf8');
   return { path: latest, body, meta: parseFrontmatter(body) };
 }
 
@@ -175,7 +175,7 @@ export function readLatestSnapshot(slug, { cwd = process.cwd() } = {}) {
 export function readTrend(slug, { limit = 5, cwd = process.cwd() } = {}) {
   const all = listSnapshotsForSlug(slug, cwd);
   const slice = all.slice(-limit);
-  return slice.map((file) => parseFrontmatter(fs.readFileSync(file, 'utf-8')));
+  return slice.map((file) => parseFrontmatter(fs.readFileSync(file, 'utf8')));
 }
 
 // ---- CLI ---------------------------------------------------------------
@@ -192,7 +192,7 @@ function main(argv) {
     case 'write': {
       const [slug, bodyFile] = args;
       if (!slug || !bodyFile) { process.stderr.write('usage: write <slug> <body-file>\n'); process.exit(1); }
-      const raw = fs.readFileSync(bodyFile, 'utf-8');
+      const raw = fs.readFileSync(bodyFile, 'utf8');
       // The body file may be a full report. The caller passes the meta as
       // a JSON object on stdin if it wants structured frontmatter; otherwise
       // we write with minimal metadata.
@@ -216,9 +216,10 @@ function main(argv) {
       process.stdout.write(JSON.stringify(rows, null, 2) + '\n');
       return;
     }
-    default:
+    default: {
       process.stderr.write('usage: critique-storage.mjs <slug|write|latest|trend> [args]\n');
       process.exit(1);
+    }
   }
 }
 

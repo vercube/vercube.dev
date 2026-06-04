@@ -54,15 +54,15 @@ function normalizeColorForCheck(value) {
   const v = value.trim();
   const hex6 = v.match(/^#([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i);
   if (hex6) {
-    const [r, g, b] = [parseInt(hex6[1], 16), parseInt(hex6[2], 16), parseInt(hex6[3], 16)];
+    const [r, g, b] = [Number.parseInt(hex6[1], 16), Number.parseInt(hex6[2], 16), Number.parseInt(hex6[3], 16)];
     return `rgb(${r}, ${g}, ${b})`;
   }
   const hex3 = v.match(/^#([0-9a-f])([0-9a-f])([0-9a-f])$/i);
   if (hex3) {
     const [r, g, b] = [
-      parseInt(hex3[1] + hex3[1], 16),
-      parseInt(hex3[2] + hex3[2], 16),
-      parseInt(hex3[3] + hex3[3], 16),
+      Number.parseInt(hex3[1] + hex3[1], 16),
+      Number.parseInt(hex3[2] + hex3[2], 16),
+      Number.parseInt(hex3[3] + hex3[3], 16),
     ];
     return `rgb(${r}, ${g}, ${b})`;
   }
@@ -91,7 +91,7 @@ function buildBorderOverrideMap(document, window) {
   function parseShorthand(text) {
     const m = text.trim().match(BORDER_SHORTHAND_RE);
     if (!m) return null;
-    return { width: parseFloat(m[1]), color: normalizeColorForCheck(m[3]) };
+    return { width: Number.parseFloat(m[1]), color: normalizeColorForCheck(m[3]) };
   }
 
   // Read from the per-property accessors on rule.style. jsdom preserves
@@ -198,7 +198,7 @@ function unwrapCssAtLayer(source) {
     let depth = 1;
     let i = openEnd;
     while (i < source.length && depth > 0) {
-      const c = source.charCodeAt(i);
+      const c = source.codePointAt(i);
       if (c === 0x7b /* { */) depth++;
       else if (c === 0x7d /* } */) depth--;
       i++;
@@ -414,17 +414,17 @@ function normalizeStaticCssValue(prop, value, customProps, parentStyle, currentS
     if (parsed) resolved = staticColorToCss(parsed);
   }
   if (prop === 'fontSize') {
-    const base = parseFloat(parentStyle?.fontSize) || 16;
+    const base = Number.parseFloat(parentStyle?.fontSize) || 16;
     const px = resolveLengthPx(resolved, base);
     if (px != null) resolved = `${px}px`;
   }
   if (prop === 'letterSpacing') {
-    const base = parseFloat(currentStyle?.fontSize || parentStyle?.fontSize) || 16;
+    const base = Number.parseFloat(currentStyle?.fontSize || parentStyle?.fontSize) || 16;
     const px = resolveLengthPx(resolved, base);
     if (px != null) resolved = `${px}px`;
   }
   if (prop === 'lineHeight' && resolved !== 'normal') {
-    const base = parseFloat(currentStyle?.fontSize || parentStyle?.fontSize) || 16;
+    const base = Number.parseFloat(currentStyle?.fontSize || parentStyle?.fontSize) || 16;
     const px = resolveLengthPx(resolved, base);
     if (px != null) resolved = `${px}px`;
   }
@@ -472,7 +472,7 @@ function parseStaticTransition(value) {
     const tokens = splitCssTokens(item);
     const timing = tokens.find(token => /^(?:ease|linear|step-|cubic-bezier\()/i.test(token));
     if (timing) timings.push(timing);
-    const prop = tokens.find(token => /^[a-z-]+$/i.test(token) && !/^(?:ease|linear|infinite|alternate|forwards|backwards|both|normal|none)$/.test(token) && !/s$/.test(token));
+    const prop = tokens.find(token => /^[a-z-]+$/i.test(token) && !/^(?:ease|linear|infinite|alternate|forwards|backwards|both|normal|none)$/.test(token) && !token.endsWith('s'));
     if (prop) props.push(prop);
   }
   return {
@@ -848,7 +848,7 @@ function collectStaticCssText(root, fileDir, profile, filePath, modules) {
         ruleId: 'inline-linked-stylesheet',
         target: filePath,
         detail: href,
-      }, () => fs.readFileSync(cssPath, 'utf-8'));
+      }, () => fs.readFileSync(cssPath, 'utf8'));
       styleTexts.push(css);
     } catch { /* skip unreadable */ }
   }

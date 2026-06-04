@@ -7,9 +7,7 @@ const site = useSiteConfig();
 const { data: navigation } = await useAsyncData('navigation', () => queryCollectionNavigation('docs'));
 const { data: docsPathRows } = await useAsyncData('docs-path-index', () => queryCollection('docs').select('path').all());
 
-const docsPathSet = computed(
-  () => new Set((docsPathRows.value ?? []).map((row) => row.path).filter(Boolean) as string[]),
-);
+const docsPathSet = computed(() => new Set((docsPathRows.value ?? []).map((row) => row.path).filter(Boolean) as string[]));
 
 const navigationDisplay = computed(() => stripFolderOnlyNavPaths(navigation.value ?? [], docsPathSet.value));
 const { data: files } = useLazyAsyncData('search', () => queryCollectionSearchSections('docs'), {

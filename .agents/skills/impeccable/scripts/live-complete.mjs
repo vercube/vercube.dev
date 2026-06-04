@@ -39,9 +39,9 @@ export async function completeCli() {
   const store = createLiveSessionStore({ cwd: process.cwd(), sessionId: args.id });
   const event = args.status === 'discarded'
     ? { type: 'discarded', id: args.id }
-    : args.status === 'agent_error'
+    : (args.status === 'agent_error'
       ? { type: 'agent_error', id: args.id, message: args.message || 'unknown error' }
-      : { type: 'complete', id: args.id };
+      : { type: 'complete', id: args.id });
   const snapshot = store.appendEvent(event);
   console.log(JSON.stringify({ ok: true, id: args.id, phase: snapshot.phase, snapshot }, null, 2));
 }
@@ -53,9 +53,9 @@ function readServerInfo() {
 async function completeThroughServer(info, args) {
   const type = args.status === 'discarded'
     ? 'discarded'
-    : args.status === 'agent_error'
+    : (args.status === 'agent_error'
       ? 'error'
-      : 'complete';
+      : 'complete');
   try {
     const res = await fetch(`http://localhost:${info.port}/poll`, {
       method: 'POST',

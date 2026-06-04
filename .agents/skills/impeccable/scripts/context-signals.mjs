@@ -43,9 +43,9 @@ function latestCritique(cwd) {
     const dir = getCritiqueDir(cwd);
     if (!fs.existsSync(dir)) return null;
     const files = fs.readdirSync(dir).filter((f) => f.endsWith('.md')).sort();
-    if (!files.length) return null;
+    if (files.length === 0) return null;
     const newest = files[files.length - 1];
-    const text = fs.readFileSync(path.join(dir, newest), 'utf-8');
+    const text = fs.readFileSync(path.join(dir, newest), 'utf8');
     const front = text.split('---')[1] || '';
     const get = (k) => {
       const m = front.match(new RegExp(`^${k}:\\s*(.+)$`, 'm'));
@@ -74,7 +74,7 @@ function gitSignals(cwd) {
     try {
       const out = execFileSync('git', args, {
         cwd,
-        encoding: 'utf-8',
+        encoding: 'utf8',
         stdio: ['ignore', 'pipe', 'ignore'],
       });
       return trim ? out.trim() : out;
@@ -170,15 +170,15 @@ const SOURCE_DIRS = ['src', 'app', 'components', 'pages', 'public'];
 function scanTargets(cwd, git) {
   // 1. Dirty tree wins: scan exactly the markup/style files in flight. It's
   //    what the user is working on, it's a small set, and it's local.
-  if (git.isRepo && git.changedFiles.length) {
+  if (git.isRepo && git.changedFiles.length > 0) {
     const changed = git.changedFiles
       .filter((f) => SCANNABLE_EXT.has(path.extname(f).toLowerCase()))
       .filter((f) => fs.existsSync(path.join(cwd, f)));
-    if (changed.length) return { targets: changed.slice(0, 50), via: 'git-changes' };
+    if (changed.length > 0) return { targets: changed.slice(0, 50), via: 'git-changes' };
   }
   // 2. Otherwise scan the local source dirs that exist.
   const dirs = SOURCE_DIRS.filter((d) => fs.existsSync(path.join(cwd, d)));
-  if (dirs.length) return { targets: dirs, via: 'source-dir' };
+  if (dirs.length > 0) return { targets: dirs, via: 'source-dir' };
   // 3. A root HTML entry, or the project root as a last resort when there's
   //    code but no conventional source dir (walkDir still skips heavy dirs).
   if (fs.existsSync(path.join(cwd, 'index.html'))) return { targets: ['index.html'], via: 'html' };

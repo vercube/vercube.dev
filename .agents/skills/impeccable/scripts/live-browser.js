@@ -54,7 +54,7 @@
   const FONT = 'system-ui, -apple-system, sans-serif';
   const MONO = 'ui-monospace, SFMono-Regular, Menlo, monospace';
   // z-index: detect overlays use 99999, so our UI must be above them
-  const Z = { highlight: 100001, bar: 100005, picker: 100007, toast: 100010 };
+  const Z = { highlight: 100_001, bar: 100_005, picker: 100_007, toast: 100_010 };
   const EASE = 'cubic-bezier(0.22, 1, 0.36, 1)'; // ease-out-quint
   const PREFIX = 'impeccable-live';
   const MANUAL_APPLY_STATE_TTL_MS = 15 * 60 * 1000;
@@ -232,7 +232,7 @@
     if (!el) return '';
     let s = el.tagName.toLowerCase();
     if (el.id) s += '#' + el.id;
-    else if (el.classList.length) s += '.' + [...el.classList].slice(0, 2).join('.');
+    else if (el.classList.length > 0) s += '.' + [...el.classList].slice(0, 2).join('.');
     return s;
   }
 
@@ -264,7 +264,7 @@
 
   function cssId(id) {
     if (window.CSS?.escape) return CSS.escape(id);
-    return String(id).replace(/([ !"#$%&'()*+,./:;<=>?@[\\\]^`{|}~])/g, '\\$1');
+    return String(id).replace(/([ !"#$%&'()*+,./:;<=>?@[\\\]^`{|}~])/g, String.raw`\$1`);
   }
 
   function liveUiRoot() {
@@ -274,28 +274,28 @@
   }
 
   function uiAppend(el) {
-    liveUiRoot().appendChild(el);
+    liveUiRoot().append(el);
     return el;
   }
 
   function uiAppendStyle(styleEl) {
     const root = liveUiRoot();
-    if (root && root !== document.body) root.appendChild(styleEl);
-    else document.head.appendChild(styleEl);
+    if (root && root !== document.body) root.append(styleEl);
+    else document.head.append(styleEl);
     return styleEl;
   }
 
   function uiGetById(id) {
     const root = liveUiRoot();
     if (root?.getElementById) {
-      const found = root.getElementById(id);
+      const found = root.querySelector(`#${id}`);
       if (found) return found;
     }
     if (root?.querySelector) {
       const found = root.querySelector('#' + cssId(id));
       if (found) return found;
     }
-    return document.getElementById(id);
+    return document.querySelector(`#${id}`);
   }
 
   function activeElementDeep() {
@@ -485,7 +485,7 @@
       // pointer-events=stroke so gaps still fall through to the overlay.
       pointerEvents: 'none', overflow: 'visible',
     });
-    annotOverlayEl.appendChild(annotSvgEl);
+    annotOverlayEl.append(annotSvgEl);
 
     annotPinsEl = document.createElement('div');
     annotPinsEl.id = PREFIX + '-annot-pins';
@@ -493,7 +493,7 @@
       position: 'absolute', inset: '0',
       pointerEvents: 'none',
     });
-    annotOverlayEl.appendChild(annotPinsEl);
+    annotOverlayEl.append(annotPinsEl);
 
     annotClearChipEl = document.createElement('div');
     annotClearChipEl.id = PREFIX + '-annot-clear';
@@ -509,7 +509,7 @@
       display: 'none', userSelect: 'none',
       boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
     });
-    annotOverlayEl.appendChild(annotClearChipEl);
+    annotOverlayEl.append(annotClearChipEl);
 
     placeholderResizeLayerEl = document.createElement('div');
     placeholderResizeLayerEl.id = PREFIX + '-placeholder-resize';
@@ -520,7 +520,7 @@
       display: 'none',
       zIndex: '2',
     });
-    annotOverlayEl.appendChild(placeholderResizeLayerEl);
+    annotOverlayEl.append(placeholderResizeLayerEl);
 
     annotOverlayEl.addEventListener('pointerdown', onAnnotDown);
     annotOverlayEl.addEventListener('pointermove', onAnnotMove);
@@ -596,7 +596,7 @@
       hit.setAttribute('pointer-events', 'stroke');
       hit.style.cursor = 'pointer';
       hit.dataset.annotStroke = String(idx);
-      annotSvgEl.appendChild(hit);
+      annotSvgEl.append(hit);
       const visible = document.createElementNS('http://www.w3.org/2000/svg', 'path');
       visible.setAttribute('d', d);
       visible.setAttribute('stroke', C.brand);
@@ -605,7 +605,7 @@
       visible.setAttribute('stroke-linejoin', 'round');
       visible.setAttribute('fill', 'none');
       visible.setAttribute('pointer-events', 'none');
-      annotSvgEl.appendChild(visible);
+      annotSvgEl.append(visible);
     });
     updateClearChip();
   }
@@ -638,7 +638,7 @@
     // 2) Stroke hit path → delete that stroke
     const strokeHit = e.target.closest?.('[data-annot-stroke]');
     if (strokeHit) {
-      const idx = parseInt(strokeHit.dataset.annotStroke, 10);
+      const idx = Number.parseInt(strokeHit.dataset.annotStroke, 10);
       if (Number.isInteger(idx)) {
         annotState.strokes.splice(idx, 1);
         redrawStrokes();
@@ -650,7 +650,7 @@
     // 3) Pin → drag, edit, or delete-on-double-click
     const pinWrap = e.target.closest?.('[data-annot-pin]');
     if (pinWrap) {
-      const idx = parseInt(pinWrap.dataset.annotPin, 10);
+      const idx = Number.parseInt(pinWrap.dataset.annotPin, 10);
       if (!Number.isInteger(idx)) return;
       // Double-click (two pointerdowns on the same pin within window) → delete.
       const now = Date.now();
@@ -741,7 +741,7 @@
       strokeEl.setAttribute('stroke-linejoin', 'round');
       strokeEl.setAttribute('fill', 'none');
       strokeEl.setAttribute('pointer-events', 'none');
-      annotSvgEl.appendChild(strokeEl);
+      annotSvgEl.append(strokeEl);
       annotPointer.strokeEl = strokeEl;
       annotPointer.strokePoints = [[annotPointer.x0, annotPointer.y0]];
     }
@@ -805,7 +805,7 @@
   function renderAllPins() {
     annotPinsEl.innerHTML = '';
     annotState.comments.forEach((c, idx) => {
-      annotPinsEl.appendChild(buildPinElement(c, idx));
+      annotPinsEl.append(buildPinElement(c, idx));
     });
     updateClearChip();
   }
@@ -829,7 +829,7 @@
       boxShadow: '0 1px 3px rgba(0,0,0,0.25)',
       flexShrink: '0',
     });
-    wrap.appendChild(dot);
+    wrap.append(dot);
 
     if (comment.text) {
       const bubble = document.createElement('div');
@@ -842,7 +842,7 @@
         pointerEvents: 'none', whiteSpace: 'pre-wrap',
         wordBreak: 'break-word',
       });
-      wrap.appendChild(bubble);
+      wrap.append(bubble);
     }
     return wrap;
   }
@@ -865,7 +865,7 @@
     });
     const originalText = annotState.comments[idx].text || '';
     input.value = originalText;
-    wrapEl.appendChild(input);
+    wrapEl.append(input);
     annotEditing = { idx, input, wrapEl, originalText };
     input.addEventListener('keydown', onAnnotInputKey, true);
     input.addEventListener('blur', () => {
@@ -946,13 +946,13 @@
         path.setAttribute('stroke-linejoin', 'round');
         path.setAttribute('fill', 'none');
         path.setAttribute('d', pointsToPath(s.points));
-        svg.appendChild(path);
+        svg.append(path);
       }
-      wrap.appendChild(svg);
+      wrap.append(svg);
     }
     for (const c of comments) {
       // idx=-1 means non-interactive; pointerEvents stay off in the clone
-      wrap.appendChild(buildPinElement(c, -1));
+      wrap.append(buildPinElement(c, -1));
     }
     return wrap;
   }
@@ -966,11 +966,11 @@
     unwrapMixedContentTextNodes(root);
     const nodes = [root, ...root.querySelectorAll('[data-impeccable-editable], [data-impeccable-original-text], [data-impeccable-text-wrap]')];
     for (const node of nodes) {
-      const runtimeEditable = node.hasAttribute('data-impeccable-editable')
-        || node.hasAttribute('data-impeccable-original-text');
-      node.removeAttribute('data-impeccable-editable');
-      node.removeAttribute('data-impeccable-original-text');
-      node.removeAttribute('data-impeccable-text-wrap');
+      const runtimeEditable = Object.hasOwn(node.dataset, "impeccableEditable")
+        || Object.hasOwn(node.dataset, "impeccableOriginalText");
+      delete node.dataset.impeccableEditable;
+      delete node.dataset.impeccableOriginalText;
+      delete node.dataset.impeccableTextWrap;
       if (runtimeEditable) {
         node.removeAttribute('contenteditable');
         if (node.style) {
@@ -1012,7 +1012,7 @@
       tagName: el.tagName.toLowerCase(), id: el.id || null,
       classes: [...el.classList],
       textContent: (el.textContent || '').slice(0, 500),
-      outerHTML: sanitizedContextOuterHTML(el, 10000),
+      outerHTML: sanitizedContextOuterHTML(el, 10_000),
       computedStyles: {
         'font-family': cs.fontFamily, 'font-size': cs.fontSize,
         'font-weight': cs.fontWeight, 'line-height': cs.lineHeight,
@@ -1174,10 +1174,10 @@
     if (mode === 'cycling' && !ensureCyclingRenderable('show-bar')) return;
     barEl.innerHTML = '';
     if (mode === 'configure') {
-      barEl.appendChild(configureKind === 'insert' ? buildInsertConfigureRow() : buildConfigureRow());
+      barEl.append(configureKind === 'insert' ? buildInsertConfigureRow() : buildConfigureRow());
       if (configureKind === 'insert') syncInsertCreateButton();
-    } else if (mode === 'generating') barEl.appendChild(buildGeneratingRow());
-    else if (mode === 'cycling') barEl.appendChild(buildCyclingRow());
+    } else if (mode === 'generating') barEl.append(buildGeneratingRow());
+    else if (mode === 'cycling') barEl.append(buildCyclingRow());
     barEl.style.display = 'block';
     positionBar();
     requestAnimationFrame(() => {
@@ -1210,13 +1210,13 @@
     barEl.style.border = '1px solid ' + BP.border;
     barEl.style.boxShadow = BP.shadow;
     if (mode === 'configure') {
-      barEl.appendChild(configureKind === 'insert' ? buildInsertConfigureRow() : buildConfigureRow());
+      barEl.append(configureKind === 'insert' ? buildInsertConfigureRow() : buildConfigureRow());
       if (configureKind === 'insert') syncInsertCreateButton();
-    } else if (mode === 'generating') barEl.appendChild(buildGeneratingRow());
-    else if (mode === 'cycling') barEl.appendChild(buildCyclingRow());
-    else if (mode === 'saving') barEl.appendChild(buildSavingRow());
+    } else if (mode === 'generating') barEl.append(buildGeneratingRow());
+    else if (mode === 'cycling') barEl.append(buildCyclingRow());
+    else if (mode === 'saving') barEl.append(buildSavingRow());
     else if (mode === 'confirmed') {
-      barEl.appendChild(buildConfirmedRow());
+      barEl.append(buildConfirmedRow());
       barEl.style.background = 'oklch(95% 0.05 145)';
       barEl.style.border = '1px solid oklch(75% 0.12 145 / 0.4)';
     }
@@ -1620,8 +1620,8 @@
     return {
       width: Math.round(placeholder.offsetWidth || 0),
       height: Math.round(placeholder.offsetHeight || PLACEHOLDER_DEFAULT_HEIGHT),
-      marginLeft: parseFloat(placeholder.style.marginLeft) || 0,
-      marginTop: parseFloat(placeholder.style.marginTop) || 0,
+      marginLeft: Number.parseFloat(placeholder.style.marginLeft) || 0,
+      marginTop: Number.parseFloat(placeholder.style.marginTop) || 0,
       position: insertAnchorPosition || 'before',
       layoutAxis: insertAnchorLayoutAxis || 'column',
       anchorTag: anchor.tagName || 'DIV',
@@ -1725,7 +1725,7 @@
       handle.dataset.impeccablePlaceholderResize = spec.edge;
       handle.setAttribute('aria-label', 'Resize placeholder');
       handle.title = 'Drag to resize';
-      placeholderResizeLayerEl.appendChild(handle);
+      placeholderResizeLayerEl.append(handle);
     }
   }
 
@@ -1751,8 +1751,8 @@
       start: {
         width: ph.offsetWidth,
         height: ph.offsetHeight,
-        marginLeft: parseFloat(ph.style.marginLeft) || 0,
-        marginTop: parseFloat(ph.style.marginTop) || 0,
+        marginLeft: Number.parseFloat(ph.style.marginLeft) || 0,
+        marginTop: Number.parseFloat(ph.style.marginTop) || 0,
       },
       parentWidth: ph.parentNode?.getBoundingClientRect().width || PLACEHOLDER_MIN_WIDTH,
       pointerId: e.pointerId,
@@ -1777,7 +1777,7 @@
     });
     const placeholder = document.createElement('div');
     placeholder.id = PREFIX + '-insert-placeholder';
-    placeholder.setAttribute('data-impeccable-insert-placeholder', 'true');
+    placeholder.dataset.impeccableInsertPlaceholder = 'true';
     placeholder.setAttribute('aria-hidden', 'true');
     Object.assign(placeholder.style, {
       boxSizing: 'border-box',
@@ -1927,7 +1927,7 @@
       if (controlsLocked) { showManualApplyBusyToast(); return; }
       toggleActionPicker();
     });
-    row.appendChild(pill);
+    row.append(pill);
 
     // Prompt field - same chat-surface chrome as the bottom Steer bar
     const inputWrap = el('div', {
@@ -2014,9 +2014,9 @@
       toggleConfigureVoice();
     });
 
-    inputWrap.appendChild(input);
-    inputWrap.appendChild(voiceBtn);
-    row.appendChild(inputWrap);
+    inputWrap.append(input);
+    inputWrap.append(voiceBtn);
+    row.append(inputWrap);
     syncConfigureInputChrome();
 
     // Variant count toggle
@@ -2044,7 +2044,7 @@
       selectedCount = selectedCount >= 4 ? 2 : selectedCount + 1;
       count.textContent = '\u00D7' + selectedCount;
     });
-    row.appendChild(count);
+    row.append(count);
 
     // Go button
     const go = el('button', {
@@ -2067,7 +2067,7 @@
     go.addEventListener('mousedown', () => { if (!controlsLocked) go.style.transform = 'scale(0.97)'; });
     go.addEventListener('mouseup', () => go.style.transform = 'scale(1)');
     go.addEventListener('click', (e) => { e.stopPropagation(); handleGo(); });
-    row.appendChild(go);
+    row.append(go);
 
     // Auto-focus input after a beat
     if (!controlsLocked) setTimeout(() => input.focus(), 60);
@@ -2155,9 +2155,9 @@
       toggleConfigureVoice();
     });
 
-    inputWrap.appendChild(input);
-    inputWrap.appendChild(voiceBtn);
-    row.appendChild(inputWrap);
+    inputWrap.append(input);
+    inputWrap.append(voiceBtn);
+    row.append(inputWrap);
 
     const count = el('button', {
       display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
@@ -2177,7 +2177,7 @@
       selectedCount = selectedCount >= 4 ? 2 : selectedCount + 1;
       count.textContent = '\u00D7' + selectedCount;
     });
-    row.appendChild(count);
+    row.append(count);
 
     const create = el('button', {
       display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
@@ -2206,7 +2206,7 @@
       if (!isInsertCreateEnabled(create)) return;
       handleInsertCreate();
     });
-    row.appendChild(create);
+    row.append(create);
     syncInsertCreateButton(create, input);
     if (!controlsLocked) setTimeout(() => input.focus(), 60);
     return row;
@@ -2226,10 +2226,10 @@
       flexShrink: '0', whiteSpace: 'nowrap',
     });
     label.textContent = configureKind === 'insert' ? 'Insert' : actionLabel();
-    row.appendChild(label);
+    row.append(label);
 
     // Dots
-    row.appendChild(buildDots(false));
+    row.append(buildDots(false));
 
     // Status
     const status = el('span', {
@@ -2243,7 +2243,7 @@
       : (arrivedVariants < expectedVariants
         ? 'Generating ' + expectedVariants + ' variants...'
         : 'Done');
-    row.appendChild(status);
+    row.append(status);
 
     return row;
   }
@@ -2266,10 +2266,10 @@
     prev.id = PREFIX + '-variant-prev';
     prev.addEventListener('click', (e) => { e.stopPropagation(); cycleVariant(-1); });
     if (visibleVariant <= 1) prev.style.opacity = '0.3';
-    row.appendChild(prev);
+    row.append(prev);
 
     // Dots (clickable)
-    row.appendChild(buildDots(true));
+    row.append(buildDots(true));
 
     // Counter
     const counter = el('span', {
@@ -2278,14 +2278,14 @@
     });
     counter.id = PREFIX + '-variant-counter';
     counter.textContent = visibleVariant + '/' + arrivedVariants;
-    row.appendChild(counter);
+    row.append(counter);
 
     // Next
     const next = navBtn('\u2192');
     next.id = PREFIX + '-variant-next';
     next.addEventListener('click', (e) => { e.stopPropagation(); cycleVariant(1); });
     if (visibleVariant >= arrivedVariants) next.style.opacity = '0.3';
-    row.appendChild(next);
+    row.append(next);
 
     // Tune chip - only when the visible variant exposes params
     const visParams = parseVariantParams(getVisibleVariantEl());
@@ -2305,7 +2305,7 @@
       tune.innerHTML = TUNE_ICON_SVG;
       const tuneLabel = document.createElement('span');
       tuneLabel.textContent = 'Tune';
-      tune.appendChild(tuneLabel);
+      tune.append(tuneLabel);
       const tuneBadge = document.createElement('span');
       Object.assign(tuneBadge.style, {
         display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
@@ -2318,7 +2318,7 @@
         boxSizing: 'border-box',
       });
       tuneBadge.textContent = String(visParams.length);
-      tune.appendChild(tuneBadge);
+      tune.append(tuneBadge);
       tune.title = 'Tune this variant (' + visParams.length + ' knob' + (visParams.length === 1 ? '' : 's') + ')';
       tune.addEventListener('mouseenter', () => {
         if (!tuneOpen) tune.style.background = BP.accentSoft;
@@ -2328,11 +2328,11 @@
       });
       tune.addEventListener('click', (e) => { e.stopPropagation(); toggleTunePopover(); });
       tune.dataset.iceqTune = '1';
-      row.appendChild(tune);
+      row.append(tune);
     }
 
     // Spacer
-    row.appendChild(el('div', { flex: '1' }));
+    row.append(el('div', { flex: '1' }));
 
     // Accept - primary action, kinpaku gold + lacquer-deep (matches demo .live-demo-ctx-accept)
     const accept = el('button', {
@@ -2349,7 +2349,7 @@
     accept.addEventListener('mouseup', () => accept.style.transform = 'scale(1)');
     accept.addEventListener('click', (e) => { e.stopPropagation(); handleAccept(); });
     if (arrivedVariants === 0) { accept.style.opacity = '0.3'; accept.style.pointerEvents = 'none'; }
-    row.appendChild(accept);
+    row.append(accept);
 
     // Discard
     const discard = el('button', {
@@ -2363,7 +2363,7 @@
     discard.addEventListener('mouseenter', () => { discard.style.color = BP.text; discard.style.borderColor = BP.text; });
     discard.addEventListener('mouseleave', () => { discard.style.color = BP.textDim; discard.style.borderColor = BP.hairline; });
     discard.addEventListener('click', (e) => { e.stopPropagation(); handleDiscard(); });
-    row.appendChild(discard);
+    row.append(discard);
 
     return row;
   }
@@ -2384,12 +2384,12 @@
       animation: 'impeccable-spin 0.6s linear infinite',
       flexShrink: '0',
     });
-    row.appendChild(spinner);
+    row.append(spinner);
     const label = el('span', {
       fontSize: '12px', color: BP.textDim, fontWeight: '500',
     });
     label.textContent = 'Applying variant...';
-    row.appendChild(label);
+    row.append(label);
 
     ensureSpinKeyframes();
     return row;
@@ -2407,12 +2407,12 @@
       color: 'oklch(45% 0.15 145)',
     });
     check.textContent = '\u2713';
-    row.appendChild(check);
+    row.append(check);
     const label = el('span', {
       fontSize: '12px', color: 'oklch(35% 0.1 145)', fontWeight: '600',
     });
     label.textContent = 'Variant applied';
-    row.appendChild(label);
+    row.append(label);
     return row;
   }
 
@@ -2431,8 +2431,8 @@
       // kinpaku chips, especially when all variants had arrived and every
       // dot wore an accent ring.
       const dotBg = active ? C.brand
-        : arrived ? BP.textDim
-        : 'transparent';
+        : (arrived ? BP.textDim
+        : 'transparent');
       const dotBorder = arrived ? 'none' : '1.5px solid ' + BP.hairline;
       const dot = el('div', {
         width: active ? '8px' : '6px',
@@ -2453,7 +2453,7 @@
           selectVariant(idx, 'variant_changed');
         });
       }
-      container.appendChild(dot);
+      container.append(dot);
     }
     return container;
   }
@@ -2532,8 +2532,8 @@
       iconWrap.innerHTML = ICONS[action.value] || '';
       const labelEl = el('span', { lineHeight: '1' });
       labelEl.textContent = action.label;
-      chip.appendChild(iconWrap);
-      chip.appendChild(labelEl);
+      chip.append(iconWrap);
+      chip.append(labelEl);
       chip.dataset.action = action.value;
       chip.addEventListener('mouseenter', () => {
         if (action.value !== selectedAction) chip.style.background = P.accentSoft;
@@ -2551,10 +2551,10 @@
         const input = uiGetById(PREFIX + '-input');
         if (input && prompt) input.value = prompt;
       });
-      grid.appendChild(chip);
+      grid.append(chip);
     });
 
-    pickerEl.appendChild(grid);
+    pickerEl.append(grid);
     uiAppend(pickerEl);
     defangOutsideHandlers(pickerEl);
 
@@ -2694,7 +2694,7 @@
       gap: '12px 16px',
     });
 
-    paramsPanelEl.appendChild(paramsPanelBody);
+    paramsPanelEl.append(paramsPanelBody);
     uiAppend(paramsPanelEl);
     // Don't override pointer-events: the panel toggles between 'none' (closed,
     // click-through) and 'auto' (open) on its own. Just silence the host's
@@ -2739,13 +2739,13 @@
       return Array.isArray(params) ? params : [];
     }
     if (!variantEl) return [];
-    const raw = variantEl.getAttribute('data-impeccable-params');
+    const raw = variantEl.dataset.impeccableParams;
     if (!raw) return [];
     try {
       const parsed = JSON.parse(raw);
       return Array.isArray(parsed) ? parsed : [];
-    } catch (err) {
-      console.warn('[impeccable] Invalid data-impeccable-params JSON:', err.message);
+    } catch (error) {
+      console.warn('[impeccable] Invalid data-impeccable-params JSON:', error.message);
       return [];
     }
   }
@@ -2774,8 +2774,8 @@
   }
 
   function formatRangeValue(input) {
-    const max = parseFloat(input.max), min = parseFloat(input.min);
-    const v = parseFloat(input.value);
+    const max = Number.parseFloat(input.max), min = Number.parseFloat(input.min);
+    const v = Number.parseFloat(input.value);
     if (!isFinite(v)) return input.value;
     return (max - min) <= 2 ? v.toFixed(2) : String(Math.round(v));
   }
@@ -2794,13 +2794,13 @@
         letterSpacing: '0.03em',
       });
       lbl.textContent = p.label || p.id;
-      labelRow.appendChild(lbl);
+      labelRow.append(lbl);
       const readout = el('span', {
         fontSize: '10.5px', color: P.textDim,
         fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace',
       });
-      labelRow.appendChild(readout);
-      row.appendChild(labelRow);
+      labelRow.append(readout);
+      row.append(labelRow);
 
       if (p.kind === 'range') {
         const input = document.createElement('input');
@@ -2815,13 +2815,13 @@
         readout.textContent = formatRangeValue(input);
         input.addEventListener('input', (e) => {
           e.stopPropagation();
-          const v = parseFloat(input.value);
+          const v = Number.parseFloat(input.value);
           paramsCurrentValues[p.id] = v;
           readout.textContent = formatRangeValue(input);
           applyParamValue(variantEl, p, v);
           queueCheckpoint('param_changed');
         });
-        row.appendChild(input);
+        row.append(input);
       } else if (p.kind === 'toggle') {
         const initial = !!p.default;
         readout.textContent = initial ? 'On' : 'Off';
@@ -2841,7 +2841,7 @@
           transition: 'left 0.18s ' + EASE,
           boxShadow: '0 1px 2px oklch(0% 0 0 / 0.2)',
         });
-        track.appendChild(knob);
+        track.append(knob);
         track.addEventListener('click', (e) => {
           e.stopPropagation();
           const next = !paramsCurrentValues[p.id];
@@ -2852,7 +2852,7 @@
           applyParamValue(variantEl, p, next);
           queueCheckpoint('param_changed');
         });
-        row.appendChild(track);
+        row.append(track);
       } else if (p.kind === 'steps') {
         const opts = (p.options || []).map(o =>
           typeof o === 'string' ? { value: o, label: o } : o
@@ -2889,13 +2889,13 @@
             applyParamValue(variantEl, p, o.value);
             queueCheckpoint('param_changed');
           });
-          segRow.appendChild(b);
+          segRow.append(b);
           segBtns.push({ btn: b, val: o.value });
         });
-        row.appendChild(segRow);
+        row.append(segRow);
       }
 
-      paramsPanelBody.appendChild(row);
+      paramsPanelBody.append(row);
     }
   }
 
@@ -2927,7 +2927,7 @@
       if (el.hasAttribute && el.hasAttribute('contenteditable')) return;
       if (el !== rootEl && isOwn(el)) return;
 
-      const children = Array.from(el.childNodes);
+      const children = [...el.childNodes];
       const textNodes = [];
       let allText = children.length > 0;
       let hasNonWhitespaceText = false;
@@ -2962,7 +2962,7 @@
     const tag = rootEl.tagName.toLowerCase();
     if (MIXED_WRAP_SKIP[tag]) return;
     if (rootEl.hasAttribute('contenteditable')) return;
-    const children = Array.from(rootEl.childNodes);
+    const children = [...rootEl.childNodes];
     const hasText = children.some((n) => n.nodeType === 3 && /\S/.test(n.nodeValue || ''));
     const hasElement = children.some((n) => n.nodeType === 1);
     if (hasText && hasElement) {
@@ -2976,7 +2976,7 @@
         }
       }
     }
-    for (const child of Array.from(rootEl.children)) {
+    for (const child of [...rootEl.children]) {
       if (!child.dataset || !child.dataset.impeccableTextWrap) {
         wrapMixedContentTextNodes(child);
       }
@@ -3147,8 +3147,8 @@
 
   function sourceHintForElement(el) {
     if (!el || !el.getAttribute) return null;
-    const file = el.getAttribute('data-astro-source-file');
-    const loc = el.getAttribute('data-astro-source-loc');
+    const file = el.dataset.astroSourceFile;
+    const loc = el.dataset.astroSourceLoc;
     if (file || loc) {
       const parsed = parseSourceLoc(loc);
       return {
@@ -3203,7 +3203,7 @@
       classes.push(normalizeDocumentRefToken(cls));
       if (classes.length === 2) break;
     }
-    return classes.length ? '.' + classes.join('.') : '';
+    return classes.length > 0 ? '.' + classes.join('.') : '';
   }
 
   function normalizeDocumentRefToken(value) {
@@ -3266,7 +3266,7 @@
       id: el.id || null,
       classes: el.classList ? [...el.classList].filter((cls) => cls.indexOf('impeccable-') !== 0) : [],
       textContent: (el.textContent || '').slice(0, 1000),
-      outerHTML: sanitizedContextOuterHTML(el, 10000) || null,
+      outerHTML: sanitizedContextOuterHTML(el, 10_000) || null,
     };
   }
 
@@ -3341,9 +3341,9 @@
       showBar('configure');
       showAnnotOverlay(selectedElement);
       renderEditBadge('idle');
-    } catch (err) {
-      console.error('[impeccable] manual edit stash failed:', err);
-      const detail = String(err?.message || '');
+    } catch (error) {
+      console.error('[impeccable] manual edit stash failed:', error);
+      const detail = String(error?.message || '');
       if (detail.includes('newText cannot contain') || detail.includes('newText cannot be empty')) {
         showToast('Save rejected: ' + detail.replace(/^manual_edits:\s*/, ''), 5500);
       } else {
@@ -3454,7 +3454,7 @@
       remainingCount: Number.isFinite(Number(existing.remainingCount)) ? Number(existing.remainingCount) : currentCount,
       phase: existing.phase || 'applying',
       startedAt: Number(existing.startedAt) || Date.now(),
-      ...(patch || {}),
+      ...patch,
     });
   }
 
@@ -3503,7 +3503,7 @@
   function updateManualApplyProgressFromChunk(chunk) {
     if (!chunk || !pendingApplyInFlight) return;
     const stored = readStoredManualApplyState() || {};
-    const totalOps = Number(chunk.totalOpCount) || Number(stored.totalOps) || Number(stored.count) || parseInt(pendingPillEl?.dataset.count || '0', 10) || 0;
+    const totalOps = Number(chunk.totalOpCount) || Number(stored.totalOps) || Number(stored.count) || Number.parseInt(pendingPillEl?.dataset.count || '0', 10) || 0;
     const completedOps = Math.min(totalOps, (Number(stored.completedOps) || 0) + (Number(chunk.opCount) || 0));
     const remainingCount = Math.max(0, totalOps - completedOps);
     storeManualApplyState(Number(stored.count) || totalOps, {
@@ -3516,7 +3516,7 @@
   }
 
   function updateManualApplyRepairState(repair, phase) {
-    const count = parseInt(pendingPillEl?.dataset.count || '0', 10) || Number(readStoredManualApplyState()?.count) || 0;
+    const count = Number.parseInt(pendingPillEl?.dataset.count || '0', 10) || Number(readStoredManualApplyState()?.count) || 0;
     if (count <= 0) return;
     storeManualApplyState(count, {
       phase,
@@ -3580,7 +3580,7 @@
   function setPendingApplyLoading(loading, count) {
     if (!pendingPillEl || !pendingPillLabelEl || !pendingPillCountEl || !pendingTrashBtn) return;
     pendingApplyInFlight = loading === true;
-    const currentCount = count || parseInt(pendingPillEl.dataset.count || '0', 10) || 0;
+    const currentCount = count || Number.parseInt(pendingPillEl.dataset.count || '0', 10) || 0;
     if (pendingApplyInFlight) storeManualApplyState(currentCount);
     else clearStoredManualApplyState();
     if (pendingPillSpinnerEl) pendingPillSpinnerEl.style.display = pendingApplyInFlight ? 'inline-block' : 'none';
@@ -3607,7 +3607,7 @@
 
   function updatePendingCounter(currentPageCount) {
     if (!pendingDockEl || !pendingPillEl || !pendingPillLabelEl || !pendingPillCountEl || !pendingTrashBtn) return;
-    const previousCount = parseInt(pendingPillEl.dataset.count || '0', 10);
+    const previousCount = Number.parseInt(pendingPillEl.dataset.count || '0', 10);
     if (!currentPageCount || currentPageCount <= 0) {
       hidePendingApplyDock();
       return;
@@ -3638,13 +3638,13 @@
       if (!res.ok) return;
       const data = await res.json();
       updatePendingCounter(data.count || 0);
-    } catch (err) {
-      console.warn('[impeccable] failed to fetch pending count:', err);
+    } catch (error) {
+      console.warn('[impeccable] failed to fetch pending count:', error);
     }
   }
 
   async function onPendingPillClick() {
-    const count = parseInt(pendingPillEl?.dataset.count || '0', 10);
+    const count = Number.parseInt(pendingPillEl?.dataset.count || '0', 10);
     if (count <= 0 || pendingApplyInFlight) return;
     const ok = confirm('Apply ' + count + ' copy edit' + (count === 1 ? '' : 's') + ' to source?');
     if (!ok) return;
@@ -3679,19 +3679,19 @@
           showToast('No edits applied - see console', 4000);
         }
       }
-    } catch (err) {
-      console.error('[impeccable] commit failed:', err);
+    } catch (error) {
+      console.error('[impeccable] commit failed:', error);
       showToast('Apply failed - see console', 4000);
     } finally {
       if (waitForSseCompletion) return;
-      const remainingCount = parseInt(pendingPillEl?.dataset.count || '0', 10) || 0;
+      const remainingCount = Number.parseInt(pendingPillEl?.dataset.count || '0', 10) || 0;
       if (remainingCount > 0) setPendingApplyLoading(false);
       else hidePendingApplyDock();
     }
   }
 
   async function onPendingTrashClick() {
-    const count = parseInt(pendingPillEl?.dataset.count || '0', 10);
+    const count = Number.parseInt(pendingPillEl?.dataset.count || '0', 10);
     if (count <= 0 || pendingApplyInFlight) return;
     const ok = confirm('Discard ' + count + ' copy edit' + (count === 1 ? '' : 's') + ' on this page?');
     if (!ok) return;
@@ -3709,14 +3709,14 @@
       } else {
         showToast('Discarded ' + count + ' copy edit' + (count === 1 ? '' : 's'), 2500);
       }
-    } catch (err) {
-      console.error('[impeccable] discard failed:', err);
+    } catch (error) {
+      console.error('[impeccable] discard failed:', error);
       showToast('Discard failed - see console', 4000);
     }
   }
 
   function showManualApplyDecision(msg) {
-    const count = parseInt(pendingPillEl?.dataset.count || '0', 10) || numberOrNull(msg?.remainingCount) || 0;
+    const count = Number.parseInt(pendingPillEl?.dataset.count || '0', 10) || numberOrNull(msg?.remainingCount) || 0;
     pendingApplyInFlight = false;
     storeManualApplyState(count, {
       phase: 'repair-decision',
@@ -3741,7 +3741,7 @@
   }
 
   async function onPendingKeepFixingClick() {
-    const count = parseInt(pendingPillEl?.dataset.count || '0', 10) || numberOrNull(readStoredManualApplyState()?.count) || 0;
+    const count = Number.parseInt(pendingPillEl?.dataset.count || '0', 10) || numberOrNull(readStoredManualApplyState()?.count) || 0;
     if (count <= 0) return;
     updateManualApplyRepairState({ attempt: 1, maxAttempts: 3 }, 'repairing');
     try {
@@ -3753,8 +3753,8 @@
       if (pendingKeepFixingBtn) pendingKeepFixingBtn.style.display = 'none';
       if (pendingRollbackBtn) pendingRollbackBtn.style.display = 'none';
       if (pendingTrashBtn) pendingTrashBtn.style.display = 'inline-flex';
-    } catch (err) {
-      console.error('[impeccable] repair retry failed:', err);
+    } catch (error) {
+      console.error('[impeccable] repair retry failed:', error);
       showToast('Repair retry failed - see console', 4000);
       showManualApplyDecision({ remainingCount: count, repair: readStoredManualApplyState() });
     }
@@ -3777,8 +3777,8 @@
       clearStoredManualApplyState();
       updatePendingCounter(numberOrNull(result.remainingCount) || 0);
       showToast('Rolled back source; copy edits are still staged.', 3500);
-    } catch (err) {
-      console.error('[impeccable] manual Apply rollback failed:', err);
+    } catch (error) {
+      console.error('[impeccable] manual Apply rollback failed:', error);
       showToast('Rollback failed - see console', 4000);
     }
   }
@@ -3933,7 +3933,7 @@
   }
 
   function directMixedTextRestoreNodes(parent) {
-    return Array.from(parent?.childNodes || []).filter((node) => {
+    return [...parent?.childNodes || []].filter((node) => {
       if (node.nodeType === 3) return /\S/.test(node.nodeValue || '');
       return node.nodeType === 1
         && node.dataset
@@ -3952,7 +3952,7 @@
     const selector = (tag === '*' ? '' : tag) + classes.map((cls) => '.' + cssIdent(cls)).join('') || '*';
     let matches = [];
     try {
-      matches = Array.from(document.querySelectorAll(selector));
+      matches = [...document.querySelectorAll(selector)];
     } catch {
       matches = [];
     }
@@ -3974,7 +3974,7 @@
         continue;
       }
       const scope = current || document.body;
-      const children = Array.from(scope.children || []);
+      const children = [...scope.children || []];
       current = children.find((child) => elementMatchesManualRefSegment(child, segment)) || null;
       if (!current) return null;
     }
@@ -4010,7 +4010,7 @@
 
   function cssIdent(value) {
     if (window.CSS && typeof window.CSS.escape === 'function') return window.CSS.escape(String(value));
-    return String(value).replace(/[^a-zA-Z0-9_-]/g, '\\$&');
+    return String(value).replace(/[^a-zA-Z0-9_-]/g, String.raw`\$&`);
   }
 
   //
@@ -4045,7 +4045,7 @@
     for (const [name, value] of Object.entries(styles)) {
       setImportantStyle(editBadgeProxyRoot, name.replace(/[A-Z]/g, (m) => '-' + m.toLowerCase()), value);
     }
-    document.body.appendChild(editBadgeProxyRoot);
+    document.body.append(editBadgeProxyRoot);
   }
 
   function styleEditBadgeProxy(proxy, target) {
@@ -4164,7 +4164,7 @@
         proxy.dataset.impeccableEditBadgeProxy = 'true';
         proxy.setAttribute('aria-hidden', 'true');
         bindEditBadgeProxy(proxy, target);
-        editBadgeProxyRoot.appendChild(proxy);
+        editBadgeProxyRoot.append(proxy);
         editBadgeProxyByTarget.set(target, proxy);
       }
       proxy.title = target.title || target.textContent || 'Edit copy';
@@ -4263,7 +4263,7 @@
         btn.addEventListener('mouseleave', () => { btn.style.background = SURFACE; btn.style.color = ACCENT; });
         btn.onclick = enterEditingMode;
       }
-      editBadgeEl.appendChild(btn);
+      editBadgeEl.append(btn);
     } else {
       // 'editing' - show Cancel + Save separated
       editBadgeEl.innerHTML = '';
@@ -4511,7 +4511,7 @@
   function parseOriginalMarkupElement(originalMarkup) {
     const parser = new DOMParser();
     const doc = parser.parseFromString('<div id="impeccable-anchor">' + originalMarkup + '</div>', 'text/html');
-    return doc.getElementById('impeccable-anchor')?.firstElementChild || null;
+    return doc.querySelector('#impeccable-anchor')?.firstElementChild || null;
   }
 
   function findLiveElementForOriginalMarkup(originalMarkup) {
@@ -4641,11 +4641,11 @@
         });
       }
       return true;
-    } catch (err) {
+    } catch (error) {
       if (svelteComponentSession?.sessionId === sessionId) {
         svelteComponentSession.swapAnchor = null;
       }
-      console.error('[impeccable] Failed to mount Svelte variant ' + variantNum + ' for ' + sessionId + ':', err);
+      console.error('[impeccable] Failed to mount Svelte variant ' + variantNum + ' for ' + sessionId + ':', error);
       return false;
     }
   }
@@ -4749,7 +4749,7 @@
         saveSession();
         queueCheckpoint('svelte_component_anchor_missing');
         waitForSvelteComponentTargetAndRetry({ manifestPath, sessionId, manifest });
-        showToast('Variants ready. Reveal the selected element to resume.', 15000);
+        showToast('Variants ready. Reveal the selected element to resume.', 15_000);
         return;
       }
 
@@ -4762,7 +4762,7 @@
       const mountTarget = document.createElement('div');
       mountTarget.dataset.impeccableComponentMount = sessionId;
       mountTarget.style.display = 'contents';
-      wrapper.appendChild(mountTarget);
+      wrapper.append(mountTarget);
 
       const insertMode = isSvelteInsertManifest(manifest);
       const detachedOriginal = insertMode ? null : liveEl;
@@ -4821,8 +4821,8 @@
       positionBar();
       saveSession();
       console.log('[impeccable] Mounted ' + arrivedVariants + ' Svelte component variants.');
-    } catch (err) {
-      console.error('[impeccable] Failed to mount Svelte component variants:', err);
+    } catch (error) {
+      console.error('[impeccable] Failed to mount Svelte component variants:', error);
       abortSvelteComponentInjection(sessionId, 'Could not load variants. Fix the error and re-run.');
     }
   }
@@ -4855,8 +4855,8 @@
         const orphan = document.querySelector('[data-impeccable-variants="' + sessionId + '"]');
         if (orphan) orphan.remove();
       }
-    } catch (err) {
-      console.warn('[impeccable] Svelte component abort cleanup failed:', err);
+    } catch (error) {
+      console.warn('[impeccable] Svelte component abort cleanup failed:', error);
     }
     hideShaderOverlay();
     if (variantObserver) { variantObserver.disconnect(); variantObserver = null; }
@@ -4927,7 +4927,7 @@
             state = 'GENERATING';
             showBar('generating');
             saveSession();
-            showToast('Variants ready. Reveal the selected element to resume.', 15000);
+            showToast('Variants ready. Reveal the selected element to resume.', 15_000);
             return;
           }
 
@@ -4939,7 +4939,7 @@
         // when a late HMR/source reinjection lands after they have cycled.
         const variants = wrapper.querySelectorAll('[data-impeccable-variant]:not([data-impeccable-variant="original"])');
         arrivedVariants = variants.length;
-        expectedVariants = parseInt(wrapper.dataset.impeccableVariantCount || arrivedVariants);
+        expectedVariants = Number.parseInt(wrapper.dataset.impeccableVariantCount || arrivedVariants);
         if (arrivedVariants <= 0) {
           recoverEmptyCycling('source-fallback-empty');
           return;
@@ -4964,8 +4964,8 @@
         saveSession();
         console.log('[impeccable] Injected ' + arrivedVariants + ' variants from source file.');
       })
-      .catch(err => {
-        console.error('[impeccable] Failed to fetch source:', err);
+      .catch(error => {
+        console.error('[impeccable] Failed to fetch source:', error);
         showToast('Could not load variants. Try refreshing the page.', 5000);
       });
   }
@@ -5019,11 +5019,11 @@
     for (const token of tokens) {
       const index = sourceText.indexOf(token, cursor);
       if (index === -1) continue;
-      pattern += escapeRegExp(sourceText.slice(cursor, index)).replace(/\s+/g, '\\s*');
+      pattern += escapeRegExp(sourceText.slice(cursor, index)).replace(/\s+/g, String.raw`\s*`);
       pattern += '(.*?)';
       cursor = index + token.length;
     }
-    pattern += escapeRegExp(sourceText.slice(cursor)).replace(/\s+/g, '\\s*') + '$';
+    pattern += escapeRegExp(sourceText.slice(cursor)).replace(/\s+/g, String.raw`\s*`) + '$';
     return new RegExp(pattern);
   }
 
@@ -5044,7 +5044,7 @@
   }
 
   function escapeRegExp(value) {
-    return String(value).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    return String(value).replace(/[.*+?^${}()|[\]\\]/g, String.raw`\$&`);
   }
 
   async function selectVariant(next, checkpointReason) {
@@ -5108,7 +5108,7 @@
     const variants = wrapper.querySelectorAll('[data-impeccable-variant]:not([data-impeccable-variant="original"])');
     for (const variant of variants) {
       if (!isVariantShown(variant)) continue;
-      const idx = parseInt(variant.dataset.impeccableVariant || '0', 10);
+      const idx = Number.parseInt(variant.dataset.impeccableVariant || '0', 10);
       if (idx > 0) return idx;
     }
     return 0;
@@ -5318,7 +5318,7 @@
         if (visEl) selectedElement = visEl;
       }
 
-      const expected = parseInt(wrapper.dataset.impeccableVariantCount || '0');
+      const expected = Number.parseInt(wrapper.dataset.impeccableVariantCount || '0');
       if (expected > 0) expectedVariants = expected;
 
       if (arrivedVariants >= expectedVariants && expectedVariants > 0) {
@@ -5401,7 +5401,7 @@
       sseRetries = 0; // reset on any successful message
       let msg; try { msg = JSON.parse(e.data); } catch { return; }
       switch (msg.type) {
-        case 'connected':
+        case 'connected': {
           hasProjectContext = !!msg.hasProjectContext;
           if (!hasProjectContext) showToast('No PRODUCT.md found. Variants will be brand-agnostic. Run /impeccable init to generate one.', 7000);
           console.log('[impeccable] Live mode connected.');
@@ -5411,12 +5411,15 @@
           if (state === 'IDLE' && (pickActive || insertActive)) state = 'PICKING';
           syncPageChatFocus('sse-connected');
           break;
-        case 'agent_polling':
+        }
+        case 'agent_polling': {
           syncAgentPollingUi(!!msg.connected);
           break;
-        case 'steer_done':
+        }
+        case 'steer_done': {
           maybeCompleteSteer(msg);
           break;
+        }
         case 'manual_edit_stashed':
         case 'manual_edit_discarded':
         case 'manual_edit_commit_started':
@@ -5425,10 +5428,11 @@
         case 'manual_edit_repair_needs_decision':
         case 'manual_edit_repair_rollback_done':
         case 'manual_edit_commit_done':
-        case 'manual_edit_commit_failed':
+        case 'manual_edit_commit_failed': {
           handleManualEditActivity(msg);
           break;
-        case 'done':
+        }
+        case 'done': {
           if (maybeCompleteSteer(msg)) break;
           rememberSessionFileMeta(msg);
           // Variants already arrived via HMR → normal transition.
@@ -5458,26 +5462,30 @@
             if (state !== 'GENERATING') return;
             showToast(
               "Variants ready. If the picked element isn't visible, retrace the path that revealed it - they'll appear automatically.",
-              15000,
+              15_000,
             );
           }, 2000);
           break;
+        }
         case 'complete':
-        case 'accept':
+        case 'accept': {
           if (maybeCompleteAcceptedSession(msg)) break;
           break;
-        case 'agent_done':
+        }
+        case 'agent_done': {
           // Carbonize accepts are not terminal until live-complete.mjs sends
           // the final complete event. Keep the browser in its recoverable
           // saving state while the source cleanup is still in flight.
           break;
-        case 'discarded':
+        }
+        case 'discarded': {
           if (msg.id && msg.id === currentSessionId) {
             markSessionHandled();
             cleanup();
           }
           break;
-        case 'error':
+        }
+        case 'error': {
           if (pendingAcceptedSession?.id && msg.id === pendingAcceptedSession.id) {
             pendingAcceptedSession = null;
             state = 'CYCLING';
@@ -5492,6 +5500,7 @@
           renderEditBadge('hidden');
           state = 'PICKING';
           break;
+        }
       }
     };
 
@@ -5584,7 +5593,7 @@
       phase: 'steer',
       reason,
       pageUrl: location.pathname,
-      ...(extra || {}),
+      ...extra,
     }).catch(() => null);
   }
 
@@ -5855,7 +5864,7 @@
     }
 
     // Arrow/Enter nav works in PICKING (hover) and CONFIGURING (selected, input empty)
-    var navEl = (state === 'PICKING') ? hoveredElement : (state === 'CONFIGURING') ? selectedElement : null;
+    var navEl = (state === 'PICKING') ? hoveredElement : ((state === 'CONFIGURING') ? selectedElement : null);
     if (navEl && (e.key === 'ArrowUp' || e.key === 'ArrowDown' || (e.key === 'Enter' && state === 'PICKING'))) {
       let next = null;
       if (e.key === 'ArrowDown' && !e.shiftKey) {
@@ -6075,9 +6084,9 @@
   function bufferToBase64(buf) {
     const bytes = new Uint8Array(buf);
     let binary = '';
-    const CHUNK = 0x8000;
+    const CHUNK = 0x80_00;
     for (let i = 0; i < bytes.length; i += CHUNK) {
-      binary += String.fromCharCode.apply(null, bytes.subarray(i, i + CHUNK));
+      binary += String.fromCodePoint.apply(null, bytes.subarray(i, i + CHUNK));
     }
     return btoa(binary);
   }
@@ -6138,7 +6147,7 @@
     const m = /rgba?\(([^)]+)\)/.exec(s);
     if (!m) return false;
     const parts = m[1].split(',').map((p) => p.trim());
-    if (parts.length === 4) return parseFloat(parts[3]) === 0;
+    if (parts.length === 4) return Number.parseFloat(parts[3]) === 0;
     return false;
   }
 
@@ -6288,7 +6297,7 @@
         el.style.position = 'relative';
       }
       annotNode = buildAnnotationsForCapture(rect, snapshot);
-      el.appendChild(annotNode);
+      el.append(annotNode);
     }
     try {
       const ms = await loadModernScreenshot();
@@ -6300,8 +6309,8 @@
       if (shouldUseAncestorCropShaderProxy(el)) {
         try {
           return await hideCaptureChromeForShaderProxy(() => captureElementFromRenderedAncestor(ms, el, opts));
-        } catch (err) {
-          console.warn('[impeccable] Svelte ancestor crop capture failed, falling back to element capture:', err);
+        } catch (error) {
+          console.warn('[impeccable] Svelte ancestor crop capture failed, falling back to element capture:', error);
         }
       }
       const bg = resolveCanvasBackground(el);
@@ -6352,8 +6361,8 @@
     let paper;
     try {
       ({ blob, paper } = await captureElementToBlob(el, snapshot, rect));
-    } catch (err) {
-      console.warn('[impeccable] capture failed, proceeding without screenshot:', err);
+    } catch (error) {
+      console.warn('[impeccable] capture failed, proceeding without screenshot:', error);
     }
     // Light up the shader overlay the moment capture is ready - no reason to
     // wait for the upload to complete before the user sees something alive.
@@ -6378,8 +6387,8 @@
         } else {
           console.warn('[impeccable] annotation upload failed:', uploadRes.status);
         }
-      } catch (err) {
-        console.warn('[impeccable] annotation upload failed:', err);
+      } catch (error) {
+        console.warn('[impeccable] annotation upload failed:', error);
       }
     }
     sendEvent(screenshotPath ? { ...basePayload, screenshotPath } : basePayload);
@@ -6464,7 +6473,7 @@ void main() {
 }`;
 
   // Kinpaku gold converted to approximate sRGB 0-1 (matches oklch(84% 0.19 80.46))
-  const SHADER_ACCENT = [1.0, 0.78, 0.31];
+  const SHADER_ACCENT = [1, 0.78, 0.31];
   // Fallback ground when an element and all its ancestors are transparent -
   // matches the original off-white risograph paper.
   const SHADER_PAPER_FALLBACK = [0.975, 0.965, 0.955];
@@ -6701,8 +6710,8 @@ void main() {
       gl.vertexAttribPointer(posLoc, 2, gl.FLOAT, false, 16, 0);
       gl.enableVertexAttribArray(uvLoc);
       gl.vertexAttribPointer(uvLoc, 2, gl.FLOAT, false, 16, 8);
-    } catch (err) {
-      console.warn('[impeccable] shader setup failed:', err);
+    } catch (error) {
+      console.warn('[impeccable] shader setup failed:', error);
       canvas.remove();
       return;
     }
@@ -6711,8 +6720,8 @@ void main() {
     let bitmap;
     try {
       bitmap = await createImageBitmap(blob);
-    } catch (err) {
-      console.warn('[impeccable] shader bitmap decode failed:', err);
+    } catch (error) {
+      console.warn('[impeccable] shader bitmap decode failed:', error);
       const lose = gl.getExtension?.('WEBGL_lose_context');
       try { lose?.loseContext(); } catch {}
       showShaderBitmapFallback(canvas, blob);
@@ -6740,7 +6749,7 @@ void main() {
     function frame() {
       if (!shaderState) return;
       const elapsed = (performance.now() - shaderState.startTime) / 1000;
-      const t = shaderState.reduced ? 0.0 : elapsed;
+      const t = shaderState.reduced ? 0 : elapsed;
       gl.viewport(0, 0, canvas.width, canvas.height);
       gl.useProgram(program);
       gl.activeTexture(gl.TEXTURE0);
@@ -6939,7 +6948,7 @@ void main() {
     const style = wrapper.querySelector('style[data-impeccable-css]');
     if (style && !document.querySelector('style[data-impeccable-accepted-css="' + sessionId + '"]')) {
       const promotedStyle = style.cloneNode(true);
-      promotedStyle.setAttribute('data-impeccable-accepted-css', sessionId);
+      promotedStyle.dataset.impeccableAcceptedCss = sessionId;
       parent.insertBefore(promotedStyle, wrapper);
     }
 
@@ -7085,7 +7094,7 @@ void main() {
       return true;
     }
 
-    showToast('Variants ready. Reveal the selected element to resume.', 15000);
+    showToast('Variants ready. Reveal the selected element to resume.', 15_000);
     return true;
   }
 
@@ -7290,7 +7299,7 @@ void main() {
     }
 
     currentSessionId = sessionId;
-    expectedVariants = parseInt(wrapper.dataset.impeccableVariantCount || '0');
+    expectedVariants = Number.parseInt(wrapper.dataset.impeccableVariantCount || '0');
     const variants = wrapper.querySelectorAll('[data-impeccable-variant]:not([data-impeccable-variant="original"])');
     arrivedVariants = variants.length;
 
@@ -7359,8 +7368,8 @@ void main() {
             if (blob && state === 'GENERATING') {
               showShaderOverlay(shaderTarget, blob, rect, paper);
             }
-          } catch (err) {
-            console.warn('[impeccable] shader resume failed:', err);
+          } catch (error) {
+            console.warn('[impeccable] shader resume failed:', error);
           }
         })();
       }
@@ -7474,7 +7483,7 @@ void main() {
   let voiceCtx = null;
   const PAGE_CHAT_COLLAPSED_W = '88px';
   const PAGE_CHAT_PROCESSING_W = '76px';
-  const STEER_AWAIT_TIMEOUT_MS = 120000;
+  const STEER_AWAIT_TIMEOUT_MS = 120_000;
   const AGENT_STATUS_POLL_MS = 5000;
   const AGENT_DISCONNECTED_MARK = 'oklch(56% 0.032 82 / 0.78)';
   const AGENT_DISCONNECTED_TIP = 'Agent disconnected - run live-poll.mjs to connect';
@@ -7508,7 +7517,7 @@ void main() {
         const bg = getComputedStyle(el).backgroundColor;
         const m = bg.match(/rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)(?:\s*,\s*([\d.]+))?\s*\)/);
         if (!m) return null;
-        const alpha = m[4] == null ? 1 : parseFloat(m[4]);
+        const alpha = m[4] == null ? 1 : Number.parseFloat(m[4]);
         if (alpha < 0.5) return null; // transparent / nearly transparent → skip
         return [+m[1], +m[2], +m[3]];
       }
@@ -7704,7 +7713,7 @@ void main() {
       pageChatExpanded,
       active: steerFocusTargetLabel(activeElementDeep()),
       shouldSteer: shouldFocusSteerChat(),
-      ...(extra || {}),
+      ...extra,
     });
   }
 
@@ -7802,7 +7811,7 @@ void main() {
     });
     wrap.setAttribute('aria-hidden', 'true');
     for (let i = 0; i < 3; i++) {
-      wrap.appendChild(el('span', {
+      wrap.append(el('span', {
         display: 'inline-block',
         width: '4px', height: '4px', borderRadius: '50%',
         background: P.patinaPale,
@@ -7883,7 +7892,7 @@ void main() {
     pageChatEl.setAttribute('aria-label', 'Processing steer request');
     if (!pageChatDotsEl) {
       pageChatDotsEl = buildSteerProcessingDots();
-      pageChatEl.appendChild(pageChatDotsEl);
+      pageChatEl.append(pageChatDotsEl);
     }
     syncPageChatFocusRing();
     syncPageChatChrome();
@@ -7961,23 +7970,30 @@ void main() {
 
   function steerVoiceErrorMessage(code) {
     switch (code) {
-      case 'not-allowed':
+      case 'not-allowed': {
         return 'Microphone access blocked';
-      case 'audio-capture':
+      }
+      case 'audio-capture': {
         return 'No microphone found';
-      case 'network':
+      }
+      case 'network': {
         return isEmbeddedPreviewBrowser()
           ? steerVoiceUnavailableMessage()
           : 'Voice input needs a network connection (browser speech uses a cloud service)';
-      case 'service-not-allowed':
+      }
+      case 'service-not-allowed': {
         return 'Voice input is not available in this browser tab';
-      case 'language-not-supported':
+      }
+      case 'language-not-supported': {
         return 'Speech language not supported';
+      }
       case 'no-speech':
-      case 'aborted':
+      case 'aborted': {
         return null;
-      default:
+      }
+      default: {
         return 'Voice input failed (' + code + ')';
+      }
     }
   }
 
@@ -8103,11 +8119,11 @@ void main() {
     voiceRecognition = rec;
     try {
       rec.start();
-    } catch (err) {
-      console.warn('[impeccable.voice] start failed:', err);
+    } catch (error) {
+      console.warn('[impeccable.voice] start failed:', error);
       stopVoice({
         suppressSubmit: true,
-        message: err?.message?.includes('already started')
+        message: error?.message?.includes('already started')
           ? 'Voice input already running'
           : 'Could not start voice input',
       });
@@ -8289,10 +8305,10 @@ void main() {
     pageChatVoiceBtn.setAttribute('aria-label', 'Voice input');
     pageChatVoiceBtn.innerHTML = ICON_PAGE_VOICE;
 
-    pageChatEl.appendChild(chatIcon);
-    pageChatEl.appendChild(pageChatHint);
-    pageChatEl.appendChild(pageChatInput);
-    pageChatEl.appendChild(pageChatVoiceBtn);
+    pageChatEl.append(chatIcon);
+    pageChatEl.append(pageChatHint);
+    pageChatEl.append(pageChatInput);
+    pageChatEl.append(pageChatVoiceBtn);
 
     if (!uiGetById(PREFIX + '-page-chat-style')) {
       const s = document.createElement('style');
@@ -8373,7 +8389,7 @@ void main() {
       }
     });
 
-    parent.appendChild(pageChatEl);
+    parent.append(pageChatEl);
     steerFocusLog('page-chat-mounted', {});
   }
 
@@ -8548,12 +8564,12 @@ void main() {
     agentDot.dataset.agentDot = 'true';
     agentDot.setAttribute('aria-hidden', 'true');
 
-    brandMark.appendChild(agentDot);
-    brand.appendChild(brandMark);
+    brandMark.append(agentDot);
+    brand.append(brandMark);
     brand.addEventListener('mouseenter', () => showAgentPollTooltip(brand));
     brand.addEventListener('mouseleave', hideAgentPollTooltip);
     globalBarBrandEl = brand;
-    globalBarEl.appendChild(brand);
+    globalBarEl.append(brand);
     syncAgentPollingUi(false);
 
     // Inner wrapper: holds the toggles with normal bar padding.
@@ -8562,7 +8578,7 @@ void main() {
       padding: '4px 5px 4px ' + GLOBAL_BAR_INNER_PAD_LEFT + 'px', gap: GLOBAL_BAR_INNER_GAP + 'px',
     });
     inner.id = PREFIX + '-global-bar-inner';
-    globalBarEl.appendChild(inner);
+    globalBarEl.append(inner);
 
     // Button factory: icon-only at rest, label slides in on hover/active.
     function makeIconBtn({ id, svg, label, ariaLabel, labelFont, onClick }) {
@@ -8611,7 +8627,7 @@ void main() {
       ariaLabel: 'Pick element',
       onClick: () => togglePick(),
     });
-    inner.appendChild(pickBtn);
+    inner.append(pickBtn);
 
     const insertBtn = makeIconBtn({
       id: PREFIX + '-insert-toggle',
@@ -8620,7 +8636,7 @@ void main() {
       ariaLabel: 'Insert new element',
       onClick: () => toggleInsert(),
     });
-    inner.appendChild(insertBtn);
+    inner.append(insertBtn);
 
     // Detect toggle
     const detectBtn = makeIconBtn({
@@ -8637,8 +8653,8 @@ void main() {
       display: 'none', fontFamily: MONO, marginLeft: '4px',
     });
     detectBadge.id = PREFIX + '-detect-badge';
-    detectBtn.appendChild(detectBadge);
-    inner.appendChild(detectBtn);
+    detectBtn.append(detectBadge);
+    inner.append(detectBtn);
 
     // DESIGN.md panel toggle - quartet of color squares as the mark.
     const designBtn = makeIconBtn({
@@ -8654,7 +8670,7 @@ void main() {
       labelFont: MONO,
       onClick: () => toggleDesignPanel(),
     });
-    inner.appendChild(designBtn);
+    inner.append(designBtn);
 
     initPageChat(inner, P);
 
@@ -8724,9 +8740,9 @@ void main() {
       lineHeight: '1',
     });
     ensureSpinKeyframes();
-    pendingPillEl.appendChild(pendingPillSpinnerEl);
-    pendingPillEl.appendChild(pendingPillLabelEl);
-    pendingPillEl.appendChild(pendingPillCountEl);
+    pendingPillEl.append(pendingPillSpinnerEl);
+    pendingPillEl.append(pendingPillLabelEl);
+    pendingPillEl.append(pendingPillCountEl);
     pendingPillEl.addEventListener('mouseenter', () => {
       if (pendingApplyInFlight) return;
       pendingPillEl.style.filter = 'brightness(1.1)';
@@ -8779,7 +8795,7 @@ void main() {
     });
     pendingTrashTooltipEl.textContent = 'Discard copy edits';
     pendingTrashTooltipEl.setAttribute('role', 'tooltip');
-    pendingTrashBtn.appendChild(pendingTrashTooltipEl);
+    pendingTrashBtn.append(pendingTrashTooltipEl);
     pendingTrashBtn.setAttribute('aria-label', 'Discard copy edits on this page');
     const showTrashTooltip = () => {
       pendingTrashBtn.style.color = P.accent;
@@ -8829,10 +8845,10 @@ void main() {
     pendingRollbackBtn.setAttribute('aria-label', 'Rollback source and keep copy edits staged');
     pendingRollbackBtn.addEventListener('click', onPendingRollbackClick);
 
-    pendingDockEl.appendChild(pendingPillEl);
-    pendingDockEl.appendChild(pendingTrashBtn);
-    pendingDockEl.appendChild(pendingKeepFixingBtn);
-    pendingDockEl.appendChild(pendingRollbackBtn);
+    pendingDockEl.append(pendingPillEl);
+    pendingDockEl.append(pendingTrashBtn);
+    pendingDockEl.append(pendingKeepFixingBtn);
+    pendingDockEl.append(pendingRollbackBtn);
 
     // Thin divider before the exit button
     const divider = el('span', {
@@ -8840,7 +8856,7 @@ void main() {
       background: P.hairline,
       margin: '0 4px 0 2px',
     });
-    inner.appendChild(divider);
+    inner.append(divider);
 
     // Exit × on the right - intentionally subtle (textDim at rest, text on
     // hover) so it sits behind the active toggles in visual hierarchy.
@@ -8865,7 +8881,7 @@ void main() {
     exitBtn.addEventListener('mouseenter', () => { exitBtn.style.color = 'oklch(58% 0.15 35)'; exitBtn.style.background = P.exitHover; });
     exitBtn.addEventListener('mouseleave', () => { exitBtn.style.color = P.textDim; exitBtn.style.background = 'transparent'; });
     exitBtn.addEventListener('click', () => { sendEvent({ type: 'exit' }); teardown(); });
-    inner.appendChild(exitBtn);
+    inner.append(exitBtn);
 
     // Bar-level hover: expand every toggle's label at once; collapse on leave.
     // Buttons with dataset.active="true" ignore collapse (their label stays).
@@ -9047,7 +9063,7 @@ void main() {
     const s = document.createElement('script');
     s.src = 'http://localhost:' + PORT + '/detect.js';
     s.dataset.impeccableExtension = 'true';
-    document.head.appendChild(s);
+    document.head.append(s);
   }
 
   function onDetectMessage(e) {
@@ -9197,11 +9213,11 @@ void main() {
     // Theme-match the bar: dark chrome on light pages, light chrome on dark pages.
     const theme = detectPageTheme();
     style.textContent = designPanelCss(barPaletteForTheme(theme));
-    designShadow.appendChild(style);
+    designShadow.append(style);
 
     const root = document.createElement('div');
     root.className = 'root';
-    designShadow.appendChild(root);
+    designShadow.append(root);
 
     uiAppend(designHost);
     // The host is pointer-events: none; the panel inside the shadow DOM
@@ -9515,13 +9531,13 @@ void main() {
     // Panel
     const panel = document.createElement('aside');
     panel.className = 'panel';
-    panel.setAttribute('data-open', designState.open ? 'true' : 'false');
-    panel.appendChild(buildDesignHeader());
+    panel.dataset.open = designState.open ? 'true' : 'false';
+    panel.append(buildDesignHeader());
     const body = document.createElement('div');
     body.className = 'panel-body';
     body.id = 'panel-body';
-    panel.appendChild(body);
-    root.appendChild(panel);
+    panel.append(body);
+    root.append(panel);
 
     renderDesignBody();
   }
@@ -9533,7 +9549,7 @@ void main() {
     const title = document.createElement('div');
     title.className = 'panel-title';
     title.textContent = 'DESIGN.md';
-    header.appendChild(title);
+    header.append(title);
 
     const tabs = document.createElement('div');
     tabs.className = 'tabs';
@@ -9541,7 +9557,7 @@ void main() {
       const btn = document.createElement('button');
       btn.className = 'tab';
       btn.textContent = t[1];
-      btn.setAttribute('data-active', designState.tab === t[0] ? 'true' : 'false');
+      btn.dataset.active = designState.tab === t[0] ? 'true' : 'false';
       btn.addEventListener('click', () => {
         if (designState.tab === t[0]) return;
         designState.tab = t[0];
@@ -9551,16 +9567,16 @@ void main() {
           fetchDesignSystem(); // raw is part of the same fetch pair
         }
       });
-      tabs.appendChild(btn);
+      tabs.append(btn);
     }
-    header.appendChild(tabs);
+    header.append(tabs);
 
     const close = document.createElement('button');
     close.className = 'panel-close';
     close.innerHTML = '&#x2715;';
     close.setAttribute('aria-label', 'Close panel');
     close.addEventListener('click', toggleDesignPanel);
-    header.appendChild(close);
+    header.append(close);
 
     return header;
   }
@@ -9593,8 +9609,8 @@ void main() {
       designState.mdNewerThanJson = !!jsonData.mdNewerThanJson;
       designState.raw = designState.present && rawRes.ok ? await rawRes.text() : null;
       designState.error = jsonData.parseError || jsonData.sidecarError || null;
-    } catch (err) {
-      designState.error = err?.message || 'Failed to load design system.';
+    } catch (error) {
+      designState.error = error?.message || 'Failed to load design system.';
     } finally {
       designState.loading = false;
       renderDesignChrome(); // refresh title from data
@@ -9607,18 +9623,18 @@ void main() {
     body.innerHTML = '';
 
     if (designState.loading) {
-      body.appendChild(msgDiv('loading', 'Loading design system…'));
+      body.append(msgDiv('loading', 'Loading design system…'));
       return;
     }
     if (designState.error) {
-      body.appendChild(msgDiv('error', designState.error));
+      body.append(msgDiv('error', designState.error));
       return;
     }
     if (designState.present === false) {
       const empty = document.createElement('div');
       empty.className = 'empty';
       empty.innerHTML = `<strong>No DESIGN.md yet</strong>Create one by running <code>/impeccable document</code> in your terminal, then re-open this panel.`;
-      body.appendChild(empty);
+      body.append(empty);
       return;
     }
 
@@ -9628,9 +9644,9 @@ void main() {
     }
 
     // Visual tab - single unified render path.
-    if (designState.mdNewerThanJson) body.appendChild(renderStaleHint());
+    if (designState.mdNewerThanJson) body.append(renderStaleHint());
     if (designState.hasMd && !designState.hasSidecar) {
-      body.appendChild(renderParsedMdCta());
+      body.append(renderParsedMdCta());
     }
     renderDesignVisual(body, designState.parsed, designState.sidecar);
   }
@@ -9667,30 +9683,30 @@ void main() {
     const proseColors = parsed?.colors || null;
 
     const colors = buildColorModels(frontmatter.colors, extensions.colorMeta, proseColors);
-    if (colors.length) renderColorTiles(body, colors);
+    if (colors.length > 0) renderColorTiles(body, colors);
 
     const types = buildTypographyModels(frontmatter.typography, extensions.typographyMeta);
-    if (types.length) renderTypeTiles(body, types);
+    if (types.length > 0) renderTypeTiles(body, types);
 
     const radii = buildRadiiModels(frontmatter.rounded);
-    if (radii.length) renderRadiiTile(body, radii);
+    if (radii.length > 0) renderRadiiTile(body, radii);
 
     if (extensions.shadows?.length) renderShadowTiles(body, extensions.shadows);
 
     const components = sidecar?.components || [];
-    if (components.length) renderComponentTiles(body, components);
+    if (components.length > 0) renderComponentTiles(body, components);
 
     // Narrative: sidecar wins if present (richer, agent-curated). Otherwise
     // synthesize from prose sections.
     const narrative = sidecar?.narrative || synthesizeNarrative(parsed);
-    if (narrative.rules?.length) body.appendChild(renderRulesCollapsible(narrative.rules));
-    if ((narrative.dos?.length || narrative.donts?.length)) body.appendChild(renderDosDontsCollapsible(narrative));
+    if (narrative.rules?.length) body.append(renderRulesCollapsible(narrative.rules));
+    if ((narrative.dos?.length || narrative.donts?.length)) body.append(renderDosDontsCollapsible(narrative));
     if (narrative.overview || narrative.northStar || narrative.keyCharacteristics?.length) {
-      body.appendChild(renderOverviewCollapsible(narrative));
+      body.append(renderOverviewCollapsible(narrative));
     }
 
     if (body.childElementCount === 0) {
-      body.appendChild(msgDiv('empty', 'No design system data available.'));
+      body.append(msgDiv('empty', 'No design system data available.'));
     }
   }
 
@@ -9792,28 +9808,28 @@ void main() {
       const meta = document.createElement('div');
       meta.className = 'tile-meta';
       meta.innerHTML = `<span class="name">${escapeHtml(c.name || c.role || 'Color')}</span><span>${escapeHtml(c.value || '')}</span>`;
-      tile.appendChild(meta);
+      tile.append(meta);
 
       const hero = document.createElement('div');
       hero.className = 'c-hero';
       hero.style.background = cssSafe(c.value || '');
-      tile.appendChild(hero);
+      tile.append(hero);
 
       const ramp = synthesizeRamp(c);
-      if (ramp.length) {
+      if (ramp.length > 0) {
         const r = document.createElement('div');
         r.className = 'c-ramp';
         r.innerHTML = ramp.map((v) => `<span style="background:${cssSafe(v)}"></span>`).join('');
-        tile.appendChild(r);
+        tile.append(r);
       }
 
       if (c.description) {
         const d = document.createElement('div');
         d.className = 'c-desc';
         d.textContent = c.description;
-        tile.appendChild(d);
+        tile.append(d);
       }
-      body.appendChild(tile);
+      body.append(tile);
     }
   }
 
@@ -9835,7 +9851,7 @@ void main() {
       const meta = document.createElement('div');
       meta.className = 'tile-meta';
       meta.innerHTML = `<span>${escapeHtml(t.role || '')}</span><span>${escapeHtml(t.weight || '')} ${escapeHtml(t.style === 'italic' ? 'italic' : '')}</span>`;
-      tile.appendChild(meta);
+      tile.append(meta);
 
       const specimen = document.createElement('div');
       specimen.className = 't-specimen';
@@ -9846,28 +9862,28 @@ void main() {
       specimen.style.fontSize = '56px';  // Fixed specimen size - compare faces, not scales.
       specimen.style.letterSpacing = 'normal';
       specimen.style.textTransform = 'none';
-      tile.appendChild(specimen);
+      tile.append(specimen);
 
       // The system's actual sample size for this role, shown as small mono meta below.
       if (t.sampleSize) {
         const scale = document.createElement('div');
         scale.style.cssText = 'font-family:' + MONO + '; font-size: 10px; color:' + DP.meta + '; margin-top: 2px;';
         scale.textContent = t.sampleSize;
-        tile.appendChild(scale);
+        tile.append(scale);
       }
 
       const family = document.createElement('div');
       family.className = 't-family';
       family.textContent = t.family || t.name || '';
-      tile.appendChild(family);
+      tile.append(family);
 
       if (t.purpose) {
         const p = document.createElement('div');
         p.className = 't-purpose';
         p.textContent = t.purpose;
-        tile.appendChild(p);
+        tile.append(p);
       }
-      body.appendChild(tile);
+      body.append(tile);
     }
   }
 
@@ -9886,7 +9902,7 @@ void main() {
     const meta = document.createElement('div');
     meta.className = 'tile-meta';
     meta.innerHTML = `<span class="name">Corner Radii</span><span>${radii.length}</span>`;
-    tile.appendChild(meta);
+    tile.append(meta);
 
     const strip = document.createElement('div');
     strip.className = 'r-strip';
@@ -9896,19 +9912,19 @@ void main() {
       const s = document.createElement('div');
       s.className = 'r-sample';
       s.style.borderRadius = r.value || '0';
-      item.appendChild(s);
+      item.append(s);
       const lbl = document.createElement('div');
       lbl.className = 'r-label';
       lbl.textContent = r.name || '';
-      item.appendChild(lbl);
+      item.append(lbl);
       const val = document.createElement('div');
       val.className = 'r-val';
       val.textContent = r.value || '';
-      item.appendChild(val);
-      strip.appendChild(item);
+      item.append(val);
+      strip.append(item);
     }
-    tile.appendChild(strip);
-    body.appendChild(tile);
+    tile.append(strip);
+    body.append(tile);
   }
 
   function renderShadowTiles(body, shadows) {
@@ -9919,25 +9935,25 @@ void main() {
       const meta = document.createElement('div');
       meta.className = 'tile-meta';
       meta.innerHTML = `<span class="name">${escapeHtml(sh.name || 'Shadow')}</span><span>Elevation</span>`;
-      tile.appendChild(meta);
+      tile.append(meta);
 
       const surface = document.createElement('div');
       surface.className = 's-surface';
       surface.style.boxShadow = sh.value || 'none';
-      tile.appendChild(surface);
+      tile.append(surface);
 
       const val = document.createElement('div');
       val.className = 's-value';
       val.textContent = sh.value || '';
-      tile.appendChild(val);
+      tile.append(val);
 
       if (sh.purpose) {
         const p = document.createElement('div');
         p.className = 's-purpose';
         p.textContent = sh.purpose;
-        tile.appendChild(p);
+        tile.append(p);
       }
-      body.appendChild(tile);
+      body.append(tile);
     }
   }
 
@@ -9957,7 +9973,7 @@ void main() {
         ? (group[0].name || group[0].kind || 'Component')
         : titleForKind(group[0].kind, group.length);
       meta.innerHTML = `<span class="name">${escapeHtml(groupTitle)}</span><span class="cmp-kind">${escapeHtml(group[0].kind || '')}</span>`;
-      tile.appendChild(meta);
+      tile.append(meta);
 
       for (const c of group) {
         const stage = document.createElement('div');
@@ -9968,11 +9984,11 @@ void main() {
         const sub = host.attachShadow({ mode: 'open' });
         const style = document.createElement('style');
         style.textContent = c.css || '';
-        sub.appendChild(style);
+        sub.append(style);
         const container = document.createElement('div');
         container.innerHTML = c.html || '';
-        sub.appendChild(container);
-        stage.appendChild(host);
+        sub.append(container);
+        stage.append(host);
 
         // Show component name as a sublabel only when the tile groups >1 item,
         // or when the component's display name differs from its kind.
@@ -9981,9 +9997,9 @@ void main() {
           const lbl = document.createElement('div');
           lbl.className = 'cmp-sublabel';
           lbl.textContent = c.name || '';
-          stage.appendChild(lbl);
+          stage.append(lbl);
         }
-        tile.appendChild(stage);
+        tile.append(stage);
       }
 
       // Single shared description if all items carry the same one; otherwise
@@ -9992,9 +10008,9 @@ void main() {
         const d = document.createElement('div');
         d.className = 'c-desc';
         d.textContent = group[0].description;
-        tile.appendChild(d);
+        tile.append(d);
       }
-      body.appendChild(tile);
+      body.append(tile);
     }
   }
 
@@ -10028,7 +10044,7 @@ void main() {
   function buildCollapsible(key, label, count) {
     const wrap = document.createElement('div');
     wrap.className = 'coll';
-    wrap.setAttribute('data-open', designState.collapsed[key] ? 'false' : 'true');
+    wrap.dataset.open = designState.collapsed[key] ? 'false' : 'true';
 
     const head = document.createElement('button');
     head.className = 'coll-head';
@@ -10042,11 +10058,11 @@ void main() {
       saveDesignPrefs();
       renderDesignBody();
     });
-    wrap.appendChild(head);
+    wrap.append(head);
 
     const body = document.createElement('div');
     body.className = 'coll-body';
-    wrap.appendChild(body);
+    wrap.append(body);
     return { wrap, body };
   }
 
@@ -10058,12 +10074,12 @@ void main() {
       const name = document.createElement('div');
       name.className = 'name';
       name.innerHTML = `${escapeHtml(r.name)}${r.section ? `<span class="section">${escapeHtml(r.section)}</span>` : ''}`;
-      card.appendChild(name);
+      card.append(name);
       const b = document.createElement('div');
       b.className = 'body';
       b.textContent = r.body || '';
-      card.appendChild(b);
-      body.appendChild(card);
+      card.append(b);
+      body.append(card);
     }
     return wrap;
   }
@@ -10077,15 +10093,15 @@ void main() {
       const el = document.createElement('div');
       el.className = 'do';
       el.innerHTML = inlineMd(d);
-      grid.appendChild(el);
+      grid.append(el);
     }
     for (const d of n.donts || []) {
       const el = document.createElement('div');
       el.className = 'dont';
       el.innerHTML = inlineMd(d);
-      grid.appendChild(el);
+      grid.append(el);
     }
-    body.appendChild(grid);
+    body.append(grid);
     return wrap;
   }
 
@@ -10097,19 +10113,19 @@ void main() {
       const star = document.createElement('span');
       star.className = 'north-star';
       star.textContent = '“' + n.northStar + '”';
-      ov.appendChild(star);
+      ov.append(star);
     }
     if (n.overview) {
       const p = document.createElement('p');
       p.innerHTML = inlineMd(n.overview);
-      ov.appendChild(p);
+      ov.append(p);
     }
     if (n.keyCharacteristics?.length) {
       const ul = document.createElement('ul');
       ul.innerHTML = n.keyCharacteristics.map((k) => `<li>${inlineMd(k)}</li>`).join('');
-      ov.appendChild(ul);
+      ov.append(ul);
     }
-    body.appendChild(ov);
+    body.append(ov);
     return wrap;
   }
 
@@ -10137,7 +10153,7 @@ void main() {
     const wrap = document.createElement('div');
     wrap.className = 'md';
     wrap.innerHTML = renderMarkdown(md);
-    body.appendChild(wrap);
+    body.append(wrap);
   }
 
   function renderMarkdown(md) {
@@ -10151,13 +10167,13 @@ void main() {
     let listType = null; // 'ul' | 'ol'
 
     const flushPara = () => {
-      if (paraBuf.length) {
+      if (paraBuf.length > 0) {
         out.push(`<p>${inlineMd(paraBuf.join(' '))}</p>`);
         paraBuf = [];
       }
     };
     const flushList = () => {
-      if (listBuf.length) {
+      if (listBuf.length > 0) {
         out.push(buildListHtml(listBuf, listType));
         listBuf = [];
         listType = null;
@@ -10209,7 +10225,7 @@ void main() {
       paraBuf.push(line);
     }
     flushAll();
-    if (inCode && codeBuf.length) {
+    if (inCode && codeBuf.length > 0) {
       out.push(`<pre><code>${escapeHtml(codeBuf.join('\n'))}</code></pre>`);
     }
     return out.join('\n');

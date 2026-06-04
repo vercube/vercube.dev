@@ -91,7 +91,7 @@
     function readScrollY() {
       const raw = safeRead(scrollKey);
       if (raw == null) return null;
-      const n = parseFloat(raw);
+      const n = Number.parseFloat(raw);
       return isFinite(n) ? n : null;
     }
 

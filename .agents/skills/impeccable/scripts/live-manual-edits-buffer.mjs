@@ -32,16 +32,16 @@ export function readBufferStrict(cwd = process.cwd()) {
 function readBufferInternal(cwd, { strict }) {
   const filePath = getBufferPath(cwd);
   try {
-    const raw = fs.readFileSync(filePath, 'utf-8');
+    const raw = fs.readFileSync(filePath, 'utf8');
     const parsed = JSON.parse(raw);
     if (!parsed || typeof parsed !== 'object' || !Array.isArray(parsed.entries)) {
       if (strict) throw new Error('manual_edit_buffer_invalid_schema');
       return { version: BUFFER_VERSION, entries: [] };
     }
     return { version: BUFFER_VERSION, entries: parsed.entries };
-  } catch (err) {
-    if (strict && err?.code !== 'ENOENT') {
-      throw new Error('manual_edit_buffer_unreadable: ' + (err.message || String(err)));
+  } catch (error) {
+    if (strict && error?.code !== 'ENOENT') {
+      throw new Error('manual_edit_buffer_unreadable: ' + (error.message || String(error)));
     }
     return { version: BUFFER_VERSION, entries: [] };
   }
@@ -69,7 +69,7 @@ export function stageEntry(cwd, newEntry) {
     for (const existing of buf.entries) {
       if (existing.pageUrl !== pageUrl) continue;
       const existingOpIdx = existing.ops.findIndex((op) => op.ref === newOp.ref);
-      if (existingOpIdx >= 0) {
+      if (existingOpIdx !== -1) {
         // Keep the original source text but refresh the latest DOM/source evidence.
         existing.ops[existingOpIdx] = {
           ...newOp,

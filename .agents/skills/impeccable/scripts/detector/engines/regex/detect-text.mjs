@@ -30,12 +30,12 @@ function isNeutralBorderColor(str) {
   if (['gray', 'grey', 'silver', 'white', 'black', 'transparent', 'currentcolor'].includes(c)) return true;
   const hex = c.match(/^#([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/);
   if (hex) {
-    const [r, g, b] = [parseInt(hex[1], 16), parseInt(hex[2], 16), parseInt(hex[3], 16)];
+    const [r, g, b] = [Number.parseInt(hex[1], 16), Number.parseInt(hex[2], 16), Number.parseInt(hex[3], 16)];
     return (Math.max(r, g, b) - Math.min(r, g, b)) < 30;
   }
   const shex = c.match(/^#([0-9a-f])([0-9a-f])([0-9a-f])$/);
   if (shex) {
-    const [r, g, b] = [parseInt(shex[1] + shex[1], 16), parseInt(shex[2] + shex[2], 16), parseInt(shex[3] + shex[3], 16)];
+    const [r, g, b] = [Number.parseInt(shex[1] + shex[1], 16), Number.parseInt(shex[2] + shex[2], 16), Number.parseInt(shex[3] + shex[3], 16)];
     return (Math.max(r, g, b) - Math.min(r, g, b)) < 30;
   }
   return false;
@@ -103,7 +103,7 @@ const REGEX_MATCHERS = [
     fmt: (m) => m[0] },
   { id: 'bounce-easing', regex: /cubic-bezier\(\s*([\d.-]+)\s*,\s*([\d.-]+)\s*,\s*([\d.-]+)\s*,\s*([\d.-]+)\s*\)/g,
     test: (m) => {
-      const y1 = parseFloat(m[2]), y2 = parseFloat(m[4]);
+      const y1 = Number.parseFloat(m[2]), y2 = Number.parseFloat(m[4]);
       return y1 < -0.1 || y1 > 1.1 || y2 < -0.1 || y2 > 1.1;
     },
     fmt: (m) => `cubic-bezier(${m[1]}, ${m[2]}, ${m[3]}, ${m[4]})` },
@@ -180,7 +180,7 @@ const REGEX_ANALYZERS = [
     if (sizes.size < 3) return [];
     const sorted = [...sizes].sort((a, b) => a - b);
     const ratio = sorted[sorted.length - 1] / sorted[0];
-    if (ratio >= 2.0) return [];
+    if (ratio >= 2) return [];
     const lines = content.split('\n');
     let line = 1;
     for (let i = 0; i < lines.length; i++) { if (/font-size/i.test(lines[i]) || /\btext-(?:xs|sm|base|lg|xl|\d)/i.test(lines[i])) { line = i + 1; break; } }
@@ -193,7 +193,7 @@ const REGEX_ANALYZERS = [
     const pxRe = /(?:padding|margin)(?:-(?:top|right|bottom|left))?\s*:\s*(\d+)px/gi;
     while ((m = pxRe.exec(content)) !== null) { const v = +m[1]; if (v > 0 && v < 200) vals.push(v); }
     const remRe = /(?:padding|margin)(?:-(?:top|right|bottom|left))?\s*:\s*([\d.]+)rem/gi;
-    while ((m = remRe.exec(content)) !== null) { const v = Math.round(parseFloat(m[1]) * 16); if (v > 0 && v < 200) vals.push(v); }
+    while ((m = remRe.exec(content)) !== null) { const v = Math.round(Number.parseFloat(m[1]) * 16); if (v > 0 && v < 200) vals.push(v); }
     const gapRe = /gap\s*:\s*(\d+)px/gi;
     while ((m = gapRe.exec(content)) !== null) vals.push(+m[1]);
     const twRe = /\b(?:p|px|py|pt|pb|pl|pr|m|mx|my|mt|mb|ml|mr|gap)-(\d+)\b/g;
@@ -264,7 +264,7 @@ const REGEX_ANALYZERS = [
     const sorted = [...seen].sort();
     let sequential = 0;
     for (let i = 1; i < sorted.length; i++) {
-      if (parseInt(sorted[i], 10) === parseInt(sorted[i - 1], 10) + 1) sequential++;
+      if (Number.parseInt(sorted[i], 10) === Number.parseInt(sorted[i - 1], 10) + 1) sequential++;
     }
     if (sequential < 2) return [];
     return [finding('numbered-section-markers', filePath, `Sequence: ${sorted.slice(0, 6).join(', ')}`)];

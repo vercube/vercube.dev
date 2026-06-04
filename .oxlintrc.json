@@ -8,6 +8,10 @@
     "builtin": true,
     "phantomjs": true
   },
+  "ignorePatterns": [
+    ".agents/**",
+    ".claude/**",
+  ],
   "rules": {
     "for-direction": "error",
     "no-async-promise-executor": "error",

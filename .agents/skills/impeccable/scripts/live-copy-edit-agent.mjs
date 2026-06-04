@@ -103,7 +103,7 @@ export async function runCopyEditBatchAgent(batch, opts = {}) {
   }
   if (provider === 'chat') {
     if (typeof opts.applyBatchToSource !== 'function') {
-      throw new Error('chat provider requires applyBatchToSource callback');
+      throw new TypeError('chat provider requires applyBatchToSource callback');
     }
     const raw = await opts.applyBatchToSource(batch, { repair: batch?.repair || null });
     return normalizeBatchResult(raw || {});
@@ -126,11 +126,11 @@ export async function runCopyEditBatchAgent(batch, opts = {}) {
     throw new Error(`Unsupported live copy-edit AI runner: ${provider}`);
   }
 
-  const output = fs.existsSync(resultPath) ? fs.readFileSync(resultPath, 'utf-8') : '';
+  const output = fs.existsSync(resultPath) ? fs.readFileSync(resultPath, 'utf8') : '';
   const parsed = parseCopyEditBatchResult(output);
   if (parsed) return parsed;
 
-  const tail = fs.existsSync(logPath) ? fs.readFileSync(logPath, 'utf-8').slice(-1200) : output.slice(-1200);
+  const tail = fs.existsSync(logPath) ? fs.readFileSync(logPath, 'utf8').slice(-1200) : output.slice(-1200);
   throw new Error('AI copy-edit batch did not return a valid completion payload. ' + tail.trim());
 }
 
@@ -145,20 +145,20 @@ export function runCopyEditPostApplyChecks({ cwd = process.cwd(), files = [] } =
       continue;
     }
     let content = '';
-    try { content = fs.readFileSync(file, 'utf-8'); } catch (err) {
-      failures.push({ file: relativeFile, reason: 'read_failed', message: err.message });
+    try { content = fs.readFileSync(file, 'utf8'); } catch (error) {
+      failures.push({ file: relativeFile, reason: 'read_failed', message: error.message });
       continue;
     }
     const markerMatch = findLeftoverImpeccableMarker(content);
     if (markerMatch) failures.push({ file: relativeFile, reason: 'leftover_impeccable_marker', marker: markerMatch });
-    if (/\.json$/.test(relativeFile)) {
+    if (relativeFile.endsWith('.json')) {
       try {
         JSON.parse(content);
-      } catch (err) {
+      } catch (error) {
         failures.push({
           file: relativeFile,
           reason: 'invalid_json',
-          message: err.message || String(err),
+          message: error.message || String(error),
         });
       }
     }
@@ -166,7 +166,7 @@ export function runCopyEditPostApplyChecks({ cwd = process.cwd(), files = [] } =
     if (syntaxCheck?.failure) failures.push(syntaxCheck.failure);
     if (syntaxCheck?.warning) warnings.push(syntaxCheck.warning);
     if (/\.(mjs|cjs|js)$/.test(relativeFile)) {
-      const check = spawnSync(process.execPath, ['--check', file], { cwd, encoding: 'utf-8' });
+      const check = spawnSync(process.execPath, ['--check', file], { cwd, encoding: 'utf8' });
       if (check.status !== 0) {
         failures.push({
           file: relativeFile,
@@ -199,12 +199,12 @@ function checkFrameworkSourceSyntax(relativeFile, content) {
       errorRecovery: false,
     });
     return null;
-  } catch (err) {
+  } catch (error) {
     return {
       failure: {
         file: relativeFile,
         reason: 'invalid_source_syntax',
-        message: err.message || String(err),
+        message: error.message || String(error),
       },
     };
   }
@@ -252,7 +252,7 @@ function runManualEditValidationScript(cwd) {
   if (!script) return null;
   const validation = spawnSync(script, {
     cwd,
-    encoding: 'utf-8',
+    encoding: 'utf8',
     shell: true,
     timeout: 30_000,
   });
@@ -281,7 +281,7 @@ function readManualEditValidationScript(cwd) {
   const pkgPath = path.join(cwd, 'package.json');
   if (!fs.existsSync(pkgPath)) return null;
   try {
-    const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf-8'));
+    const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
     const script = pkg?.scripts?.['impeccable:manual-edit-validate'];
     return typeof script === 'string' && script.trim() ? script : null;
   } catch {
@@ -344,7 +344,7 @@ function stripLiveRuntimeHtml(html) {
 }
 
 function normalizeBatchResult(result) {
-  const status = result.status === 'partial' ? 'partial' : result.status === 'error' ? 'error' : 'done';
+  const status = result.status === 'partial' ? 'partial' : (result.status === 'error' ? 'error' : 'done');
   const appliedEntryIds = Array.isArray(result.appliedEntryIds)
     ? result.appliedEntryIds.filter((id) => typeof id === 'string')
     : [];
@@ -403,7 +403,7 @@ function applyMockWrites(env, cwd) {
     const absolute = path.resolve(cwd, relativeFile);
     if (!isPathInsideOrEqual(cwd, absolute)) continue;
     fs.mkdirSync(path.dirname(absolute), { recursive: true });
-    fs.writeFileSync(absolute, content, 'utf-8');
+    fs.writeFileSync(absolute, content, 'utf8');
   }
 }
 
@@ -663,8 +663,8 @@ function computeCommandAuthed(command) {
       '--output-format', 'json',
       'ping',
     ], {
-      encoding: 'utf-8',
-      timeout: 10000,
+      encoding: 'utf8',
+      timeout: 10_000,
       env: process.env,
     });
   } catch {

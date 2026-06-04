@@ -135,7 +135,7 @@ export function getLiveUiElementById(id, env = globalThis) {
   const root = resolveLiveUiRoot(env);
   if (!id) return null;
   if (root?.getElementById) {
-    const found = root.getElementById(id);
+    const found = root.querySelector(`#${id}`);
     if (found) return found;
   }
   if (root?.querySelector) {
@@ -148,7 +148,7 @@ export function getLiveUiElementById(id, env = globalThis) {
 export function appendToLiveUiRoot(el, env = globalThis) {
   const root = resolveLiveUiRoot(env);
   if (!root) throw new Error('Impeccable live UI root is not available');
-  root.appendChild(el);
+  root.append(el);
   return el;
 }
 
@@ -156,9 +156,9 @@ export function appendStyleToLiveUiRoot(styleEl, env = globalThis) {
   const doc = env?.document;
   const root = resolveLiveUiRoot(env);
   if (root && root !== doc?.body) {
-    root.appendChild(styleEl);
+    root.append(styleEl);
   } else {
-    (doc?.head || doc?.body || root).appendChild(styleEl);
+    (doc?.head || doc?.body || root).append(styleEl);
   }
   return styleEl;
 }
@@ -175,5 +175,5 @@ function escapeCssIdent(value) {
   if (typeof CSS !== 'undefined' && typeof CSS.escape === 'function') {
     return CSS.escape(String(value));
   }
-  return String(value).replace(/([ !"#$%&'()*+,./:;<=>?@[\\\]^`{|}~])/g, '\\$1');
+  return String(value).replace(/([ !"#$%&'()*+,./:;<=>?@[\\\]^`{|}~])/g, String.raw`\$1`);
 }

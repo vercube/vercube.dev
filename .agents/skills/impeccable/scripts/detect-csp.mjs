@@ -91,7 +91,7 @@ export function detectCsp(cwd = process.cwd()) {
     const ext = path.extname(absPath);
     const base = path.basename(absPath).toLowerCase();
     const isConfig = (name) =>
-      new RegExp('(^|/)' + name + '\\.config\\.').test(relPath);
+      new RegExp('(^|/)' + name + String.raw`\.config\.`).test(relPath);
 
     // === append-arrays candidates ===
 
@@ -183,7 +183,7 @@ function walk(root, dir, depth, visit) {
       try {
         const buf = Buffer.alloc(MAX_READ_BYTES);
         const n = fs.readSync(fd, buf, 0, MAX_READ_BYTES, 0);
-        body = buf.slice(0, n).toString('utf-8');
+        body = buf.slice(0, n).toString('utf8');
       } finally { fs.closeSync(fd); }
     } catch { continue; }
     visit(abs, path.relative(root, abs), body);

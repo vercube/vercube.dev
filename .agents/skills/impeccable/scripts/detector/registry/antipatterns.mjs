@@ -400,7 +400,7 @@ const GATED_PROVIDERS = new Set(
 // pass through. `findings` carry the rule id on `.antipattern`.
 function filterByProviders(findings, providers = []) {
   const enabled = new Set(providers || []);
-  if (!GATED_PROVIDERS.size) return findings;
+  if (GATED_PROVIDERS.size === 0) return findings;
   return findings.filter(f => {
     const rule = getAntipattern(f.antipattern);
     if (!rule || !rule.gated) return true;

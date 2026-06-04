@@ -97,7 +97,7 @@ export function loadLock(projectRoot) {
   const lockPath = join(projectRoot, 'skills-lock.json');
   if (!existsSync(lockPath)) return null;
   try {
-    return JSON.parse(readFileSync(lockPath, 'utf-8'));
+    return JSON.parse(readFileSync(lockPath, 'utf8'));
   } catch {
     return null;
   }
@@ -120,7 +120,7 @@ export function isImpeccableSkill(skillDir, { skillName, lock } = {}) {
   if (!existsSync(skillMd)) return false;
   let content;
   try {
-    content = readFileSync(skillMd, 'utf-8');
+    content = readFileSync(skillMd, 'utf8');
   } catch {
     return false;
   }
@@ -224,7 +224,7 @@ export function cleanSkillsLock(projectRoot) {
 
   let lock;
   try {
-    lock = JSON.parse(readFileSync(lockPath, 'utf-8'));
+    lock = JSON.parse(readFileSync(lockPath, 'utf8'));
   } catch {
     return [];
   }
@@ -245,7 +245,7 @@ export function cleanSkillsLock(projectRoot) {
   }
 
   if (removed.length > 0) {
-    writeFileSync(lockPath, JSON.stringify(lock, null, 2) + '\n', 'utf-8');
+    writeFileSync(lockPath, JSON.stringify(lock, null, 2) + '\n', 'utf8');
   }
 
   return removed;

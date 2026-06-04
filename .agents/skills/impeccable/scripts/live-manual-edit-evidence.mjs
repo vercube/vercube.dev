@@ -168,7 +168,7 @@ function analyzeSourceHint(op, cwd) {
     return { ...hint, status: 'generated', relativeFile };
   }
 
-  const content = fs.readFileSync(file, 'utf-8');
+  const content = fs.readFileSync(file, 'utf8');
   const lines = content.split('\n');
   const line = hint.line || 1;
   const start = Math.max(0, line - 4);
@@ -253,7 +253,7 @@ function maybeAddSearchFile(file, cwd, seenFiles, out) {
   seenFiles.add(realFile);
   if (isGeneratedFile(file, { cwd })) return;
   let content;
-  try { content = fs.readFileSync(file, 'utf-8'); } catch { return; }
+  try { content = fs.readFileSync(file, 'utf8'); } catch { return; }
   out.push({ file, relativeFile: path.relative(cwd, file), content, lines: content.split('\n') });
 }
 
@@ -262,7 +262,7 @@ function findLiteralMatches(searchFiles, needle, { max }) {
 }
 
 function findObjectKeyMatches(searchFiles, text, { max }) {
-  const re = new RegExp('(["\\\'`])' + escapeRegExp(text) + '\\1(?=\\s*:)', 'g');
+  const re = new RegExp('(["\\\'`])' + escapeRegExp(text) + String.raw`\1(?=\s*:)`, 'g');
   const out = [];
   for (const file of searchFiles) {
     for (const match of file.content.matchAll(re)) {
@@ -359,5 +359,5 @@ function decodeBasicHtml(value) {
 }
 
 function escapeRegExp(value) {
-  return String(value).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return String(value).replace(/[.*+?^${}()|[\]\\]/g, String.raw`\$&`);
 }

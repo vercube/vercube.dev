@@ -56,13 +56,13 @@ function checkStaticPageTypography(document, window) {
   }
   const sizes = new Set();
   for (const el of document.querySelectorAll('h1, h2, h3, h4, h5, h6, p, span, a, li, td, th, label, button, div')) {
-    const fontSize = parseFloat(window.getComputedStyle(el).fontSize);
+    const fontSize = Number.parseFloat(window.getComputedStyle(el).fontSize);
     if (fontSize >= 8 && fontSize < 200) sizes.add(Math.round(fontSize * 10) / 10);
   }
   if (sizes.size >= 3) {
     const sorted = [...sizes].sort((a, b) => a - b);
     const ratio = sorted[sorted.length - 1] / sorted[0];
-    if (ratio < 2.0) {
+    if (ratio < 2) {
       findings.push({ id: 'flat-type-hierarchy', snippet: `Sizes: ${sorted.map(s => s + 'px').join(', ')} (ratio ${ratio.toFixed(1)}:1)` });
     }
   }
@@ -84,7 +84,7 @@ function checkElementBrokenImage(el) {
 }
 
 const STATIC_ELEMENT_RULES = [
-  { id: 'border-rules', selector: '*', run: (el, tag, style, window, customPropMap) => checkElementBorders(tag, style, null, resolveBorderRadiusPx(el, style, parseFloat(style.width) || 0, window)) },
+  { id: 'border-rules', selector: '*', run: (el, tag, style, window, customPropMap) => checkElementBorders(tag, style, null, resolveBorderRadiusPx(el, style, Number.parseFloat(style.width) || 0, window)) },
   { id: 'color-rules', selector: '*', run: (el, tag, style, window, customPropMap) => checkElementColors(el, style, tag, window, customPropMap, false) },
   { id: 'dark-glow', selector: '*', run: (el, tag, style, window, customPropMap) => checkElementGlow(tag, style, resolveBackground(el.parentElement || el, window, customPropMap)) },
   { id: 'motion-rules', selector: '*', run: (el, tag, style) => checkElementMotion(tag, style) },
@@ -105,7 +105,7 @@ async function detectHtml(filePath, options = {}) {
     phase: 'setup',
     ruleId: 'read-html',
     target: filePath,
-  }, () => fs.readFileSync(filePath, 'utf-8'));
+  }, () => fs.readFileSync(filePath, 'utf8'));
 
   let modules;
   try {

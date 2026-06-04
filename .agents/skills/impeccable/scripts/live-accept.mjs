@@ -24,7 +24,7 @@ import {
   removeSvelteComponentSession,
 } from './live-svelte-component.mjs';
 
-const EXTENSIONS = ['.html', '.jsx', '.tsx', '.vue', '.svelte', '.astro'];
+const EXTENSIONS = new Set(['.html', '.jsx', '.tsx', '.vue', '.svelte', '.astro']);
 
 // ---------------------------------------------------------------------------
 // CLI
@@ -101,10 +101,10 @@ Output (JSON):
         paramValues,
         process.cwd(),
       );
-    } catch (err) {
+    } catch (error) {
       result = {
         handled: false,
-        error: err.message,
+        error: error.message,
         file: svelteComponentManifest.sourceFile,
         sourceFile: svelteComponentManifest.sourceFile,
         previewMode: 'svelte-component',
@@ -257,7 +257,7 @@ function handleDiscard(id, lines, targetFile) {
     ...restored,
     ...lines.slice(replaceRange.end + 1),
   ];
-  fs.writeFileSync(targetFile, newLines.join('\n'), 'utf-8');
+  fs.writeFileSync(targetFile, newLines.join('\n'), 'utf8');
   return {};
 }
 
@@ -375,14 +375,14 @@ function handleAccept(id, variantNum, lines, targetFile, paramValues) {
     ...replacement,
     ...lines.slice(replaceRange.end + 1),
   ];
-  fs.writeFileSync(targetFile, newLines.join('\n'), 'utf-8');
+  fs.writeFileSync(targetFile, newLines.join('\n'), 'utf8');
 
   return { carbonize: needsCarbonize, acceptedOriginalText: originalContent.join('\n') };
 }
 
 function readSourceShadowPreviewMeta(content, id) {
   const escaped = escapeRegExp(id);
-  const wrapperRe = new RegExp('<[^>]+data-impeccable-variants=(["\'])' + escaped + '\\1[^>]*>');
+  const wrapperRe = new RegExp('<[^>]+data-impeccable-variants=(["\'])' + escaped + String.raw`\1[^>]*>`);
   const match = String(content || '').match(wrapperRe);
   if (!match) return null;
   const tag = match[0];
@@ -395,7 +395,7 @@ function readSourceShadowPreviewMeta(content, id) {
 }
 
 function readHtmlAttr(tag, name) {
-  const match = String(tag || '').match(new RegExp('\\s' + escapeRegExp(name) + '\\s*=\\s*(["\'])(.*?)\\1'));
+  const match = String(tag || '').match(new RegExp(String.raw`\s` + escapeRegExp(name) + String.raw`\s*=\s*(["'])(.*?)\1`));
   if (!match) return null;
   return decodeHtmlAttr(match[2]);
 }
@@ -500,11 +500,11 @@ function expandReplaceRange(block, lines, isJsx) {
 }
 
 function escapeRegExp(value) {
-  return String(value).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return String(value).replace(/[.*+?^${}()|[\]\\]/g, String.raw`\$&`);
 }
 
 function isVariantEndMarkerLine(line, id) {
-  return new RegExp('impeccable-variants-end\\s+' + escapeRegExp(id) + '(?:\\s|--|\\*/|$)').test(line);
+  return new RegExp(String.raw`impeccable-variants-end\s+` + escapeRegExp(id) + String.raw`(?:\s|--|\*/|$)`).test(line);
 }
 
 function hasVariantWrapperAttr(line, id) {
@@ -562,7 +562,7 @@ function stripStyleAndJoin(lines, block) {
  * Returns the inner string (may be empty), or null if not found.
  */
 function extractInnerByAttr(text, attrMatch) {
-  const openerRe = new RegExp('<([A-Za-z][A-Za-z0-9]*)\\b[^>]*' + attrMatch + '[^>]*>');
+  const openerRe = new RegExp(String.raw`<([A-Za-z][A-Za-z0-9]*)\b[^>]*` + attrMatch + '[^>]*>');
   const openMatch = text.match(openerRe);
   if (!openMatch) return null;
 
@@ -571,7 +571,7 @@ function extractInnerByAttr(text, attrMatch) {
 
   // Match any opener or closer of this tag name after innerStart.
   // (Does not match self-closing <TAG … />, which doesn't contribute to depth.)
-  const tagRe = new RegExp('<(?:/)?' + tagName + '\\b[^>]*>', 'g');
+  const tagRe = new RegExp('<(?:/)?' + tagName + String.raw`\b[^>]*>`, 'g');
   tagRe.lastIndex = innerStart;
 
   let depth = 1;
@@ -672,7 +672,7 @@ function extractCss(lines, block, id) {
  * `{` `{` … `}` `}`, which oxc rejects with "Expected `}` but found `@`".
  */
 function stripJsxTemplateLines(content) {
-  const out = content.slice();
+  const out = [...content];
 
   // Drop any leading blank lines so we don't miss a `{` line buried below
   // them; same for trailing.
@@ -756,7 +756,7 @@ function findSessionFile(id, cwd) {
     if (!fs.existsSync(absDir)) continue;
     const result = searchDir(absDir, marker, seen, 0);
     if (result) {
-      const content = fs.readFileSync(result, 'utf-8');
+      const content = fs.readFileSync(result, 'utf8');
       return { file: result, content, lines: content.split('\n') };
     }
   }
@@ -776,10 +776,10 @@ function searchDir(dir, query, seen, depth) {
 
   for (const entry of entries) {
     if (!entry.isFile()) continue;
-    if (!EXTENSIONS.includes(path.extname(entry.name).toLowerCase())) continue;
+    if (!EXTENSIONS.has(path.extname(entry.name).toLowerCase())) continue;
     const filePath = path.join(dir, entry.name);
     try {
-      const content = fs.readFileSync(filePath, 'utf-8');
+      const content = fs.readFileSync(filePath, 'utf8');
       if (content.includes(query)) return filePath;
     } catch { /* skip */ }
   }

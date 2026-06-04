@@ -63,14 +63,7 @@ const backgroundSrc = getBackgroundSrc();
       "
     />
     <div
-      style="
-        position: relative;
-        display: flex;
-        flex-direction: column;
-        gap: 16px;
-        justify-content: center;
-        padding-left: 80px;
-      "
+      style="position: relative; display: flex; flex-direction: column; gap: 16px; justify-content: center; padding-left: 80px"
     >
       <div style="display: flex">
         <svg width="50" viewBox="0 0 94 107" fill="none" xmlns="http://www.w3.org/2000/svg">

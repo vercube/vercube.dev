@@ -38,7 +38,7 @@ export function detectSvelteKitProject(cwd = process.cwd(), config = null) {
 
 export function applySvelteKitLiveAdapter({ cwd = process.cwd(), port, config = null } = {}) {
   if (!Number.isFinite(Number(port))) {
-    throw new Error('SvelteKit live adapter requires a numeric port');
+    throw new TypeError('SvelteKit live adapter requires a numeric port');
   }
   const detected = detectSvelteKitProject(cwd, config);
   if (!detected) return null;
@@ -49,9 +49,9 @@ export function applySvelteKitLiveAdapter({ cwd = process.cwd(), port, config = 
   const layoutAbs = path.join(cwd, layoutRel);
   fs.mkdirSync(path.dirname(layoutAbs), { recursive: true });
   const layoutExisted = fs.existsSync(layoutAbs);
-  const before = layoutExisted ? fs.readFileSync(layoutAbs, 'utf-8') : defaultSvelteLayout();
+  const before = layoutExisted ? fs.readFileSync(layoutAbs, 'utf8') : defaultSvelteLayout();
   const after = patchSvelteLayout(before);
-  fs.writeFileSync(layoutAbs, after, 'utf-8');
+  fs.writeFileSync(layoutAbs, after, 'utf8');
 
   return {
     file: layoutRel,
@@ -69,10 +69,10 @@ export function removeSvelteKitLiveAdapter({ cwd = process.cwd(), config = null 
   const layoutAbs = path.join(cwd, detected.layoutFile);
   let removed = false;
   if (fs.existsSync(layoutAbs)) {
-    const before = fs.readFileSync(layoutAbs, 'utf-8');
+    const before = fs.readFileSync(layoutAbs, 'utf8');
     const after = unpatchSvelteLayout(before);
     if (after !== before) {
-      fs.writeFileSync(layoutAbs, after, 'utf-8');
+      fs.writeFileSync(layoutAbs, after, 'utf8');
       removed = true;
     }
   }
@@ -124,14 +124,14 @@ export function patchSvelteLayout(content) {
 export function unpatchSvelteLayout(content) {
   let out = String(content || '');
   const blockRe = new RegExp(
-    '([ \\t]*)' + escapeRegExp(SVELTE_LAYOUT_MARKER_OPEN)
-    + '\\n<ImpeccableLiveRoot\\s*/>\\n'
+    String.raw`([ \t]*)` + escapeRegExp(SVELTE_LAYOUT_MARKER_OPEN)
+    + String.raw`\n<ImpeccableLiveRoot\s*/>\n`
     + escapeRegExp(SVELTE_LAYOUT_MARKER_CLOSE)
-    + '\\n?',
+    + String.raw`\n?`,
     'g',
   );
   out = out.replace(blockRe, '$1');
-  out = out.replace(new RegExp('^\\s*' + escapeRegExp(SVELTE_ROOT_IMPORT) + '\\s*\\n?', 'gm'), '');
+  out = out.replace(new RegExp(String.raw`^\s*` + escapeRegExp(SVELTE_ROOT_IMPORT) + String.raw`\s*\n?`, 'gm'), '');
   out = out.replace(/<script>\s*<\/script>\s*\n?/g, '');
   return out.replace(/\n{3,}/g, '\n\n');
 }
@@ -139,7 +139,7 @@ export function unpatchSvelteLayout(content) {
 export function ensureSvelteLiveRootComponent(cwd, port) {
   const file = path.join(cwd, SVELTE_LIVE_ROOT_COMPONENT);
   fs.mkdirSync(path.dirname(file), { recursive: true });
-  fs.writeFileSync(file, buildSvelteLiveRootComponent(port), 'utf-8');
+  fs.writeFileSync(file, buildSvelteLiveRootComponent(port), 'utf8');
   return file;
 }
 
@@ -236,11 +236,11 @@ function packageHasSvelteKit(cwd) {
   const file = path.join(cwd, 'package.json');
   if (!fs.existsSync(file)) return false;
   try {
-    const pkg = JSON.parse(fs.readFileSync(file, 'utf-8'));
+    const pkg = JSON.parse(fs.readFileSync(file, 'utf8'));
     const deps = {
-      ...(pkg.dependencies || {}),
-      ...(pkg.devDependencies || {}),
-      ...(pkg.peerDependencies || {}),
+      ...pkg.dependencies,
+      ...pkg.devDependencies,
+      ...pkg.peerDependencies,
     };
     return Boolean(deps['@sveltejs/kit'] || deps['@sveltejs/vite-plugin-svelte'] || deps.svelte);
   } catch {
@@ -250,7 +250,7 @@ function packageHasSvelteKit(cwd) {
 
 function fileIncludes(file, text) {
   try {
-    return fs.readFileSync(file, 'utf-8').includes(text);
+    return fs.readFileSync(file, 'utf8').includes(text);
   } catch {
     return false;
   }
@@ -270,5 +270,5 @@ function pruneEmptyDir(dir, stopDir) {
 }
 
 function escapeRegExp(value) {
-  return String(value).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return String(value).replace(/[.*+?^${}()|[\]\\]/g, String.raw`\$&`);
 }

@@ -490,20 +490,20 @@ function isNeutralColor(color) {
   // lch chroma is ~0–150; >= 3 reads as tinted. jsdom emits both formats
   // literally (it does NOT convert them to rgb).
   const oklch = color.match(/oklch\(\s*[\d.]+%?\s*([\d.-]+)/i);
-  if (oklch) return parseFloat(oklch[1]) < 0.02;
+  if (oklch) return Number.parseFloat(oklch[1]) < 0.02;
   const lch = color.match(/lch\(\s*[\d.]+%?\s*([\d.-]+)/i);
-  if (lch) return parseFloat(lch[1]) < 3;
+  if (lch) return Number.parseFloat(lch[1]) < 3;
 
   // oklab()/lab() — a and b are signed axes; chroma = sqrt(a² + b²).
   // oklab a/b are ~-0.4..0.4, threshold 0.02. lab a/b are ~-128..127, threshold 3.
   const oklab = color.match(/oklab\(\s*[\d.]+%?\s*([\d.-]+)\s+([\d.-]+)/i);
   if (oklab) {
-    const a = parseFloat(oklab[1]), b = parseFloat(oklab[2]);
+    const a = Number.parseFloat(oklab[1]), b = Number.parseFloat(oklab[2]);
     return Math.hypot(a, b) < 0.02;
   }
   const lab = color.match(/lab\(\s*[\d.]+%?\s*([\d.-]+)\s+([\d.-]+)/i);
   if (lab) {
-    const a = parseFloat(lab[1]), b = parseFloat(lab[2]);
+    const a = Number.parseFloat(lab[1]), b = Number.parseFloat(lab[2]);
     return Math.hypot(a, b) < 3;
   }
 
@@ -511,13 +511,13 @@ function isNeutralColor(color) {
   // Modern jsdom usually converts hsl() to rgb, but handle it directly for
   // safety across versions and for any engine that preserves the format.
   const hsl = color.match(/hsla?\(\s*[\d.-]+\s*,?\s*([\d.]+)%/i);
-  if (hsl) return parseFloat(hsl[1]) < 10;
+  if (hsl) return Number.parseFloat(hsl[1]) < 10;
 
   // hwb(hue whiteness% blackness%) — a pixel is fully gray when
   // whiteness + blackness >= 100; chroma-like saturation = 1 - (w+b)/100.
   const hwb = color.match(/hwb\(\s*[\d.-]+\s+([\d.]+)%\s+([\d.]+)%/i);
   if (hwb) {
-    const w = parseFloat(hwb[1]), b = parseFloat(hwb[2]);
+    const w = Number.parseFloat(hwb[1]), b = Number.parseFloat(hwb[2]);
     return (1 - Math.min(100, w + b) / 100) < 0.1;
   }
 
@@ -536,7 +536,7 @@ function parseRgb(color) {
 
 function relativeLuminance({ r, g, b }) {
   const [rs, gs, bs] = [r / 255, g / 255, b / 255].map(c =>
-    c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4
+    c <= 0.039_28 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4
   );
   return 0.2126 * rs + 0.7152 * gs + 0.0722 * bs;
 }
@@ -557,9 +557,9 @@ function parseGradientColors(bgImage) {
   for (const m of bgImage.matchAll(/#([0-9a-f]{6}|[0-9a-f]{3})\b/gi)) {
     const h = m[1];
     if (h.length === 6) {
-      colors.push({ r: parseInt(h.slice(0,2),16), g: parseInt(h.slice(2,4),16), b: parseInt(h.slice(4,6),16), a: 1 });
+      colors.push({ r: Number.parseInt(h.slice(0,2),16), g: Number.parseInt(h.slice(2,4),16), b: Number.parseInt(h.slice(4,6),16), a: 1 });
     } else {
-      colors.push({ r: parseInt(h[0]+h[0],16), g: parseInt(h[1]+h[1],16), b: parseInt(h[2]+h[2],16), a: 1 });
+      colors.push({ r: Number.parseInt(h[0]+h[0],16), g: Number.parseInt(h[1]+h[1],16), b: Number.parseInt(h[2]+h[2],16), a: 1 });
     }
   }
   return colors;
@@ -651,7 +651,7 @@ function checkColors(opts) {
   if (hasDirectText && textColor && !isEmojiOnly) {
     // Run background-dependent checks against either a solid bg or, if the
     // ancestor is a gradient, against every gradient stop (use the worst case).
-    const bgs = effectiveBg ? [effectiveBg] : (effectiveBgStops && effectiveBgStops.length ? effectiveBgStops : null);
+    const bgs = effectiveBg ? [effectiveBg] : (effectiveBgStops && effectiveBgStops.length > 0 ? effectiveBgStops : null);
     if (bgs) {
       // Gray on colored background — flag if every stop is chromatic
       const textLum = relativeLuminance(textColor);
@@ -667,7 +667,7 @@ function checkColors(opts) {
       for (let i = 1; i < ratios.length; i++) if (ratios[i] < ratios[worstIdx]) worstIdx = i;
       const ratio = ratios[worstIdx];
       const isLargeText = fontSize >= WCAG_LARGE_TEXT_PX || (fontSize >= WCAG_LARGE_BOLD_TEXT_PX && fontWeight >= 700);
-      const threshold = isLargeText ? 3.0 : 4.5;
+      const threshold = isLargeText ? 3 : 4.5;
       if (ratio < threshold) {
         // Skip the false-positive class where text has alpha < 1 AND we
         // couldn't find an opaque ancestor (effectiveBg is null, we're
@@ -702,7 +702,7 @@ function checkColors(opts) {
 
   // Tailwind class checks
   if (classList) {
-    const classStr = typeof classList === 'string' ? classList : Array.from(classList).join(' ');
+    const classStr = typeof classList === 'string' ? classList : [...classList].join(' ');
 
     const grayMatch = classStr.match(/\btext-(?:gray|slate|zinc|neutral|stone)-\d+\b/);
     const colorBgMatch = classStr.match(/\bbg-(?:red|orange|amber|yellow|lime|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink|rose)-\d+\b/);
@@ -842,12 +842,12 @@ function isAccentColor(cssColor) {
   const hexM = /^#([0-9a-f]{3,8})\b/i.exec(s);
   if (hexM) {
     let h = hexM[1];
-    if (h.length === 3 || h.length === 4) h = h.split('').map((c) => c + c).join('').slice(0, 6);
+    if (h.length === 3 || h.length === 4) h = [...h].map((c) => c + c).join('').slice(0, 6);
     else h = h.slice(0, 6);
     if (h.length === 6) {
-      const r = parseInt(h.slice(0, 2), 16);
-      const g = parseInt(h.slice(2, 4), 16);
-      const b = parseInt(h.slice(4, 6), 16);
+      const r = Number.parseInt(h.slice(0, 2), 16);
+      const g = Number.parseInt(h.slice(2, 4), 16);
+      const b = Number.parseInt(h.slice(4, 6), 16);
       return (Math.max(r, g, b) - Math.min(r, g, b)) >= 40;
     }
   }
@@ -859,14 +859,14 @@ function isAccentColor(cssColor) {
   if (/^oklch\(/i.test(s)) {
     const nums = s.match(/\d*\.\d+|\d+/g);
     if (nums && nums.length >= 2) {
-      const c = parseFloat(nums[1]);
+      const c = Number.parseFloat(nums[1]);
       return !Number.isNaN(c) && c >= 0.05;
     }
   }
   // hsl(H, S%, L%) — saturation > 20% reads as accent.
   const hslM = /hsla?\(\s*[\d.]+\s*,\s*([\d.]+)%/i.exec(s);
   if (hslM) {
-    const sat = parseFloat(hslM[1]);
+    const sat = Number.parseFloat(hslM[1]);
     return !Number.isNaN(sat) && sat >= 20;
   }
   return false;
@@ -957,7 +957,7 @@ function checkMotion(opts) {
     const bezierRe = /cubic-bezier\(\s*([\d.-]+)\s*,\s*([\d.-]+)\s*,\s*([\d.-]+)\s*,\s*([\d.-]+)\s*\)/g;
     let m;
     while ((m = bezierRe.exec(timingFunctions)) !== null) {
-      const y1 = parseFloat(m[2]), y2 = parseFloat(m[4]);
+      const y1 = Number.parseFloat(m[2]), y2 = Number.parseFloat(m[4]);
       if (y1 < -0.1 || y1 > 1.1 || y2 < -0.1 || y2 > 1.1) {
         findings.push({ id: 'bounce-easing', snippet: `cubic-bezier(${m[1]}, ${m[2]}, ${m[3]}, ${m[4]})` });
         break;
@@ -998,7 +998,7 @@ function checkGlow(opts) {
     const afterColor = shadow.substring(shadow.indexOf(colorMatch[0]) + colorMatch[0].length);
     const beforeColor = shadow.substring(0, shadow.indexOf(colorMatch[0]));
     const pxVals = [...beforeColor.matchAll(/([\d.]+)px/g), ...afterColor.matchAll(/([\d.]+)px/g)]
-      .map(m => parseFloat(m[1]));
+      .map(m => Number.parseFloat(m[1]));
 
     // Third value is blur (offset-x, offset-y, blur, [spread])
     if (pxVals.length >= 3 && pxVals[2] > 4) {
@@ -1049,20 +1049,20 @@ function checkHtmlPatterns(html) {
   const spacingRe = /(?:padding|margin)(?:-(?:top|right|bottom|left))?\s*:\s*(\d+)px/gi;
   let sm;
   while ((sm = spacingRe.exec(html)) !== null) {
-    const v = parseInt(sm[1], 10);
+    const v = Number.parseInt(sm[1], 10);
     if (v > 0 && v < 200) spacingValues.push(v);
   }
   const gapRe = /gap\s*:\s*(\d+)px/gi;
   while ((sm = gapRe.exec(html)) !== null) {
-    spacingValues.push(parseInt(sm[1], 10));
+    spacingValues.push(Number.parseInt(sm[1], 10));
   }
   const twSpaceRe = /\b(?:p|px|py|pt|pb|pl|pr|m|mx|my|mt|mb|ml|mr|gap)-(\d+)\b/g;
   while ((sm = twSpaceRe.exec(html)) !== null) {
-    spacingValues.push(parseInt(sm[1], 10) * 4);
+    spacingValues.push(Number.parseInt(sm[1], 10) * 4);
   }
   const remSpacingRe = /(?:padding|margin)(?:-(?:top|right|bottom|left))?\s*:\s*([\d.]+)rem/gi;
   while ((sm = remSpacingRe.exec(html)) !== null) {
-    const v = Math.round(parseFloat(sm[1]) * 16);
+    const v = Math.round(Number.parseFloat(sm[1]) * 16);
     if (v > 0 && v < 200) spacingValues.push(v);
   }
   const roundedSpacing = spacingValues.map(v => Math.round(v / 4) * 4);
@@ -1093,7 +1093,7 @@ function checkHtmlPatterns(html) {
   const bezierRe = /cubic-bezier\(\s*([\d.-]+)\s*,\s*([\d.-]+)\s*,\s*([\d.-]+)\s*,\s*([\d.-]+)\s*\)/g;
   let bm;
   while ((bm = bezierRe.exec(html)) !== null) {
-    const y1 = parseFloat(bm[2]), y2 = parseFloat(bm[4]);
+    const y1 = Number.parseFloat(bm[2]), y2 = Number.parseFloat(bm[4]);
     if (y1 < -0.1 || y1 > 1.1 || y2 < -0.1 || y2 > 1.1) {
       findings.push({ id: 'bounce-easing', snippet: `cubic-bezier(${bm[1]}, ${bm[2]}, ${bm[3]}, ${bm[4]})` });
       break;
@@ -1193,9 +1193,9 @@ function readOwnBackgroundColor(el, computedStyle) {
   if (hexMatch) {
     const h = hexMatch[1];
     if (h.length === 6) {
-      return { r: parseInt(h.slice(0, 2), 16), g: parseInt(h.slice(2, 4), 16), b: parseInt(h.slice(4, 6), 16), a: 1 };
+      return { r: Number.parseInt(h.slice(0, 2), 16), g: Number.parseInt(h.slice(2, 4), 16), b: Number.parseInt(h.slice(4, 6), 16), a: 1 };
     }
-    return { r: parseInt(h[0] + h[0], 16), g: parseInt(h[1] + h[1], 16), b: parseInt(h[2] + h[2], 16), a: 1 };
+    return { r: Number.parseInt(h[0] + h[0], 16), g: Number.parseInt(h[1] + h[1], 16), b: Number.parseInt(h[2] + h[2], 16), a: 1 };
   }
   return bg;
 }
@@ -1299,9 +1299,9 @@ function parseRadiusToPx(value, widthPx) {
   const trimmed = value.trim();
   if (!trimmed) return null;
   const first = trimmed.split(/\s+/)[0];
-  const num = parseFloat(first);
+  const num = Number.parseFloat(first);
   if (Number.isNaN(num)) return null;
-  if (/%$/.test(first)) {
+  if (first.endsWith('%')) {
     if (widthPx && widthPx > 0) return (num / 100) * widthPx;
     return num;
   }
@@ -1327,10 +1327,10 @@ function checkElementBordersDOM(el) {
   const sides = ['Top', 'Right', 'Bottom', 'Left'];
   const widths = {}, colors = {};
   for (const s of sides) {
-    widths[s] = parseFloat(style[`border${s}Width`]) || 0;
+    widths[s] = Number.parseFloat(style[`border${s}Width`]) || 0;
     colors[s] = style[`border${s}Color`] || '';
   }
-  return checkBorders(tag, widths, colors, parseFloat(style.borderRadius) || 0);
+  return checkBorders(tag, widths, colors, Number.parseFloat(style.borderRadius) || 0);
 }
 
 function checkElementColorsDOM(el) {
@@ -1350,8 +1350,8 @@ function checkElementColorsDOM(el) {
     bgColor: readOwnBackgroundColor(el, style),
     effectiveBg,
     effectiveBgStops: effectiveBg ? null : resolveGradientStops(el),
-    fontSize: parseFloat(style.fontSize) || 16,
-    fontWeight: parseInt(style.fontWeight) || 400,
+    fontSize: Number.parseFloat(style.fontSize) || 16,
+    fontWeight: Number.parseInt(style.fontWeight) || 400,
     hasDirectText,
     isEmojiOnly: isEmojiOnlyText(directText),
     bgClip: style.webkitBackgroundClip || style.backgroundClip || '',
@@ -1388,8 +1388,8 @@ function checkElementIconTileDOM(el) {
     siblingBottom: sibRect.bottom,
     siblingBgColor: parseRgb(sibStyle.backgroundColor),
     siblingBgImage: sibStyle.backgroundImage || '',
-    siblingBorderWidth: parseFloat(sibStyle.borderTopWidth) || 0,
-    siblingBorderRadius: parseFloat(sibStyle.borderRadius) || 0,
+    siblingBorderWidth: Number.parseFloat(sibStyle.borderTopWidth) || 0,
+    siblingBorderRadius: Number.parseFloat(sibStyle.borderRadius) || 0,
     hasIconChild: !!iconChild || hasInlineEmojiIcon,
     iconChildWidth: iconRect?.width || 0,
   });
@@ -1403,7 +1403,7 @@ function checkElementItalicSerifDOM(el) {
     tag,
     fontStyle: style.fontStyle || '',
     fontFamily: style.fontFamily || '',
-    fontSize: parseFloat(style.fontSize) || 0,
+    fontSize: Number.parseFloat(style.fontSize) || 0,
     headingText: el.textContent || '',
   });
 }
@@ -1418,12 +1418,12 @@ function checkElementHeroEyebrowDOM(el) {
   return checkHeroEyebrow({
     headingTag: tag,
     headingText: el.textContent || '',
-    headingFontSize: parseFloat(headStyle.fontSize) || 0,
+    headingFontSize: Number.parseFloat(headStyle.fontSize) || 0,
     siblingTag: sibling.tagName.toLowerCase(),
     siblingText: sibling.textContent || '',
     siblingTextTransform: sibStyle.textTransform || '',
-    siblingFontSize: parseFloat(sibStyle.fontSize) || 0,
-    siblingLetterSpacing: parseFloat(sibStyle.letterSpacing) || 0,
+    siblingFontSize: Number.parseFloat(sibStyle.fontSize) || 0,
+    siblingLetterSpacing: Number.parseFloat(sibStyle.letterSpacing) || 0,
     siblingFontWeight: sibStyle.fontWeight || '',
     siblingColor: sibStyle.color || '',
   });
@@ -1440,16 +1440,16 @@ function checkElementHeroEyebrowDOM(el) {
 function buildCustomPropMap(document) {
   const map = new Map();
   let sheets;
-  try { sheets = Array.from(document.styleSheets || []); }
+  try { sheets = [...document.styleSheets || []]; }
   catch { return map; }
   for (const sheet of sheets) {
     let rules;
-    try { rules = Array.from(sheet.cssRules || []); }
+    try { rules = [...sheet.cssRules || []]; }
     catch { continue; }
     for (const rule of rules) {
       // Style rules only (type 1). Walk @media / @supports if present.
       if (rule.type === 4 /* MEDIA_RULE */ || rule.type === 12 /* SUPPORTS_RULE */) {
-        try { rules.push(...Array.from(rule.cssRules || [])); } catch { /* ignore */ }
+        try { rules.push(...rule.cssRules || []); } catch { /* ignore */ }
         continue;
       }
       if (rule.type !== 1 /* STYLE_RULE */) continue;
@@ -1492,16 +1492,16 @@ function oklchToRgb(L, C, H) {
   const hRad = (H * Math.PI) / 180;
   const a = C * Math.cos(hRad);
   const b = C * Math.sin(hRad);
-  const l_ = L + 0.3963377774 * a + 0.2158037573 * b;
-  const m_ = L - 0.1055613458 * a - 0.0638541728 * b;
-  const s_ = L - 0.0894841775 * a - 1.2914855480 * b;
+  const l_ = L + 0.396_337_777_4 * a + 0.215_803_757_3 * b;
+  const m_ = L - 0.105_561_345_8 * a - 0.063_854_172_8 * b;
+  const s_ = L - 0.089_484_177_5 * a - 1.291_485_548 * b;
   const lc = l_ * l_ * l_, mc = m_ * m_ * m_, sc = s_ * s_ * s_;
-  const rLin =  4.0767416621 * lc - 3.3077115913 * mc + 0.2309699292 * sc;
-  const gLin = -1.2684380046 * lc + 2.6097574011 * mc - 0.3413193965 * sc;
-  const bLin = -0.0041960863 * lc - 0.7034186147 * mc + 1.7076147010 * sc;
+  const rLin =  4.076_741_662_1 * lc - 3.307_711_591_3 * mc + 0.230_969_929_2 * sc;
+  const gLin = -1.268_438_004_6 * lc + 2.609_757_401_1 * mc - 0.341_319_396_5 * sc;
+  const bLin = -0.004_196_086_3 * lc - 0.703_418_614_7 * mc + 1.707_614_701 * sc;
   const enc = (x) => {
     const c = Math.max(0, Math.min(1, x));
-    return c <= 0.0031308 ? 12.92 * c : 1.055 * Math.pow(c, 1 / 2.4) - 0.055;
+    return c <= 0.003_130_8 ? 12.92 * c : 1.055 * Math.pow(c, 1 / 2.4) - 0.055;
   };
   return {
     r: Math.round(enc(rLin) * 255),
@@ -1526,18 +1526,18 @@ function parseAnyColor(s) {
     const h = m[1];
     if (h.length === 3 || h.length === 4) {
       return {
-        r: parseInt(h[0] + h[0], 16),
-        g: parseInt(h[1] + h[1], 16),
-        b: parseInt(h[2] + h[2], 16),
-        a: h.length === 4 ? parseInt(h[3] + h[3], 16) / 255 : 1,
+        r: Number.parseInt(h[0] + h[0], 16),
+        g: Number.parseInt(h[1] + h[1], 16),
+        b: Number.parseInt(h[2] + h[2], 16),
+        a: h.length === 4 ? Number.parseInt(h[3] + h[3], 16) / 255 : 1,
       };
     }
     if (h.length === 6 || h.length === 8) {
       return {
-        r: parseInt(h.slice(0, 2), 16),
-        g: parseInt(h.slice(2, 4), 16),
-        b: parseInt(h.slice(4, 6), 16),
-        a: h.length === 8 ? parseInt(h.slice(6, 8), 16) / 255 : 1,
+        r: Number.parseInt(h.slice(0, 2), 16),
+        g: Number.parseInt(h.slice(2, 4), 16),
+        b: Number.parseInt(h.slice(4, 6), 16),
+        a: h.length === 8 ? Number.parseInt(h.slice(6, 8), 16) / 255 : 1,
       };
     }
   }
@@ -1546,9 +1546,9 @@ function parseAnyColor(s) {
   // Match L (with optional %), then C and H separated permissively.
   m = str.match(/oklch\(\s*([\d.]+)(%?)\s*[\s,]*\s*([\d.]+)\s*[\s,]+\s*([-\d.]+)(?:deg)?\s*\)/i);
   if (m) {
-    const Lnum = parseFloat(m[1]);
+    const Lnum = Number.parseFloat(m[1]);
     const L = m[2] === '%' ? Lnum / 100 : Lnum;
-    return oklchToRgb(L, parseFloat(m[3]), parseFloat(m[4]));
+    return oklchToRgb(L, Number.parseFloat(m[3]), Number.parseFloat(m[4]));
   }
   return null;
 }
@@ -1628,8 +1628,8 @@ function collectRepeatedSectionKickerCandidates(doc, getStyle, resolveLetterSpac
     const kickerStyle = getStyle(kicker);
     const headingText = (heading.textContent || '').replace(/\s+/g, ' ').trim();
     const kickerText = cleanInlineText(kicker) || (kicker.textContent || '').replace(/\s+/g, ' ').trim();
-    const headingFontSize = resolveLetterSpacing(headingStyle.fontSize || '', 16) || parseFloat(headingStyle.fontSize) || 0;
-    const kickerFontSize = resolveLetterSpacing(kickerStyle.fontSize || '', 16) || parseFloat(kickerStyle.fontSize) || 0;
+    const headingFontSize = resolveLetterSpacing(headingStyle.fontSize || '', 16) || Number.parseFloat(headingStyle.fontSize) || 0;
+    const kickerFontSize = resolveLetterSpacing(kickerStyle.fontSize || '', 16) || Number.parseFloat(kickerStyle.fontSize) || 0;
     const kickerLetterSpacing = resolveLetterSpacing(kickerStyle.letterSpacing || '', kickerFontSize);
 
     if (!isRepeatedKickerCandidate({
@@ -1780,7 +1780,7 @@ function resolveFontSizePx(el, win) {
   for (let i = chain.length - 1; i >= 0; i--) {
     const v = chain[i];
     if (!v || v === 'inherit') continue;
-    const num = parseFloat(v);
+    const num = Number.parseFloat(v);
     if (isNaN(num)) continue;
     if (v.endsWith('px')) px = num;
     else if (v.endsWith('rem')) px = num * 16;
@@ -1795,7 +1795,7 @@ function resolveFontSizePx(el, win) {
 // known font-size context. Returns null for "normal" / unparseable values.
 function resolveLengthPx(value, fontSizePx) {
   if (!value || value === 'normal' || value === 'auto' || value === 'inherit') return null;
-  const num = parseFloat(value);
+  const num = Number.parseFloat(value);
   if (isNaN(num)) return null;
   if (value.endsWith('px')) return num;
   if (value.endsWith('rem')) return num * 16;
@@ -1836,22 +1836,22 @@ function checkQuality(opts) {
   //   horizontal: max(8px, fontSize × 0.5)
   if (rect && hasDirectText && textLen > 20 && rect.width > 100 && rect.height > 30) {
     const borders = {
-      top: parseFloat(style.borderTopWidth) || 0,
-      right: parseFloat(style.borderRightWidth) || 0,
-      bottom: parseFloat(style.borderBottomWidth) || 0,
-      left: parseFloat(style.borderLeftWidth) || 0,
+      top: Number.parseFloat(style.borderTopWidth) || 0,
+      right: Number.parseFloat(style.borderRightWidth) || 0,
+      bottom: Number.parseFloat(style.borderBottomWidth) || 0,
+      left: Number.parseFloat(style.borderLeftWidth) || 0,
     };
     const borderCount = Object.values(borders).filter(w => w > 0).length;
     const hasBg = style.backgroundColor && style.backgroundColor !== 'rgba(0, 0, 0, 0)';
     if (borderCount >= 2 || hasBg) {
       const vPads = [], hPads = [];
-      if (hasBg || borders.top > 0) vPads.push(parseFloat(style.paddingTop) || 0);
-      if (hasBg || borders.bottom > 0) vPads.push(parseFloat(style.paddingBottom) || 0);
-      if (hasBg || borders.left > 0) hPads.push(parseFloat(style.paddingLeft) || 0);
-      if (hasBg || borders.right > 0) hPads.push(parseFloat(style.paddingRight) || 0);
+      if (hasBg || borders.top > 0) vPads.push(Number.parseFloat(style.paddingTop) || 0);
+      if (hasBg || borders.bottom > 0) vPads.push(Number.parseFloat(style.paddingBottom) || 0);
+      if (hasBg || borders.left > 0) hPads.push(Number.parseFloat(style.paddingLeft) || 0);
+      if (hasBg || borders.right > 0) hPads.push(Number.parseFloat(style.paddingRight) || 0);
 
-      const vMin = vPads.length ? Math.min(...vPads) : Infinity;
-      const hMin = hPads.length ? Math.min(...hPads) : Infinity;
+      const vMin = vPads.length > 0 ? Math.min(...vPads) : Infinity;
+      const hMin = hPads.length > 0 ? Math.min(...hPads) : Infinity;
       const vThresh = Math.max(4, fontSize * 0.3);
       const hThresh = Math.max(8, fontSize * 0.5);
 
@@ -1895,10 +1895,10 @@ function checkQuality(opts) {
         /^rgba\(\s*\d+\s*,\s*\d+\s*,\s*\d+\s*,\s*0(?:\.0+)?\s*\)$/.test(c);
 
       const borderW = {
-        top:    parseFloat(style.borderTopWidth)    || 0,
-        right:  parseFloat(style.borderRightWidth)  || 0,
-        bottom: parseFloat(style.borderBottomWidth) || 0,
-        left:   parseFloat(style.borderLeftWidth)   || 0,
+        top:    Number.parseFloat(style.borderTopWidth)    || 0,
+        right:  Number.parseFloat(style.borderRightWidth)  || 0,
+        bottom: Number.parseFloat(style.borderBottomWidth) || 0,
+        left:   Number.parseFloat(style.borderLeftWidth)   || 0,
       };
       const borderVisible = {
         top:    borderW.top    > 0 && !isTransparent(style.borderTopColor),
@@ -1910,12 +1910,12 @@ function checkQuality(opts) {
       // border{Top,…}Width/Color but does NOT decompose `outline` —
       // the longhands come back empty when the value was set via the
       // shorthand. Fall back to parsing `style.outline` ourselves.
-      let outlineW = parseFloat(style.outlineWidth) || 0;
+      let outlineW = Number.parseFloat(style.outlineWidth) || 0;
       let outlineStyleVal = style.outlineStyle || '';
       let outlineColorVal = style.outlineColor || '';
       if (!outlineW && style.outline) {
         const wMatch = style.outline.match(/(\d+(?:\.\d+)?)\s*px/);
-        if (wMatch) outlineW = parseFloat(wMatch[1]) || 0;
+        if (wMatch) outlineW = Number.parseFloat(wMatch[1]) || 0;
         if (!outlineStyleVal) {
           outlineStyleVal = /\b(solid|dashed|dotted|double|groove|ridge|inset|outset)\b/.test(style.outline) ? 'solid' : '';
         }
@@ -2040,9 +2040,9 @@ function checkQuality(opts) {
     if (!inNavHeader && !hasOwnBg && !isPositioned && widthRatio > 0.5 && (leftClose || rightClose)) {
       const which = leftClose && rightClose
         ? `left ${Math.round(rect.left)}px / right ${Math.round(viewportWidth - rect.right)}px`
-        : leftClose
+        : (leftClose
           ? `left ${Math.round(rect.left)}px`
-          : `right ${Math.round(viewportWidth - rect.right)}px`;
+          : `right ${Math.round(viewportWidth - rect.right)}px`);
       findings.push({ id: 'body-text-viewport-edge', snippet: `<${tag.toLowerCase()}> with ${textLen}-char body bleeds to viewport edge (${which})` });
     }
   }
@@ -2117,7 +2117,7 @@ function checkElementQualityDOM(el) {
   const textLen = el.textContent?.trim().length || 0;
   // Browser getComputedStyle resolves everything to px — direct parseFloat
   // works.
-  const fontSize = parseFloat(style.fontSize) || 16;
+  const fontSize = Number.parseFloat(style.fontSize) || 16;
   const lineHeightPx = resolveLengthPx(style.lineHeight, fontSize);
   const letterSpacingPx = resolveLengthPx(style.letterSpacing, fontSize);
   const rect = el.getBoundingClientRect();
@@ -2134,7 +2134,7 @@ function checkPageQualityFromDoc(doc) {
   let prevLevel = 0;
   let prevText = '';
   for (const h of headings) {
-    const level = parseInt(h.tagName[1]);
+    const level = Number.parseInt(h.tagName[1]);
     const text = (h.textContent || '').trim().replace(/\s+/g, ' ').slice(0, 60);
     if (prevLevel > 0 && level > prevLevel + 1) {
       findings.push({
@@ -2172,7 +2172,7 @@ function checkElementBorders(tag, style, overrides, resolvedRadius) {
   const sides = ['Top', 'Right', 'Bottom', 'Left'];
   const widths = {}, colors = {};
   for (const s of sides) {
-    widths[s] = parseFloat(style[`border${s}Width`]) || 0;
+    widths[s] = Number.parseFloat(style[`border${s}Width`]) || 0;
     colors[s] = style[`border${s}Color`] || '';
     // jsdom silently drops any border shorthand containing var(), leaving
     // both width and color empty on the computed style. When the detectHtml
@@ -2194,7 +2194,7 @@ function checkElementBorders(tag, style, overrides, resolvedRadius) {
   // and browser callers that don't pre-resolve.
   const radius = resolvedRadius != null
     ? resolvedRadius
-    : (parseFloat(style.borderRadius) || 0);
+    : (Number.parseFloat(style.borderRadius) || 0);
   return checkBorders(tag, widths, colors, radius);
 }
 
@@ -2242,8 +2242,8 @@ function checkElementColors(el, style, tag, window, customPropMap, hasAnchorInhe
     bgColor: readOwnBackgroundColor(el, style),
     effectiveBg,
     effectiveBgStops: effectiveBg ? null : resolveGradientStops(el, window),
-    fontSize: parseFloat(style.fontSize) || 16,
-    fontWeight: parseInt(style.fontWeight) || 400,
+    fontSize: Number.parseFloat(style.fontSize) || 16,
+    fontWeight: Number.parseInt(style.fontWeight) || 400,
     hasDirectText,
     isEmojiOnly: isEmojiOnlyText(directText),
     bgClip: style.webkitBackgroundClip || style.backgroundClip || '',
@@ -2259,14 +2259,14 @@ function checkElementIconTile(el, tag, window) {
 
   const sibStyle = window.getComputedStyle(sibling);
   // jsdom doesn't lay out — read explicit pixel dimensions from CSS instead.
-  const sibWidth = parseFloat(sibStyle.width) || 0;
-  const sibHeight = parseFloat(sibStyle.height) || 0;
+  const sibWidth = Number.parseFloat(sibStyle.width) || 0;
+  const sibHeight = Number.parseFloat(sibStyle.height) || 0;
 
   const iconChild = sibling.querySelector('svg, i[data-lucide], i[class*="fa-"], i[class*="icon"]');
   let iconWidth = 0;
   if (iconChild) {
     const iconStyle = window.getComputedStyle(iconChild);
-    iconWidth = parseFloat(iconStyle.width) || parseFloat(iconChild.getAttribute('width')) || 0;
+    iconWidth = Number.parseFloat(iconStyle.width) || Number.parseFloat(iconChild.getAttribute('width')) || 0;
   }
   // Or: tile contains an emoji/symbol character directly as its only content
   const sibDirectText = [...sibling.childNodes].filter(n => n.nodeType === 3).map(n => n.textContent).join('');
@@ -2282,7 +2282,7 @@ function checkElementIconTile(el, tag, window) {
     siblingBottom: 0,
     siblingBgColor: parseRgb(sibStyle.backgroundColor),
     siblingBgImage: sibStyle.backgroundImage || '',
-    siblingBorderWidth: parseFloat(sibStyle.borderTopWidth) || 0,
+    siblingBorderWidth: Number.parseFloat(sibStyle.borderTopWidth) || 0,
     siblingBorderRadius: resolveBorderRadiusPx(sibling, sibStyle, sibWidth, window),
     hasIconChild: !!iconChild || hasInlineEmojiIcon,
     iconChildWidth: iconWidth,
@@ -2295,7 +2295,7 @@ function checkElementItalicSerif(el, style, tag) {
     tag,
     fontStyle: style.fontStyle || '',
     fontFamily: style.fontFamily || '',
-    fontSize: parseFloat(style.fontSize) || 0,
+    fontSize: Number.parseFloat(style.fontSize) || 0,
     headingText: el.textContent || '',
   });
 }
@@ -2313,14 +2313,14 @@ function checkElementHeroEyebrow(el, style, tag, window, customPropMap) {
   const letterSpacingRaw = customPropMap ? resolveVarRefs(sibStyle.letterSpacing, customPropMap) : sibStyle.letterSpacing;
   const colorRaw = customPropMap ? resolveVarRefs(sibStyle.color, customPropMap) : sibStyle.color;
   const headingFontSizeRaw = customPropMap ? resolveVarRefs(style.fontSize, customPropMap) : style.fontSize;
-  const siblingFontSize = parseFloat(fontSizeRaw) || 0;
+  const siblingFontSize = Number.parseFloat(fontSizeRaw) || 0;
   // resolveLengthPx returns null for 'normal' / 'auto'; coerce to 0 so the
   // gate falls through cleanly. jsdom returns letter-spacing verbatim
   // (e.g. '0.15em'), unlike real browsers, so this conversion is required.
   return checkHeroEyebrow({
     headingTag: tag,
     headingText: el.textContent || '',
-    headingFontSize: parseFloat(headingFontSizeRaw) || 0,
+    headingFontSize: Number.parseFloat(headingFontSizeRaw) || 0,
     siblingTag: sibling.tagName.toLowerCase(),
     siblingText: sibling.textContent || '',
     siblingTextTransform: sibStyle.textTransform || '',
@@ -2404,13 +2404,13 @@ function checkTypography() {
 
   const sizes = new Set();
   for (const el of document.querySelectorAll('h1,h2,h3,h4,h5,h6,p,span,a,li,td,th,label,button,div')) {
-    const fs = parseFloat(getComputedStyle(el).fontSize);
+    const fs = Number.parseFloat(getComputedStyle(el).fontSize);
     if (fs > 0 && fs < 200) sizes.add(Math.round(fs * 10) / 10);
   }
   if (sizes.size >= 3) {
     const sorted = [...sizes].sort((a, b) => a - b);
     const ratio = sorted[sorted.length - 1] / sorted[0];
-    if (ratio < 2.0) {
+    if (ratio < 2) {
       findings.push({ type: 'flat-type-hierarchy', detail: `Sizes: ${sorted.map(s => s + 'px').join(', ')} (ratio ${ratio.toFixed(1)}:1)` });
     }
   }
@@ -2425,7 +2425,7 @@ function isCardLikeDOM(el) {
   const cls = el.getAttribute('class') || '';
   const hasShadow = (style.boxShadow && style.boxShadow !== 'none') || /\bshadow(?:-sm|-md|-lg|-xl|-2xl)?\b/.test(cls);
   const hasBorder = /\bborder\b/.test(cls);
-  const hasRadius = parseFloat(style.borderRadius) > 0 || /\brounded(?:-sm|-md|-lg|-xl|-2xl|-full)?\b/.test(cls);
+  const hasRadius = Number.parseFloat(style.borderRadius) > 0 || /\brounded(?:-sm|-md|-lg|-xl|-2xl|-full)?\b/.test(cls);
   const hasBg = (style.backgroundColor && style.backgroundColor !== 'rgba(0, 0, 0, 0)') || /\bbg-(?:white|gray-\d+|slate-\d+)\b/.test(cls);
   return isCardLikeFromProps(hasShadow, hasBorder, hasRadius, hasBg);
 }
@@ -2527,14 +2527,14 @@ function checkPageTypography(doc, win) {
   const sizes = new Set();
   const textEls = doc.querySelectorAll('h1, h2, h3, h4, h5, h6, p, span, a, li, td, th, label, button, div');
   for (const el of textEls) {
-    const fontSize = parseFloat(win.getComputedStyle(el).fontSize);
+    const fontSize = Number.parseFloat(win.getComputedStyle(el).fontSize);
     // Filter out sub-8px values (jsdom doesn't resolve relative units properly)
     if (fontSize >= 8 && fontSize < 200) sizes.add(Math.round(fontSize * 10) / 10);
   }
   if (sizes.size >= 3) {
     const sorted = [...sizes].sort((a, b) => a - b);
     const ratio = sorted[sorted.length - 1] / sorted[0];
-    if (ratio < 2.0) {
+    if (ratio < 2) {
       findings.push({ id: 'flat-type-hierarchy', snippet: `Sizes: ${sorted.map(s => s + 'px').join(', ')} (ratio ${ratio.toFixed(1)}:1)` });
     }
   }
@@ -2553,7 +2553,7 @@ function isCardLike(el, win) {
   const hasShadow = (style.boxShadow && style.boxShadow !== 'none') ||
     /\bshadow(?:-sm|-md|-lg|-xl|-2xl)?\b/.test(cls) || /box-shadow/i.test(rawStyle);
   const hasBorder = /\bborder\b/.test(cls);
-  const widthPx = parseFloat(style.width) || 0;
+  const widthPx = Number.parseFloat(style.width) || 0;
   const hasRadius = resolveBorderRadiusPx(el, style, widthPx, win) > 0 ||
     /\brounded(?:-sm|-md|-lg|-xl|-2xl|-full)?\b/.test(cls) || /border-radius/i.test(rawStyle);
   const hasBg = /\bbg-(?:white|gray-\d+|slate-\d+)\b/.test(cls) ||
@@ -2703,7 +2703,7 @@ function checkElementOversizedH1DOM(el) {
   const tag = el.tagName.toLowerCase();
   if (tag !== 'h1') return [];
   const style = getComputedStyle(el);
-  const fontSize = parseFloat(style.fontSize) || 0;
+  const fontSize = Number.parseFloat(style.fontSize) || 0;
   const headingText = (el.textContent || '').trim().replace(/\s+/g, ' ');
   return checkOversizedH1({ tag, fontSize, headingText });
 }
@@ -2719,7 +2719,7 @@ function shadowMaxBlurPx(boxShadow) {
     // unitless zeros ("0 0 24px"); browsers normalize to px ("0px 0px 24px") —
     // both reduce to the same numbers here.
     const cleaned = layer.replace(/rgba?\([^)]*\)|hsla?\([^)]*\)|#[0-9a-f]+|\b[a-z]+\b/gi, ' ');
-    const nums = [...cleaned.matchAll(/-?\d*\.?\d+/g)].map(m => parseFloat(m[0]));
+    const nums = [...cleaned.matchAll(/-?\d*\.?\d+/g)].map(m => Number.parseFloat(m[0]));
     if (nums.length >= 3) maxBlur = Math.max(maxBlur, nums[2]);
   }
   return maxBlur;
@@ -2737,10 +2737,10 @@ function checkGptThinBorderWideShadow({ borderWidths, boxShadow }) {
 
 function borderWidthsFromStyle(style) {
   return [
-    parseFloat(style.borderTopWidth) || 0,
-    parseFloat(style.borderRightWidth) || 0,
-    parseFloat(style.borderBottomWidth) || 0,
-    parseFloat(style.borderLeftWidth) || 0,
+    Number.parseFloat(style.borderTopWidth) || 0,
+    Number.parseFloat(style.borderRightWidth) || 0,
+    Number.parseFloat(style.borderBottomWidth) || 0,
+    Number.parseFloat(style.borderLeftWidth) || 0,
   ];
 }
 
@@ -2760,7 +2760,7 @@ function classSelector(el) {
   const cls = (el.getAttribute ? el.getAttribute('class') : el.className) || '';
   const tokens = String(cls).trim().split(/\s+/).filter(Boolean);
   const tag = el.tagName ? el.tagName.toLowerCase() : 'el';
-  return tokens.length ? `${tag}.${tokens.join('.')}` : tag;
+  return tokens.length > 0 ? `${tag}.${tokens.join('.')}` : tag;
 }
 
 function checkClippedOverflow(el, style, getStyle) {
@@ -2895,7 +2895,7 @@ if (IS_BROWSER) {
       display: none !important;
     }
   `;
-  (document.head || document.documentElement).appendChild(styleEl);
+  (document.head || document.documentElement).append(styleEl);
 
   // Spotlight backdrop element (created lazily on first use)
   let spotlightBackdrop = null;
@@ -2905,7 +2905,7 @@ if (IS_BROWSER) {
     if (!spotlightBackdrop) {
       spotlightBackdrop = document.createElement('div');
       spotlightBackdrop.className = 'impeccable-spotlight-backdrop';
-      document.body.appendChild(spotlightBackdrop);
+      document.body.append(spotlightBackdrop);
     }
     return spotlightBackdrop;
   }
@@ -3057,7 +3057,7 @@ if (IS_BROWSER) {
       delete overlay._targetEl._impeccableOverlay;
     }
     const idx = overlays.indexOf(overlay);
-    if (idx >= 0) overlays.splice(idx, 1);
+    if (idx !== -1) overlays.splice(idx, 1);
     overlay.remove();
   }
 
@@ -3116,7 +3116,7 @@ if (IS_BROWSER) {
     const textSpan = document.createElement('span');
     textSpan.style.padding = '3px 8px';
     textSpan.textContent = allText;
-    label.appendChild(textSpan);
+    label.append(textSpan);
 
     // State for cycling mode
     let cycleMode = false;
@@ -3165,14 +3165,14 @@ if (IS_BROWSER) {
         updateCycleText();
       });
 
-      navGroup.appendChild(prevBtn);
-      navGroup.appendChild(nextBtn);
+      navGroup.append(prevBtn);
+      navGroup.append(nextBtn);
       label.insertBefore(navGroup, textSpan);
       textSpan.style.padding = '3px 8px 3px 4px';
       updateCycleText();
     }
 
-    outline.appendChild(label);
+    outline.append(label);
 
     // Start hidden; the IntersectionObserver will show it once the target is rendered
     outline.style.display = 'none';
@@ -3217,12 +3217,12 @@ if (IS_BROWSER) {
       el.removeEventListener('mouseleave', onMouseLeave);
     };
 
-    document.body.appendChild(outline);
+    document.body.append(outline);
     overlays.push(outline);
   };
 
   const showPageBanner = function(findings) {
-    if (!findings.length) return;
+    if (findings.length === 0) return;
     const banner = document.createElement('div');
     banner.className = 'impeccable-overlay impeccable-banner';
     Object.assign(banner.style, {
@@ -3255,9 +3255,9 @@ if (IS_BROWSER) {
         borderRadius: '3px', fontSize: '12px', fontFamily: 'ui-monospace, monospace',
         whiteSpace: 'nowrap', flexShrink: '0', scrollSnapAlign: 'start',
       });
-      scrollArea.appendChild(tag);
+      scrollArea.append(tag);
     }
-    banner.appendChild(scrollArea);
+    banner.append(scrollArea);
 
     // Controls area (only in standalone mode, not extension)
     if (!EXTENSION_MODE) {
@@ -3283,22 +3283,22 @@ if (IS_BROWSER) {
         toggle.textContent = overlaysVisible ? '\u25C9' : '\u25CB'; // filled vs empty circle
         toggle.style.opacity = overlaysVisible ? '0.85' : '0.5';
       });
-      controls.appendChild(toggle);
+      controls.append(toggle);
 
       // Close button
       const close = document.createElement('button');
-      close.textContent = '\u00d7';
+      close.textContent = '\u00D7';
       close.title = 'Dismiss banner';
       Object.assign(close.style, {
         background: 'none', border: 'none',
         color: 'white', fontSize: '18px', cursor: 'pointer', padding: '0 4px',
       });
       close.addEventListener('click', () => banner.remove());
-      controls.appendChild(close);
+      controls.append(close);
 
-      banner.appendChild(controls);
+      banner.append(controls);
     }
-    document.body.appendChild(banner);
+    document.body.append(banner);
     overlays.push(banner);
   };
 
@@ -3433,7 +3433,7 @@ if (IS_BROWSER) {
         if (/url\s*\(/i.test(bgImage)) reasons.add('image background');
         if (/gradient/i.test(bgImage)) reasons.add('gradient background');
       }
-      if (parseFloat(currentStyle.opacity) < 0.99) reasons.add('opacity stack');
+      if (Number.parseFloat(currentStyle.opacity) < 0.99) reasons.add('opacity stack');
       if (currentStyle.mixBlendMode && currentStyle.mixBlendMode !== 'normal') reasons.add('blend mode');
       if (currentStyle.filter && currentStyle.filter !== 'none') reasons.add('filter');
       if (currentStyle.backdropFilter && currentStyle.backdropFilter !== 'none') reasons.add('backdrop filter');
@@ -3454,7 +3454,7 @@ if (IS_BROWSER) {
         if (x < 0 || y < 0 || x > window.innerWidth || y > window.innerHeight) continue;
         const stack = document.elementsFromPoint(x, y);
         const selfIndex = stack.findIndex(node => node === el || el.contains(node) || node.contains?.(el));
-        if (selfIndex < 0) continue;
+        if (selfIndex === -1) continue;
         for (const node of stack.slice(selfIndex + 1)) {
           const nodeTag = node.tagName?.toLowerCase();
           if (nodeTag === 'img' || nodeTag === 'picture' || nodeTag === 'video' || nodeTag === 'canvas' || nodeTag === 'svg') {
@@ -3496,10 +3496,10 @@ if (IS_BROWSER) {
       if (reasons.length === 0) continue;
 
       const textColor = parseRgb(style.color);
-      const fontSize = parseFloat(style.fontSize) || 16;
-      const fontWeight = parseInt(style.fontWeight) || 400;
+      const fontSize = Number.parseFloat(style.fontSize) || 16;
+      const fontWeight = Number.parseInt(style.fontWeight) || 400;
       const isLargeText = fontSize >= WCAG_LARGE_TEXT_PX || (fontSize >= WCAG_LARGE_BOLD_TEXT_PX && fontWeight >= 700);
-      const threshold = isLargeText ? 3.0 : 4.5;
+      const threshold = isLargeText ? 3 : 4.5;
       const clip = {
         x: Math.max(0, Math.floor(rect.left + window.scrollX - 2)),
         y: Math.max(0, Math.floor(rect.top + window.scrollY - 2)),
@@ -3551,7 +3551,7 @@ if (IS_BROWSER) {
 
   function pickWorstContrastColor(textColor, colors) {
     const usable = (colors || []).filter(Boolean);
-    if (!usable.length) return null;
+    if (usable.length === 0) return null;
     let worst = usable[0];
     let worstRatio = contrastRatio(textColor, worst);
     for (const color of usable.slice(1)) {
@@ -3578,11 +3578,11 @@ if (IS_BROWSER) {
     if (!token || token === 'center') return (container - painted) / 2;
     if (token === 'left' || token === 'top') return 0;
     if (token === 'right' || token === 'bottom') return container - painted;
-    if (/%$/.test(token)) {
-      const pct = parseFloat(token) / 100;
+    if (token.endsWith('%')) {
+      const pct = Number.parseFloat(token) / 100;
       return (container - painted) * pct;
     }
-    if (/px$/.test(token)) return parseFloat(token) || 0;
+    if (token.endsWith('px')) return Number.parseFloat(token) || 0;
     return (container - painted) / 2;
   }
 
@@ -3613,11 +3613,11 @@ if (IS_BROWSER) {
       const parts = size.split(/\s+/);
       const widthToken = parts[0];
       const heightToken = parts[1] || 'auto';
-      if (/%$/.test(widthToken)) paintedWidth = containerRect.width * (parseFloat(widthToken) / 100);
-      else if (/px$/.test(widthToken)) paintedWidth = parseFloat(widthToken) || paintedWidth;
+      if (widthToken.endsWith('%')) paintedWidth = containerRect.width * (Number.parseFloat(widthToken) / 100);
+      else if (widthToken.endsWith('px')) paintedWidth = Number.parseFloat(widthToken) || paintedWidth;
       if (heightToken === 'auto') paintedHeight = paintedWidth * (intrinsicHeight / intrinsicWidth);
-      else if (/%$/.test(heightToken)) paintedHeight = containerRect.height * (parseFloat(heightToken) / 100);
-      else if (/px$/.test(heightToken)) paintedHeight = parseFloat(heightToken) || paintedHeight;
+      else if (heightToken.endsWith('%')) paintedHeight = containerRect.height * (Number.parseFloat(heightToken) / 100);
+      else if (heightToken.endsWith('px')) paintedHeight = Number.parseFloat(heightToken) || paintedHeight;
     }
 
     const [xToken, yToken] = parsePositionPair(positionValue);
@@ -3724,10 +3724,10 @@ if (IS_BROWSER) {
           status: 'sampled',
           color: { r: data[0], g: data[1], b: data[2], a: data[3] / 255 },
         };
-      } catch (err) {
+      } catch (error) {
         return {
           status: 'unresolved',
-          reason: /taint|cross-origin|Security/i.test(err?.message || '') ? 'tainted image' : 'image sample failed',
+          reason: /taint|cross-origin|Security/i.test(error?.message || '') ? 'tainted image' : 'image sample failed',
         };
       }
     }
@@ -3758,8 +3758,8 @@ if (IS_BROWSER) {
         status: 'sampled',
         color: { r: data[0], g: data[1], b: data[2], a: data[3] / 255 },
       };
-    } catch (err) {
-      const reason = /taint|cross-origin|Security/i.test(err?.message || '') ? 'tainted image' : 'image sample failed';
+    } catch (error) {
+      const reason = /taint|cross-origin|Security/i.test(error?.message || '') ? 'tainted image' : 'image sample failed';
       visualContrastRasterCache.set(drawable, { ctx: null, reason });
       return {
         status: 'unresolved',
@@ -3846,7 +3846,7 @@ if (IS_BROWSER) {
       ? document.elementsFromPoint(point.x, point.y)
       : [];
     const selfIndex = stack.findIndex(node => node === el || el.contains(node));
-    const nodes = selfIndex >= 0 ? stack.slice(selfIndex) : [el, ...stack];
+    const nodes = selfIndex !== -1 ? stack.slice(selfIndex) : [el, ...stack];
     const unresolved = [];
 
     for (const node of nodes) {
@@ -4077,7 +4077,7 @@ if (IS_BROWSER) {
   function collectBrowserFindings() {
     const groupMap = new Map();
     const _disabled = EXTENSION_MODE ? (window.__IMPECCABLE_CONFIG__?.disabledRules || []) : [];
-    const _ruleOk = (id) => !_disabled.length || !_disabled.includes(id);
+    const _ruleOk = (id) => _disabled.length === 0 || !_disabled.includes(id);
     // Note: provider-gated rules (--gpt / --gemini) are NOT filtered here. In a
     // real browser env (detector page, live overlay, extension) running every
     // check is free, so we always surface them; the gating is purely a CLI
@@ -4219,7 +4219,7 @@ if (IS_BROWSER) {
       return;
     }
     const idx = lastVisualContrastAnalyses.findIndex(item => item.selector === result.selector);
-    if (idx >= 0) lastVisualContrastAnalyses[idx] = result;
+    if (idx !== -1) lastVisualContrastAnalyses[idx] = result;
     else lastVisualContrastAnalyses.push(result);
   }
 
@@ -4330,8 +4330,8 @@ if (IS_BROWSER) {
               }));
             }
           })
-          .catch(err => {
-            reportVisualContrastError(err, { selector: candidate.selector });
+          .catch(error => {
+            reportVisualContrastError(error, { selector: candidate.selector });
           })
           .finally(() => {
             lazyVisualContrastResolving.delete(el);
@@ -4429,8 +4429,8 @@ if (IS_BROWSER) {
         .then(() => {
           if (generation === scanGeneration) postSerializedFindings(collected.groupMap, options);
         })
-        .catch(err => {
-          reportVisualContrastError(err);
+        .catch(error => {
+          reportVisualContrastError(error);
         });
     }
     return allFindings;
@@ -4472,8 +4472,8 @@ if (IS_BROWSER) {
         if (e.data.config) window.__IMPECCABLE_CONFIG__ = e.data.config;
         try {
           scan(e.data.config || {});
-        } catch (err) {
-          postExtensionError(err);
+        } catch (error) {
+          postExtensionError(error);
         }
       }
       if (e.data.action === 'toggle-overlays') {
@@ -4527,8 +4527,8 @@ if (IS_BROWSER) {
       const runAutoScan = () => {
         try {
           scan();
-        } catch (err) {
-          console.warn('[impeccable] scan failed', err);
+        } catch (error) {
+          console.warn('[impeccable] scan failed', error);
         }
       };
       if (document.readyState === 'loading') {
@@ -4545,7 +4545,7 @@ if (IS_BROWSER) {
   window.impeccableScanAsync = scanAsync;
   window.impeccableCollectVisualContrastCandidates = collectVisualContrastCandidates;
   window.impeccableAnalyzeVisualContrast = analyzeVisualContrast;
-  window.impeccableGetLastVisualContrastAnalyses = () => lastVisualContrastAnalyses.slice();
+  window.impeccableGetLastVisualContrastAnalyses = () => [...lastVisualContrastAnalyses];
 }
 
 })();

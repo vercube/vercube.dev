@@ -18,7 +18,7 @@ export function manualApplyResumeHint(event = {}) {
   if (Number.isFinite(summary.opCount)) parts.push(`${summary.opCount} op(s)`);
   if (Number.isFinite(summary.entryCount)) parts.push(`${summary.entryCount} entr${summary.entryCount === 1 ? 'y' : 'ies'}`);
   if (summary.files?.length) parts.push(`likely files: ${summary.files.join(', ')}`);
-  const scope = parts.length ? ` (${parts.join(', ')})` : '';
+  const scope = parts.length > 0 ? ` (${parts.join(', ')})` : '';
   return `Manual Apply pending${scope}. If you have not already leased it, run live-poll.mjs. Apply the source edits from the manual_edit_apply batch, then reply with ${manualApplyReplyCommand(event.id)}. Polling only leases this work item; it does not commit source edits. Do not run live-commit-manual-edits.mjs for this leased event. Do not poll again before replying.`;
 }
 
@@ -76,9 +76,9 @@ export async function resumeCli() {
 
   const pending = snapshot.pendingEvent || null;
   const nextAction = pending
-    ? pending.type === 'manual_edit_apply'
+    ? (pending.type === 'manual_edit_apply'
       ? manualApplyResumeHint(pending)
-      : `Run live-poll.mjs, handle ${pending.type} ${pending.id}, then acknowledge with live-poll.mjs --reply ${pending.id} done.`
+      : `Run live-poll.mjs, handle ${pending.type} ${pending.id}, then acknowledge with live-poll.mjs --reply ${pending.id} done.`)
     : snapshot.phase === 'carbonize_required'
       ? `Finish carbonize cleanup${snapshot.sourceFile ? ` in ${snapshot.sourceFile}` : ''}, then run live-complete.mjs --id ${snapshot.id}.`
       : snapshot.phase === 'accept_requested'

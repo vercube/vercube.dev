@@ -79,7 +79,7 @@ function findHarnessDirs(projectRoot) {
 function loadCommandMetadata() {
   const metadataPath = join(__dirname, 'command-metadata.json');
   if (existsSync(metadataPath)) {
-    return JSON.parse(readFileSync(metadataPath, 'utf-8'));
+    return JSON.parse(readFileSync(metadataPath, 'utf8'));
   }
   return {};
 }
@@ -127,7 +127,7 @@ function pin(command, projectRoot) {
     if (existsSync(skillDir)) {
       const existingMd = join(skillDir, 'SKILL.md');
       if (existsSync(existingMd)) {
-        const existing = readFileSync(existingMd, 'utf-8');
+        const existing = readFileSync(existingMd, 'utf8');
         if (!existing.includes(PIN_MARKER)) {
           console.log(`  SKIP: ${skillDir} (non-pinned skill already exists)`);
           continue;
@@ -136,7 +136,7 @@ function pin(command, projectRoot) {
     }
 
     mkdirSync(skillDir, { recursive: true });
-    writeFileSync(join(skillDir, 'SKILL.md'), content, 'utf-8');
+    writeFileSync(join(skillDir, 'SKILL.md'), content, 'utf8');
     console.log(`  + ${skillDir}`);
     created++;
   }
@@ -164,7 +164,7 @@ function unpin(command, projectRoot) {
     if (!existsSync(skillMd)) continue;
 
     // Safety: only remove if it's a pinned skill
-    const content = readFileSync(skillMd, 'utf-8');
+    const content = readFileSync(skillMd, 'utf8');
     if (!content.includes(PIN_MARKER)) {
       console.log(`  SKIP: ${skillDir} (not a pinned skill)`);
       continue;
