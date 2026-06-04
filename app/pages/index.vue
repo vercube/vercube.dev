@@ -32,6 +32,7 @@ const canonicalUrl = `${siteUrl}${route.path}`;
 
 // Define OG Image component for homepage
 defineOgImage(
+  // @ts-expect-error - Docs is not typed
   'Docs',
   {
     headline: 'Next generation server framework',

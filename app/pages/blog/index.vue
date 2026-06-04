@@ -35,6 +35,7 @@ useSeoMeta({
 });
 
 defineOgImage(
+  // @ts-expect-error - Docs is not typed
   'Docs',
   {
     headline: 'Vercube',

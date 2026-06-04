@@ -22,9 +22,11 @@ if (page.value.image) {
   const imageUrl = page.value.image.startsWith('http')
     ? page.value.image
     : `${site.url || 'https://vercube.dev'}${page.value.image}`;
+  // @ts-expect-error - url is not typed
   defineOgImage({ url: imageUrl });
 } else {
   defineOgImage(
+    // @ts-expect-error - Docs is not typed
     'Docs',
     {
       headline: page.value.category || 'Vercube Blog',

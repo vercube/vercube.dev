@@ -14,6 +14,7 @@ function getBackgroundSrc() {
   if (cachedBackgroundSrc) return cachedBackgroundSrc;
 
   const config = useRuntimeConfig();
+  // @ts-expect-error - rootDir is not typed
   const roots = [config.rootDir, process.cwd()].filter(Boolean) as string[];
 
   for (const root of roots) {

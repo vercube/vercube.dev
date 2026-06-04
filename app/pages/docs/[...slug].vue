@@ -54,6 +54,7 @@ useSeoMeta({
 });
 
 defineOgImage(
+  // @ts-expect-error - Docs is not typed
   'Docs',
   {
     headline: breadcrumb.value.length ? breadcrumb.value.map((link: BreadcrumbLink) => link.label).join(' > ') : '',
