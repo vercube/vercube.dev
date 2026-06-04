@@ -41,12 +41,9 @@ useSeoMeta({
   twitterSite: '@vercubejs',
   twitterCreator: '@vercubejs',
 
-  // Open Graph defaults
+  // Open Graph defaults (per-page images come from nuxt-og-image `defineOgImage`)
   ogType: 'website',
   ogLocale: 'en_US',
-  ogImage: `${siteUrl}/og-image.png`,
-  ogImageWidth: 1200,
-  ogImageHeight: 630,
 
   // Application defaults
   applicationName: siteName,

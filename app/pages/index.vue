@@ -7,6 +7,8 @@
 </template>
 
 <script setup lang="ts">
+import { ogDocsFonts } from '~/utils/og-docs-fonts';
+
 const { data: page } = await useAsyncData('index', () => queryCollection('landing').path('/').first());
 if (!page.value) {
   throw createError({ statusCode: 404, statusMessage: 'Page not found', fatal: true });
@@ -30,14 +32,14 @@ const canonicalUrl = `${siteUrl}${route.path}`;
 
 // Define OG Image component for homepage
 defineOgImage(
-  'DocsBrowser',
+  'Docs',
   {
     headline: 'Next generation server framework',
     title: 'Vercube',
     description: 'Unleash your server development with an ultra-efficient JavaScript framework',
   },
   {
-    fonts: ['Geist:400', 'Geist:600'],
+    fonts: [...ogDocsFonts],
   },
 );
 

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { findPageBreadcrumb } from '@nuxt/content/utils';
+import { ogDocsFonts } from '~/utils/og-docs-fonts';
 import { mapContentNavigation } from '@nuxt/ui/utils/content';
 import { kebabCase } from 'scule';
 import type { ContentNavigationItem } from '@nuxt/content';
@@ -44,16 +45,6 @@ const breadcrumb: ComputedRef<BreadcrumbLink[]> = computed(() =>
   })),
 );
 
-defineOgImage(
-  'DocsBrowser',
-  {
-    headline: breadcrumb.value.map((item: BreadcrumbLink) => item.label).join(' > '),
-  },
-  {
-    fonts: ['Geist:400', 'Geist:600'],
-  },
-);
-
 const title = page.value.seo?.title || page.value.title;
 const description = page.value.seo?.description || page.value.description;
 const titleTemplate = ref('%s - Vercube Docs');
@@ -67,14 +58,14 @@ useSeoMeta({
 });
 
 defineOgImage(
-  'DocsBrowser',
+  'Docs',
   {
     headline: breadcrumb.value.length ? breadcrumb.value.map((link: BreadcrumbLink) => link.label).join(' > ') : '',
     title,
     description,
   },
   {
-    fonts: ['Geist:400', 'Geist:600'],
+    fonts: [...ogDocsFonts],
   },
 );
 

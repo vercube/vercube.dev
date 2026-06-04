@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { ogDocsFonts } from '~/utils/og-docs-fonts';
+
 definePageMeta({
   layout: 'blog',
 });
@@ -22,12 +24,27 @@ if (!posts.value) {
   });
 }
 
+const title = page.value?.seo?.title || page.value?.title || 'Blog';
+const description = page.value?.seo?.description || page.value?.description || '';
+
 useSeoMeta({
-  title: page.value?.seo?.title || page.value?.title,
-  ogTitle: page.value?.seo?.title || page.value?.title,
-  description: page.value?.seo?.description || page.value?.description,
-  ogDescription: page.value?.seo?.description || page.value?.description,
+  title,
+  ogTitle: title,
+  description,
+  ogDescription: description,
 });
+
+defineOgImage(
+  'Docs',
+  {
+    headline: 'Vercube',
+    title,
+    description,
+  },
+  {
+    fonts: [...ogDocsFonts],
+  },
+);
 </script>
 
 <template>

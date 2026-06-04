@@ -19,6 +19,10 @@ export default defineNuxtConfig({
 
   devtools: {
     enabled: true,
+
+    timeline: {
+      enabled: true,
+    },
   },
 
   css: ['~/assets/css/main.css'],
@@ -57,12 +61,19 @@ export default defineNuxtConfig({
     // Static hosting (GitHub Pages): docs must be prerendered so crawlers and OG validators get real
     // HTML with meta tags. Client-only shells look “empty” to bots.
     '/docs/**': { prerender: true },
-    // Fresh GitHub releases: keep SSR-only (no frozen HTML at build).
-    '/changelog': { prerender: false },
-    // nuxt-og-image browser renderer needs a real browser at build time; generate at runtime instead.
-    '/_og/**': { prerender: false },
+    '/blog': { prerender: true },
+    '/blog/**': { prerender: true },
+    // Prerender shell + OG; release list still refetches on the client (see changelog.vue).
+    '/changelog': { prerender: true },
     // Crawled from /; some upstream docs AST breaks minimark stringify during static generation.
     '/raw/**': { prerender: false },
+  },
+
+  // Absolute site URL is required so OG/Twitter image meta and canonical links are fully-qualified.
+  // Crawlers (Facebook, X, Slack) reject relative og:image URLs. Env var still overrides per-environment.
+  site: {
+    url: process.env.NUXT_PUBLIC_SITE_URL || 'https://vercube.dev',
+    name: 'Vercube',
   },
 
   compatibilityDate: '2025-10-01',
@@ -93,8 +104,9 @@ export default defineNuxtConfig({
       },
       {
         name: 'Geist Pixel Circle',
-        src: '/fonts/GeistPixel-Circle.woff2',
-        weights: [400, 500, 600, 700],
+        provider: 'local',
+        src: '/fonts/GeistPixel-Circle.ttf',
+        weights: [400],
         global: true,
       },
     ],
@@ -121,7 +133,9 @@ export default defineNuxtConfig({
   },
 
   ogImage: {
-    // v6: avoid exposing /_og/debug.json in production
-    debug: false,
+    // Dev: /_og/debug.json + DevTools OG tab. Prod: keep false.
+    debug: process.env.NODE_ENV !== 'production',
+    // GitHub Pages is static: PNGs under /_og/** must be generated at build (Satori prerender).
+    // Never add routeRules `/_og/**: { prerender: false }` — there is no runtime renderer on Pages.
   },
 });

@@ -32,7 +32,7 @@ const formatDate = (dateString: string) => {
           <span class="text-xs font-medium text-muted">
             {{ formatDate(post.date) }}
           </span>
-          <h2 class="text-xl font-bold text-primary">
+          <h2 class="text-xl font-normal text-primary font-(family-name:--font-geist-pixel-circle)">
             {{ post.title }}
           </h2>
           <p class="text-muted">

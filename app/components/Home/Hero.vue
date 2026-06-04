@@ -82,7 +82,7 @@ if (!page.value) {
   throw createError({ statusCode: 404, statusMessage: 'Page not found', fatal: true });
 }
 
-const installCmd = 'pnpm add @vercube/core';
+const installCmd = 'pnpm create vercube';
 const copied = ref(false);
 
 async function copyInstall() {

@@ -16,7 +16,7 @@ const { title, description } = defineProps<{
       container: 'z-[10] xl:mt-20',
       wrapper: 'relative flex flex-col',
       headline: 'mb-6',
-      title: 'text-left text-4xl font-(family-name:--font-geist-mono)',
+      title: 'text-left text-4xl font-normal font-(family-name:--font-geist-pixel-circle)',
       description: 'text-left max-w-lg font-(family-name:--font-geist-mono)',
       links: 'gap-1 justify-start -ms-2.5',
     }"

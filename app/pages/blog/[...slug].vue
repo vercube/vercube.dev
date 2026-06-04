@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { kebabCase } from 'scule';
+import { ogDocsFonts } from '~/utils/og-docs-fonts';
 
 definePageMeta({
   layout: 'blog',
@@ -12,18 +13,27 @@ if (!page.value) {
   throw createError({ statusCode: 404, statusMessage: 'Page not found', fatal: true });
 }
 
-// if (page.value.image) {
-//   defineOgImage({ url: page.value.image })
-// } else {
-//   defineOgImage('Docs', {
-//     headline: breadcrumb.value.map(item => item.label).join(' > ')
-//   }, {
-//     fonts: ['Geist:400', 'Geist:600']
-//   })
-// }
-
 const title = page.value.seo?.title || page.value.title;
 const description = page.value.seo?.description || page.value.description;
+
+const site = useSiteConfig();
+
+if (page.value.image) {
+  const imageUrl = page.value.image.startsWith('http')
+    ? page.value.image
+    : `${site.url || 'https://vercube.dev'}${page.value.image}`;
+  defineOgImage({ url: imageUrl });
+} else {
+  defineOgImage(
+    'Docs',
+    {
+      headline: page.value.category || 'Vercube Blog',
+      title,
+      description,
+    },
+    { fonts: [...ogDocsFonts] },
+  );
+}
 const titleTemplate = ref('%s - Vercube Blog');
 
 useSeoMeta({
@@ -68,14 +78,14 @@ const formatDate = (dateString: string) => {
           root: 'overflow-hidden pb-2',
           container: 'z-[10] !p-4 !gap-8',
           wrapper: 'relative flex flex-col',
-          title: 'text-left text-4xl font-(family-name:--font-geist-mono)',
+          title: 'text-left text-4xl font-normal font-(family-name:--font-geist-pixel-circle)',
           description: 'max-w-3xl text-left font-(family-name:--font-geist-mono)',
           links: 'gap-1 justify-start -ms-2.5',
         }"
       >
         <template #title>
           <h1
-            class="sm:text-4xl lg:text-5xl text-pretty tracking-tight text-highlighted text-left text-4xl font-(family-name:--font-geist-mono)"
+            class="sm:text-4xl lg:text-5xl text-pretty tracking-tight text-highlighted text-left text-4xl !font-normal font-(family-name:--font-geist-pixel-circle)"
           >
             {{ page.title }}
           </h1>

@@ -5,6 +5,8 @@
   "type": "module",
   "scripts": {
     "build": "nuxt build",
+    "og:cache:clear": "rm -rf node_modules/.cache/nuxt/.nuxt/cache/nuxt-og-image .output/public/_og",
+    "og:verify": "node scripts/verify-og.mjs",
     "dev": "TMPDIR=/tmp nuxt dev",
     "preview": "nuxt preview",
     "start": "node .output/server/index.mjs",
@@ -30,6 +32,7 @@
     "nuxt": "4.4.7",
     "nuxt-llms": "0.2.0",
     "nuxt-og-image": "6.5.1",
+    "satori": "^0.26.0",
     "three": "0.184.0"
   },
   "devDependencies": {
