@@ -49,7 +49,7 @@ useSeoMeta({
 const editThisPage = computed(() => ({
   icon: 'i-heroicons-pencil-square-solid',
   label: 'Edit this page',
-  to: `https://github.com/hugorcd/shelve/edit/main/apps/lp/content/${page?.value?.stem}.md`,
+  to: `https://github.com/vercube/vercube.dev/tree/main/content/${page?.value?.stem}.md`,
   target: '_blank',
 }));
 // oxlint-disable-next-line prefer-global-this
