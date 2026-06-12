@@ -3,6 +3,7 @@ import { ogDocsFonts } from '~/utils/og-docs-fonts';
 
 definePageMeta({
   layout: 'blog',
+  colorMode: 'dark',
 });
 const { data: page } = await useAsyncData('blog-page', () => {
   return queryCollection('pages').path('/blog').first();
@@ -35,7 +36,6 @@ useSeoMeta({
 });
 
 defineOgImage(
-  // @ts-expect-error - Docs is not typed
   'Docs',
   {
     headline: 'Vercube',

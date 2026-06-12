@@ -4,6 +4,7 @@ import { ogDocsFonts } from '~/utils/og-docs-fonts';
 
 definePageMeta({
   layout: 'blog',
+  colorMode: 'dark',
 });
 
 const route = useRoute();
@@ -26,7 +27,6 @@ if (page.value.image) {
   defineOgImage({ url: imageUrl });
 } else {
   defineOgImage(
-    // @ts-expect-error - Docs is not typed
     'Docs',
     {
       headline: page.value.category || 'Vercube Blog',
