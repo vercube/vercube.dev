@@ -1,18 +1,14 @@
 <template>
-  <ClientOnly>
-    <template #fallback>
-      <div class="fixed inset-0 bg-black" />
-    </template>
-    <HomeBackground />
-  </ClientOnly>
-  <div class="fixed inset-0 bg-gradient-to-r from-[#000] via-[#000]/50 to-transparent pointer-events-none" />
   <HomeNav />
   <HomeHero />
   <HomeFeatures />
+  <HomeBenchmarks />
   <HomeSponsorship />
 </template>
 
 <script setup lang="ts">
+import { ogDocsFonts } from '~/utils/og-docs-fonts';
+
 const { data: page } = await useAsyncData('index', () => queryCollection('landing').path('/').first());
 if (!page.value) {
   throw createError({ statusCode: 404, statusMessage: 'Page not found', fatal: true });
@@ -36,14 +32,15 @@ const canonicalUrl = `${siteUrl}${route.path}`;
 
 // Define OG Image component for homepage
 defineOgImage(
-  'DocsBrowser',
+  // @ts-expect-error - Docs is not typed
+  'Docs',
   {
     headline: 'Next generation server framework',
     title: 'Vercube',
     description: 'Unleash your server development with an ultra-efficient JavaScript framework',
   },
   {
-    fonts: ['Geist:400', 'Geist:600'],
+    fonts: [...ogDocsFonts],
   },
 );
 

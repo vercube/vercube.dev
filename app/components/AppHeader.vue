@@ -44,9 +44,7 @@ import type { ContentNavigationItem } from '@nuxt/content';
 const navigation = inject<Ref<ContentNavigationItem[]>>('navigation', ref([]));
 const navigationDisplay = inject<ComputedRef<ContentNavigationItem[]>>('navigationDisplay');
 
-const mobileNavigation = computed(
-  () => navigationDisplay?.value ?? navigation.value,
-);
+const mobileNavigation = computed(() => navigationDisplay?.value ?? navigation.value);
 
 const { header } = useAppConfig();
 </script>

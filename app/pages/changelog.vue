@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { ogDocsFonts } from '~/utils/og-docs-fonts';
+
 definePageMeta({
   layout: 'changelog',
   colorMode: 'dark',
@@ -22,11 +24,18 @@ useSeoMeta({
   ogDescription: description,
 });
 
-defineOgImage('DocsBrowser', {
-  headline: 'Vercube',
-  title: 'Changelog',
-  description: 'Track our journey with a detailed history of updates, improvements, and new features.',
-});
+defineOgImage(
+  // @ts-expect-error - Docs is not typed
+  'Docs',
+  {
+    headline: 'Vercube',
+    title: 'Changelog',
+    description: 'Track our journey with a detailed history of updates, improvements, and new features.',
+  },
+  {
+    fonts: [...ogDocsFonts],
+  },
+);
 
 const appConfig = useAppConfig();
 

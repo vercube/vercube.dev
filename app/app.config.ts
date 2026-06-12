@@ -1,7 +1,7 @@
 const links = [
   {
     icon: 'i-simple-icons-discord',
-    to: 'https://discord.gg/vercube',
+    to: 'https://chat.vercube.dev',
     target: '_blank',
     'aria-label': 'Vercube on Discord',
   },
@@ -61,7 +61,7 @@ export default defineAppConfig({
       { label: 'Docs', to: '/docs' },
       { label: 'Examples', to: '/docs/getting-started/examples' },
       { label: 'Changelog', to: '/changelog' },
-      // { label: 'Blog', to: '/blog' },
+      { label: 'Blog', to: '/blog' },
     ],
   },
   footer: {

@@ -20,6 +20,7 @@ const formatDate = (dateString: string) => {
     <NuxtLink :to class="absolute inset-0" />
     <div class="flex md:flex-row flex-col gap-4 sm:gap-6">
       <NuxtImg
+        v-if="post.shortImage"
         :src="post.shortImage"
         :alt="post.title"
         loading="lazy"
@@ -31,7 +32,7 @@ const formatDate = (dateString: string) => {
           <span class="text-xs font-medium text-muted">
             {{ formatDate(post.date) }}
           </span>
-          <h2 class="text-xl font-bold text-primary">
+          <h2 class="text-xl font-normal text-primary font-(family-name:--font-geist-pixel-circle)">
             {{ post.title }}
           </h2>
           <p class="text-muted">

@@ -54,6 +54,7 @@
   --ui-bg-muted: var(--color-neutral-50);
   --ease-smooth: cubic-bezier(0.45, 0, 0.55, 1);
   --font-geist-mono: 'Geist Mono', monospace;
+  --font-geist-pixel-circle: 'Geist Pixel Circle', 'Geist Mono', monospace;
 
   ::selection {
     color: #282a30;
@@ -130,6 +131,30 @@ body,
   @apply before:absolute after:absolute;
   @apply before:top-[-4px] before:bg-inverted before:content-[''] before:w-[1px] before:h-[9px];
   @apply after:left-[-4px] after:bg-inverted after:content-[''] after:w-[9px] after:h-[1px];
+}
+
+/* Scroll-reveal for below-hero sections. Only hides + animates when scroll-driven
+   animations are supported AND motion is allowed, so unsupported browsers and
+   reduced-motion users always see fully-visible content. */
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    .reveal {
+      animation: reveal-fade-up linear both;
+      animation-timeline: view();
+      animation-range: entry 0% cover 30%;
+    }
+  }
+}
+
+@keyframes reveal-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(28px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
 
 @utility container {

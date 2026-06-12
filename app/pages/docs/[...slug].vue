@@ -2,6 +2,7 @@
 import { findPageBreadcrumb } from '@nuxt/content/utils';
 import { mapContentNavigation } from '@nuxt/ui/utils/content';
 import { kebabCase } from 'scule';
+import { ogDocsFonts } from '~/utils/og-docs-fonts';
 import type { ContentNavigationItem } from '@nuxt/content';
 
 interface BreadcrumbLink {
@@ -18,9 +19,7 @@ const navigation = inject<Ref<ContentNavigationItem[]>>('navigation', ref([]));
 const route = useRoute();
 
 const { data: docsPathRows } = await useAsyncData('docs-path-index', () => queryCollection('docs').select('path').all());
-const docsPathSet = computed(
-  () => new Set((docsPathRows.value ?? []).map((row) => row.path).filter(Boolean) as string[]),
-);
+const docsPathSet = computed(() => new Set((docsPathRows.value ?? []).map((row) => row.path).filter(Boolean) as string[]));
 
 const { data: page } = await useAsyncData(kebabCase(route.path), () => queryCollection('docs').path(route.path).first());
 if (!page.value) {
@@ -33,25 +32,13 @@ const { data: surround } = await useAsyncData(`${kebabCase(route.path)}-surround
   });
 });
 
-const surroundDisplay = computed(() =>
-  (surround.value ?? []).filter((item) => item?.path && docsPathSet.value.has(item.path)),
-);
+const surroundDisplay = computed(() => (surround.value ?? []).filter((item) => item?.path && docsPathSet.value.has(item.path)));
 
 const breadcrumb: ComputedRef<BreadcrumbLink[]> = computed(() =>
   mapContentNavigation(findPageBreadcrumb(navigation.value, page.value?.path)).map((link) => ({
     label: link.label,
     to: link.to && docsPathSet.value.has(link.to) ? link.to : undefined,
   })),
-);
-
-defineOgImage(
-  'DocsBrowser',
-  {
-    headline: breadcrumb.value.map((item: BreadcrumbLink) => item.label).join(' > '),
-  },
-  {
-    fonts: ['Geist:400', 'Geist:600'],
-  },
 );
 
 const title = page.value.seo?.title || page.value.title;
@@ -67,14 +54,15 @@ useSeoMeta({
 });
 
 defineOgImage(
-  'DocsBrowser',
+  // @ts-expect-error - Docs is not typed
+  'Docs',
   {
     headline: breadcrumb.value.length ? breadcrumb.value.map((link: BreadcrumbLink) => link.label).join(' > ') : '',
     title,
     description,
   },
   {
-    fonts: ['Geist:400', 'Geist:600'],
+    fonts: [...ogDocsFonts],
   },
 );
 
