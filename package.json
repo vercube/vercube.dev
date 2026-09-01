@@ -38,8 +38,8 @@
   "devDependencies": {
     "@nuxt/fonts": "^0.14.0",
     "@types/three": "0.185.4",
-    "oxfmt": "0.64.0",
-    "oxlint": "1.79.0",
+    "oxfmt": "0.66.0",
+    "oxlint": "1.81.0",
     "typescript": "6.0.3",
     "vue-tsc": "3.3.11"
   },
