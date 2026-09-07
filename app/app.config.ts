@@ -42,6 +42,14 @@ export default defineAppConfig({
         list: 'rounded-full',
       },
     },
+    prose: {
+      code: {
+        // `inline-block` makes a chip unbreakable, so a long token like
+        // `@vercube/telemetry` pushes itself onto a line of its own on a narrow
+        // screen. Inline, and allowed to wrap.
+        base: 'px-1.5 py-0.5 text-sm font-mono font-medium rounded-md inline [overflow-wrap:anywhere] border border-muted text-highlighted bg-muted',
+      },
+    },
   },
   seo: {
     siteName: 'Vercube Docs',
