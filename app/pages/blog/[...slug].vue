@@ -69,8 +69,12 @@ const formatDate = (dateString: string) => {
     <div class="absolute inset-0 z-[-1] overflow-hidden">
       <HomeBackground class="inset-0" />
       <div class="absolute inset-0 bg-gradient-to-r from-black via-black/80 to-transparent pointer-events-none" />
+      <!-- On a phone the text column spans the full width, so the fading end of
+           the gradient above leaves half of every line sitting on the bright
+           halftone. This backs it. -->
+      <div class="absolute inset-0 bg-black/55 pointer-events-none md:hidden" />
     </div>
-    <UContainer class="flex flex-col items-center gap-3 mt-8 xl:pt-30">
+    <UContainer class="flex flex-col items-center gap-3 pt-24 sm:pt-28 xl:pt-30">
       <UPageSection
         :title="title"
         :description="description"
@@ -116,7 +120,10 @@ const formatDate = (dateString: string) => {
       </UPageSection>
     </UContainer>
     <div class="bg-black border-t border-default">
-      <UPageBody class="max-w-3xl mx-auto !mt-0 pt-5">
+      <!-- `max-w-3xl` is wider than a phone, so `mx-auto` leaves no gutter at
+           all below that width. `px-4` matches the `!p-4` of the title block
+           above it, so both edges line up. -->
+      <UPageBody class="max-w-3xl mx-auto !mt-0 px-4 pt-5 sm:px-6">
         <ContentRenderer v-if="page.body" :value="page" />
 
         <AppDivider class="my-10">
