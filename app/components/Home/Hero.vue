@@ -16,26 +16,20 @@
     <div class="pointer-events-none absolute inset-x-0 bottom-0 h-64 bg-gradient-to-b from-transparent to-[#010101]" />
 
     <div class="container relative z-10 mx-auto flex flex-col items-center px-6">
-      <div class="flex min-h-[78vh] flex-col items-center justify-center pt-24 text-center">
-        <p class="hero-line font-(family-name:--font-geist-mono) text-sm text-foreground/45" :style="{ '--i': 0 }">
+      <div class="hero-part flex min-h-[60vh] flex-col items-center justify-center pt-28 text-center" :style="{ '--i': 0 }">
+        <p class="font-(family-name:--font-geist-mono) text-sm text-foreground/45">
           <span class="text-[#bc4eff]">//</span> {{ page.hero.slug }}
         </p>
 
-        <h1
-          class="hero-line mt-5 text-5xl leading-[1.08] font-(family-name:--font-geist-pixel-circle) sm:text-6xl lg:text-7xl"
-          :style="{ '--i': 1 }"
-        >
+        <h1 class="mt-5 text-5xl leading-[1.08] font-(family-name:--font-geist-pixel-circle) sm:text-6xl lg:text-7xl">
           {{ page.hero.title }}
         </h1>
 
-        <p
-          class="hero-line mx-auto mt-6 max-w-xl text-balance text-foreground/55 font-(family-name:--font-geist-mono)"
-          :style="{ '--i': 2 }"
-        >
+        <p class="mx-auto mt-6 max-w-xl text-balance text-foreground/55 font-(family-name:--font-geist-mono)">
           {{ page.hero.description }}
         </p>
 
-        <div class="hero-line mt-9 flex flex-col items-center gap-5" :style="{ '--i': 3 }">
+        <div class="mt-9 flex flex-col items-center gap-5">
           <button type="button" class="install group" :aria-label="`Copy: ${installCmd}`" @click="copyInstall">
             <span class="prompt">$</span>
             <code>{{ installCmd }}</code>
@@ -68,7 +62,9 @@
         </div>
       </div>
 
-      <div class="hero-line w-full max-w-6xl pb-28 text-left" :style="{ '--i': 4 }">
+      <!-- The file starts inside the first screen: the fold crops it, which is
+           what invites the scroll. -->
+      <div class="hero-part mt-14 w-full max-w-6xl pb-24 text-left" :style="{ '--i': 1 }">
         <HomeCode />
       </div>
     </div>
@@ -100,7 +96,9 @@ async function copyInstall() {
 
 <style scoped>
 .scrim {
-  background: radial-gradient(ellipse 70% 52% at 50% 40%, rgb(1 1 1 / 0.8), rgb(1 1 1 / 0.4) 55%, transparent 82%);
+  /* Denser in the middle than it was: the display face is built from dots and
+     so is the field behind it, so the headline needs the contrast. */
+  background: radial-gradient(ellipse 72% 54% at 50% 38%, rgb(1 1 1 / 0.88), rgb(1 1 1 / 0.45) 56%, transparent 82%);
 }
 
 .install {
@@ -129,6 +127,11 @@ async function copyInstall() {
   transform: scale(0.98);
 }
 
+.install:focus-visible {
+  outline: 2px solid #bc4eff;
+  outline-offset: 3px;
+}
+
 .install .prompt {
   color: #bc4eff;
 }
@@ -143,16 +146,17 @@ async function copyInstall() {
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .hero-line {
-    animation: hero-rise 0.7s cubic-bezier(0.23, 1, 0.32, 1) both;
-    animation-delay: calc(var(--i) * 90ms + 120ms);
+  /* One move, in two beats: the title card, then the file. */
+  .hero-part {
+    animation: hero-rise 0.75s cubic-bezier(0.23, 1, 0.32, 1) both;
+    animation-delay: calc(var(--i) * 160ms + 120ms);
   }
 }
 
 @keyframes hero-rise {
   from {
     opacity: 0;
-    transform: translateY(16px);
+    transform: translateY(18px);
   }
   to {
     opacity: 1;
