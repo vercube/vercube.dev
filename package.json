@@ -27,7 +27,7 @@
     "@nuxtjs/google-fonts": "3.2.0",
     "@tresjs/nuxt": "5.6.1",
     "@unhead/vue": "3.1.1",
-    "better-sqlite3": "12.10.0",
+    "better-sqlite3": "13.0.3",
     "maath": "0.10.8",
     "nuxt": "4.4.7",
     "nuxt-llms": "0.2.0",
