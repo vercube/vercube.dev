@@ -40,7 +40,7 @@
     "@types/three": "0.185.4",
     "oxfmt": "0.64.0",
     "oxlint": "1.79.0",
-    "typescript": "6.0.3",
+    "typescript": "7.0.2",
     "vue-tsc": "3.3.11"
   },
   "resolutions": {
