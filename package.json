@@ -37,11 +37,11 @@
   },
   "devDependencies": {
     "@nuxt/fonts": "^0.14.0",
-    "@types/three": "0.185.4",
-    "oxfmt": "0.64.0",
-    "oxlint": "1.79.0",
+    "@types/three": "0.186.0",
+    "oxfmt": "0.71.0",
+    "oxlint": "1.86.0",
     "typescript": "6.0.3",
-    "vue-tsc": "3.3.11"
+    "vue-tsc": "3.3.12"
   },
   "resolutions": {
     "unimport": "4.2.0"
