@@ -56,30 +56,37 @@ useSeoMeta({
   // SEO defaults
   robots: 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1',
   author: 'Vercube Team',
+});
 
-  // Keywords (global)
-  keywords: [
-    'vercube',
-    'javascript framework',
-    'typescript framework',
-    'server framework',
-    'node.js',
-    'bun',
-    'deno',
-    'dependency injection',
-    'decorators',
-    'routing',
-    'middleware',
-    'validation',
-    'esm',
-    'web-native',
-    'request response',
-    'serverless',
-    'api framework',
-    'modern javascript',
-    'type-safe',
-    'zero-config',
-  ].join(', '),
+// Keywords (global). Not part of useSeoMeta's types since @unhead/vue 3.4, so set as a plain meta tag.
+useHead({
+  meta: [
+    {
+      name: 'keywords',
+      content: [
+        'vercube',
+        'javascript framework',
+        'typescript framework',
+        'server framework',
+        'node.js',
+        'bun',
+        'deno',
+        'dependency injection',
+        'decorators',
+        'routing',
+        'middleware',
+        'validation',
+        'esm',
+        'web-native',
+        'request response',
+        'serverless',
+        'api framework',
+        'modern javascript',
+        'type-safe',
+        'zero-config',
+      ].join(', '),
+    },
+  ],
 });
 
 // Global JSON-LD structured data
