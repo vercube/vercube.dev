@@ -32,4 +32,4 @@ minimumReleaseAgeExclude:
 # mdast-util-to-markdown 2.2.0 overflows the stack under remark-mdc 3.11.1's strong handler,
 # which breaks /llms-full.txt. Drop this once remark-mdc handles it.
 overrides:
-  mdast-util-to-markdown: 2.1.2
+  mdast-util-to-markdown: 2.2.0
