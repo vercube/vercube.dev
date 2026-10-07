@@ -24,3 +24,7 @@ allowBuilds:
   sharp: true
   unrs-resolver: false
   vue-demi: false
+
+minimumReleaseAgeExclude:
+  - '@iconify-json/lucide@1.2.141'
+  - '@iconify-json/vscode-icons@1.2.86'
