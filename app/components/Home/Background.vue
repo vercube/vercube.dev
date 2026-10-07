@@ -87,7 +87,7 @@ function init() {
   scene = new THREE.Scene();
 
   camera = new THREE.PerspectiveCamera(50, width / height, 0.01, 300);
-  camera.position.set(1.262_978_312_331_458_9, 2.664_606_471_394_044, -1.817_899_374_328_891_4);
+  camera.position.set(1.2629783123314589, 2.664606471394044, -1.8178993743288914);
   camera.lookAt(0, 0, 0);
 
   // Simulation setup

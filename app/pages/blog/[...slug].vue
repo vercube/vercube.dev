@@ -27,6 +27,7 @@ if (page.value.image) {
   defineOgImage({ url: imageUrl });
 } else {
   defineOgImage(
+    // @ts-expect-error - Docs is not typed
     'Docs',
     {
       headline: page.value.category || 'Vercube Blog',
