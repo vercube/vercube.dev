@@ -11,3 +11,16 @@ ignoredBuiltDependencies:
 onlyBuiltDependencies:
   - better-sqlite3
   - sharp
+
+# pnpm 11+ ignores .npmrc settings; the site imports hoisted transitive deps (scule, ufo, @vueuse/core, minimark).
+shamefullyHoist: true
+
+# pnpm 11+ reads build approvals from here; the two lists above are the pnpm 10 form.
+allowBuilds:
+  '@parcel/watcher': false
+  '@tailwindcss/oxide': false
+  better-sqlite3: true
+  esbuild: false
+  sharp: true
+  unrs-resolver: false
+  vue-demi: false
