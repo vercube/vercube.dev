@@ -29,7 +29,7 @@ minimumReleaseAgeExclude:
   - '@iconify-json/lucide@1.2.141'
   - '@iconify-json/vscode-icons@1.2.86'
 
-# mdast-util-to-markdown 2.2.0 overflows the stack under remark-mdc 3.11.1's strong handler,
+# mdast-util-to-markdown 2.1.3 and later overflow the stack under remark-mdc 3.11.1's strong handler,
 # which breaks /llms-full.txt. Drop this once remark-mdc handles it.
 overrides:
   mdast-util-to-markdown: 2.1.2

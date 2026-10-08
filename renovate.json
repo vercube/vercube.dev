@@ -60,9 +60,9 @@
       "allowedVersions": "<7.0.0"
     },
     {
-      "description": "Hold the mdast-util-to-markdown override in pnpm-workspace.yaml: 2.2.0 overflows the stack in remark-mdc 3.11.1's strong handler and /llms-full.txt fails to prerender. Lift once a clean build renders it.",
+      "description": "Hold the mdast-util-to-markdown override in pnpm-workspace.yaml: 2.1.3 and later overflow the stack in remark-mdc 3.11.1's strong handler and /llms-full.txt fails to prerender. Lift once a clean build renders it.",
       "matchPackageNames": ["mdast-util-to-markdown"],
-      "allowedVersions": "<2.2.0"
+      "allowedVersions": "<=2.1.2"
     }
   ]
 }
