@@ -58,6 +58,11 @@
       "description": "Hold TypeScript 6: vue-tsc (nuxt typecheck) cannot load TypeScript 7 yet (vuejs/language-tools#6170). Lift once vue-tsc supports it.",
       "matchPackageNames": ["typescript"],
       "allowedVersions": "<7.0.0"
+    },
+    {
+      "description": "Hold the mdast-util-to-markdown override in pnpm-workspace.yaml: 2.1.3 and later overflow the stack in remark-mdc 3.11.1's strong handler and /llms-full.txt fails to prerender. Lift once a clean build renders it.",
+      "matchPackageNames": ["mdast-util-to-markdown"],
+      "allowedVersions": "<=2.1.2"
     }
   ]
 }
