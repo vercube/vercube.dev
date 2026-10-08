@@ -43,6 +43,21 @@
       "groupName": "lockfile maintenance",
       "commitMessagePrefix": "chore: ",
       "labels": ["lockfile"]
+    },
+    {
+      "description": "Hold OG image rendering: satori 0.33+ throws `__dirname is not defined` in the Nitro prerender (vercel/satori#844), and newer nuxt-og-image requires it. Lift once that is fixed.",
+      "matchPackageNames": ["satori"],
+      "allowedVersions": "<0.33.0"
+    },
+    {
+      "description": "Hold nuxt-og-image on 6.5 with satori, see the rule above.",
+      "matchPackageNames": ["nuxt-og-image"],
+      "allowedVersions": "<6.6.0"
+    },
+    {
+      "description": "Hold TypeScript 6: vue-tsc (nuxt typecheck) cannot load TypeScript 7 yet (vuejs/language-tools#6170). Lift once vue-tsc supports it.",
+      "matchPackageNames": ["typescript"],
+      "allowedVersions": "<7.0.0"
     }
   ]
 }
