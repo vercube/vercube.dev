@@ -32,8 +32,8 @@
     "maath": "0.10.8",
     "nuxt": "4.6.0",
     "nuxt-llms": "0.2.0",
-    "nuxt-og-image": "6.5.1",
-    "satori": "^0.26.0",
+    "nuxt-og-image": "6.5.3",
+    "satori": "^0.32.0",
     "three": "0.186.1"
   },
   "devDependencies": {
