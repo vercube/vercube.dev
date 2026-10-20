@@ -39,10 +39,10 @@
   "devDependencies": {
     "@nuxt/fonts": "^0.14.0",
     "@types/three": "0.186.0",
-    "oxfmt": "0.72.0",
-    "oxlint": "1.87.0",
+    "oxfmt": "0.74.0",
+    "oxlint": "1.89.0",
     "typescript": "6.0.3",
-    "vue-tsc": "3.3.12"
+    "vue-tsc": "3.3.13"
   },
   "resolutions": {
     "unimport": "7.0.2"
