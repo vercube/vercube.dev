@@ -57,6 +57,9 @@ export default defineNuxtConfig({
     '/docs/modules/storage': { redirect: { statusCode: 301, to: '/docs/modules/storage/overview' } },
     '/docs/modules/logger': { redirect: { statusCode: 301, to: '/docs/modules/logger/overview' } },
     '/docs/modules/serverless': { redirect: { statusCode: 301, to: '/docs/modules/serverless/overview' } },
+    '/docs/modules/queue': { redirect: { statusCode: 301, to: '/docs/modules/queue/overview' } },
+    '/docs/modules/scheduler': { redirect: { statusCode: 301, to: '/docs/modules/scheduler/overview' } },
+    '/docs/modules/testing': { redirect: { statusCode: 301, to: '/docs/modules/testing/overview' } },
     '/docs/core/validation': { redirect: { statusCode: 301, to: '/docs/core-features/validation' } },
     // Static hosting (GitHub Pages): docs must be prerendered so crawlers and OG validators get real
     // HTML with meta tags. Client-only shells look “empty” to bots.
