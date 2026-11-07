@@ -1,0 +1,15 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": null,
+  "installCommand": "pnpm install --frozen-lockfile",
+  "buildCommand": "DEPLOY_TARGET=github-pages NUXT_PUBLIC_SITE_URL=https://vercube.dev pnpm build --preset github_pages",
+  "outputDirectory": ".output/public",
+  "git": {
+    "deploymentEnabled": {
+      "main": false
+    }
+  },
+  "github": {
+    "autoJobCancelation": true
+  }
+}
