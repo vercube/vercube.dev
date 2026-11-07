@@ -10,50 +10,81 @@ const next = computed(() => (props.surround[1]?.path ? props.surround[1] : null)
 </script>
 
 <template>
-  <div class="bg-muted p-1 rounded-lg flex items-center justify-between w-full gap-2">
-    <div
-      v-if="prev"
-      :class="
-        next
-          ? 'relative group flex items-center gap-1 text-muted sm:p-3 hover:text-highlighted'
-          : 'overflow-hidden relative group flex items-center gap-2 w-full bg-default/90 p-3 rounded-md hover:ring-2 ring-default'
-      "
-    >
-      <NuxtLink :to="prev.path" class="absolute inset-0 z-10" />
-      <div class="flex items-center gap-1 text-muted group-hover:text-highlighted">
-        <UIcon name="lucide:chevron-left" />
-        <span class="text-sm"> Previous </span>
-      </div>
-      <USeparator v-if="!next" orientation="vertical" class="w-2 h-[24px]" />
-      <div v-if="!next" class="flex flex-col truncate">
-        <p class="font-medium brightness-150 text-sm">
-          {{ prev.title }}
-        </p>
-        <p class="max-sm:hidden text-muted line-clamp-1 text-sm">
-          {{ prev.description }}
-        </p>
-      </div>
-    </div>
-    <div
-      v-if="next"
-      class="overflow-hidden relative group flex items-center gap-2 w-full justify-end bg-default/90 p-3 rounded-md hover:ring-2 ring-default"
-    >
-      <NuxtLink :to="next.path" class="absolute inset-0 z-10" />
-      <div class="flex flex-col text-right truncate">
-        <p class="font-medium brightness-150 text-sm">
-          {{ next.title }}
-        </p>
-        <p class="max-sm:hidden text-muted line-clamp-1 text-sm">
-          {{ next.description }}
-        </p>
-      </div>
-      <USeparator orientation="vertical" class="w-2 h-[24px]" />
-      <div class="flex items-center gap-1 text-muted group-hover:text-highlighted">
-        <span class="text-sm"> Next </span>
-        <UIcon name="lucide:chevron-right" />
-      </div>
-    </div>
-  </div>
+  <nav v-if="prev || next" class="surround" aria-label="Pages">
+    <NuxtLink v-if="prev" :to="prev.path" class="cell">
+      <span class="mono dir">← Previous</span>
+      <span class="title">{{ prev.title }}</span>
+      <span v-if="prev.description" class="desc">{{ prev.description }}</span>
+    </NuxtLink>
+    <span v-else class="cell empty" />
+    <NuxtLink v-if="next" :to="next.path" class="cell next">
+      <span class="mono dir">Next →</span>
+      <span class="title">{{ next.title }}</span>
+      <span v-if="next.description" class="desc">{{ next.description }}</span>
+    </NuxtLink>
+  </nav>
 </template>
 
-<style scoped></style>
+<style scoped>
+.surround {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.cell {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  padding: 28px var(--docs-pad, 24px);
+  transition: background-color 200ms ease;
+}
+
+.cell + .cell {
+  border-left: 1px solid var(--h-line);
+}
+
+a.cell:hover {
+  background: var(--h-panel);
+}
+
+.next {
+  text-align: right;
+}
+
+.dir {
+  font-size: 11px;
+  color: var(--h-accent);
+}
+
+.title {
+  font-family: 'Geist Pixel Line', 'Geist Mono', monospace;
+  font-size: 22px;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  color: var(--h-ink);
+}
+
+.desc {
+  overflow: hidden;
+  font-size: 13px;
+  color: var(--h-dim);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (width < 640px) {
+  .surround {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .cell + .cell {
+    border-left: 0;
+    border-top: 1px solid var(--h-line);
+  }
+
+  .empty {
+    display: none;
+  }
+}
+</style>

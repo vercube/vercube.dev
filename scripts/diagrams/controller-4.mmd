@@ -1,0 +1,12 @@
+flowchart TB
+  Controller["UserController"]
+  Service["UserService"]
+  Database[("Database")]
+  Client["HTTP Client"]
+  Client -->|"1 · POST /users"| Controller
+  Controller -->|"2 · Inject"| Service
+  Controller -->|"3 · Call create"| Service
+  Service -->|"4 · Save"| Database
+  Database -->|"5 · Return entity"| Service
+  Service -->|"6 · Return data"| Controller
+  Controller -->|"7 · Send JSON"| Client

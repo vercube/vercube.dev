@@ -141,7 +141,13 @@ function init() {
   animationId = requestAnimationFrame(loop);
 
   window.addEventListener('resize', onResize);
+  // The section around the field can grow after mount (fonts, content), so
+  // follow the container, not only the window.
+  resizeObserver = new ResizeObserver(onResize);
+  resizeObserver.observe(container.value);
 }
+
+let resizeObserver: ResizeObserver | null = null;
 
 function onResize() {
   if (!renderer || !camera || !container.value) return;
@@ -207,6 +213,7 @@ onMounted(() => {
 onBeforeUnmount(() => {
   cancelAnimationFrame(animationId);
   window.removeEventListener('resize', onResize);
+  resizeObserver?.disconnect();
 
   if (scene)
     scene.traverse((obj) => {

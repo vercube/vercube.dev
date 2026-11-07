@@ -1,0 +1,18 @@
+flowchart TB
+  A["Request"]
+  B["@Auth()"]
+  C["AuthProvider.validate()"]
+  D{"Result"}
+  E["Success"]
+  F["401 Unauthorized"]
+  G["@User()"]
+  H["AuthProvider.getCurrentUser()"]
+  I["User Object"]
+  A --> B
+  B --> C
+  C --> D
+  D -->|"null"| E
+  D -->|"string"| F
+  E --> G
+  G --> H
+  H --> I

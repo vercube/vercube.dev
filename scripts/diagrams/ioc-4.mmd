@@ -1,0 +1,13 @@
+flowchart TB
+  Container["Container"]
+  UserController["UserController"]
+  UserService["UserService"]
+  Database["Database"]
+  Logger["Logger"]
+  Container -->|"1 · Creates"| Database
+  Container -->|"2 · Creates"| Logger
+  Container -->|"3 · Creates UserService<br/>injects Database and Logger"| UserService
+  Container -->|"4 · Creates UserController<br/>injects UserService"| UserController
+  UserController -.->|"needs"| UserService
+  UserService -.->|"needs"| Database
+  UserService -.->|"needs"| Logger

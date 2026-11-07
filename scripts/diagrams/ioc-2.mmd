@@ -1,0 +1,10 @@
+flowchart LR
+  Container["Container"]
+  Instance["Single Database Instance"]
+  Controller1["UserController"]
+  Controller2["ProductController"]
+  Controller3["OrderController"]
+  Controller1 -.->|"uses"| Instance
+  Controller2 -.->|"uses"| Instance
+  Controller3 -.->|"uses"| Instance
+  Container -->|"creates once"| Instance

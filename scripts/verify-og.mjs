@@ -10,7 +10,7 @@ import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 const root = process.cwd();
-const bgPath = join(root, 'public/images/background.png');
+const bgPath = join(root, 'public/images/og-background.jpg');
 
 console.log('── OG background file ──');
 if (!existsSync(bgPath)) {

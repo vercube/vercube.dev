@@ -1,0 +1,10 @@
+flowchart TB
+  Request["GET /users/123"]
+  Pattern["/:id pattern"]
+  Extraction["Extract: id = '123'"]
+  Parameter["@Param'id'"]
+  Variable["id: string = '123'"]
+  Request -->|"Matches"| Pattern
+  Pattern -->|"Extracts"| Extraction
+  Extraction -->|"Via"| Parameter
+  Parameter -->|"Becomes"| Variable

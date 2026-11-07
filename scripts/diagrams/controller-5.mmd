@@ -1,0 +1,11 @@
+flowchart TB
+  Request["Request"]
+  AuthMW["AuthMiddleware<br/>class level"]
+  LogMW["LoggingMiddleware<br/>method level"]
+  Handler["Controller Method"]
+  Response["Response"]
+  Request -->|"All routes"| AuthMW
+  AuthMW -->|"/:id only"| LogMW
+  AuthMW -->|"other routes"| Handler
+  LogMW --> Handler
+  Handler --> Response
