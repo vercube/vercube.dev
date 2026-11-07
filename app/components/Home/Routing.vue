@@ -15,7 +15,7 @@
 
       <div class="pair" data-reveal style="--r: 2">
         <HomeWindow title="src/controller/UserController.ts">
-          <div class="md"><LazyMDC :value="code" cache-key="home-routing" hydrate-on-idle /></div>
+          <div class="md"><LazyMDCRenderer v-if="blocks" :body="blocks.code" hydrate-on-idle /></div>
         </HomeWindow>
 
         <HomeWindow ref="logEl" title="requests" class="log">
@@ -55,6 +55,8 @@ export class UserController {
   }
 }
 \`\`\``;
+
+const { data: blocks } = useCodeBlocks('home-routing', { code });
 
 interface Row {
   id: number;

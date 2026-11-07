@@ -39,7 +39,7 @@
         </template>
 
         <div class="code">
-          <div class="md"><LazyMDC :value="test ? testCode : appCode" :cache-key="`home-di-${test}`" hydrate-on-idle /></div>
+          <div class="md"><LazyMDCRenderer v-if="blocks" :body="test ? blocks.test : blocks.app" hydrate-on-idle /></div>
         </div>
 
         <div ref="stage" class="resolve">
@@ -174,6 +174,9 @@ container.bindMock(Database, { query: async () => [{ id: 1 }] });
 container.bind(Logger, ConsoleLogger);
 container.bind(UserService);
 \`\`\``;
+
+// Both variants are parsed at prerender, so the test tab is highlighted too.
+const { data: blocks } = useCodeBlocks('home-di', { app: appCode, test: testCode });
 </script>
 
 <style scoped>
