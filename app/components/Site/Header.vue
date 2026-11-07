@@ -88,8 +88,10 @@ function isActive(to: string) {
   z-index: 50;
   border-bottom: 1px solid var(--h-line);
   background: rgb(9 9 11 / 0.35);
+  /* No hand-written -webkit- copy: the production minifier keeps only the
+     prefixed one when both are present, and Chrome ignores it. It adds the
+     prefix itself where the browser targets need it. */
   backdrop-filter: blur(16px) saturate(1.4);
-  -webkit-backdrop-filter: blur(16px) saturate(1.4);
 }
 
 .inner {
