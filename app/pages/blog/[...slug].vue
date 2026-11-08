@@ -46,12 +46,55 @@ if (page.value.image) {
 }
 const titleTemplate = ref('%s - Vercube Blog');
 
+const fullTitle = titleTemplate.value.replace('%s', title);
+
 useSeoMeta({
   title,
   titleTemplate,
   description,
   ogDescription: description,
-  ogTitle: titleTemplate.value?.includes('%s') ? titleTemplate.value.replace('%s', title) : title,
+  ogTitle: fullTitle,
+  twitterTitle: fullTitle,
+  twitterDescription: description,
+  ogType: 'article',
+  articlePublishedTime: new Date(page.value.date).toISOString(),
+  articleModifiedTime: new Date(page.value.date).toISOString(),
+  articleAuthor: page.value.author.to ? [page.value.author.to] : undefined,
+  articleSection: page.value.category,
+});
+
+// BlogPosting structured data, so search engines read the post as a dated article by a person.
+const postUrl = `${site.url || 'https://vercube.dev'}${route.path}`;
+
+useHead({
+  script: [
+    {
+      type: 'application/ld+json',
+      innerHTML: JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'BlogPosting',
+        headline: page.value.title,
+        description,
+        datePublished: new Date(page.value.date).toISOString(),
+        dateModified: new Date(page.value.date).toISOString(),
+        url: postUrl,
+        mainEntityOfPage: postUrl,
+        inLanguage: 'en',
+        articleSection: page.value.category,
+        author: {
+          '@type': 'Person',
+          name: page.value.author.avatar?.alt || page.value.author.name,
+          url: page.value.author.to,
+        },
+        publisher: {
+          '@type': 'Organization',
+          name: 'Vercube',
+          url: site.url || 'https://vercube.dev',
+          logo: { '@type': 'ImageObject', url: `${site.url || 'https://vercube.dev'}/web-app-manifest-512x512.png` },
+        },
+      }),
+    },
+  ],
 });
 
 const editThisPage = computed(() => ({

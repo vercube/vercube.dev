@@ -24,6 +24,13 @@ const { data: files } = useLazyAsyncData('search', () => queryCollectionSearchSe
 const siteUrl = site.url || 'https://vercube.dev';
 const siteName = seo?.siteName || 'Vercube';
 
+// One canonical URL per page, so preview deployments and trailing-slash variants do not compete with it.
+const route = useRoute();
+const canonical = computed(() => `${siteUrl}${route.path === '/' ? '' : route.path.replace(/\/$/, '')}` || siteUrl);
+
+useHead({ link: [{ rel: 'canonical', href: canonical }] });
+useSeoMeta({ ogUrl: canonical });
+
 useHead({
   meta: [{ name: 'viewport', content: 'width=device-width, initial-scale=1' }],
   link: [

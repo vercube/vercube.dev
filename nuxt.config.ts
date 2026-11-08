@@ -101,7 +101,7 @@ export default defineNuxtConfig({
     ...(isGithubPagesDeploy ? { static: true } : {}),
     prerender: {
       // Seed docs so the crawler can follow sidebar/nav links to every page.
-      routes: ['/', '/docs/getting-started', ...blogRoutes],
+      routes: ['/', '/docs/getting-started', '/sitemap.xml', ...blogRoutes],
       crawlLinks: true,
       autoSubfolderIndex: false,
       // Nav includes parent paths without a markdown file (e.g. /docs/modules); crawlers still 404 those.
