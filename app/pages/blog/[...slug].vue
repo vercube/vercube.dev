@@ -40,13 +40,14 @@ if (page.value.image) {
     ]
       .filter(Boolean)
       .join(' · '),
-    title,
+    // The card shows the post title; `seo.title` is only for the <title> tag.
+    title: page.value.title,
     description,
   });
 }
 const titleTemplate = ref('%s - Vercube Blog');
 
-const fullTitle = titleTemplate.value.replace('%s', title);
+const fullTitle = titleTemplate.value.replace('%s', page.value.title);
 
 useSeoMeta({
   title,
