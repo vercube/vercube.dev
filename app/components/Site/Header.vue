@@ -210,6 +210,13 @@ function isActive(to: string) {
   }
 }
 
+/* The docs sidebar folds at 1024px: its links move into this menu. */
+@media (width < 1024px) {
+  .wide .menu-btn {
+    display: flex;
+  }
+}
+
 @media (width < 480px) {
   .start {
     display: none;

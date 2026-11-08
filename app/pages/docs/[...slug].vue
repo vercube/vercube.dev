@@ -11,6 +11,7 @@ interface BreadcrumbLink {
 
 definePageMeta({
   layout: 'docs',
+  colorMode: 'dark',
 });
 
 const navigation = inject<Ref<ContentNavigationItem[]>>('navigation', ref([]));
@@ -132,13 +133,13 @@ const communityLinks = computed(() => [
 
     <UPageBody :ui="{ base: 'mt-8 pb-0 space-y-12' }">
       <ContentRenderer v-if="page.body" :value="page" />
-      <nav class="after" aria-label="More pages">
+      <div class="after">
         <AppSurround :surround="surroundDisplay as any" />
         <p class="mono help">
           <NuxtLink to="https://github.com/vercube/vercube/issues/new/choose" target="_blank">Report an issue</NuxtLink>
           <NuxtLink :to="editThisPage.to" target="_blank">Edit this page on GitHub →</NuxtLink>
         </p>
-      </nav>
+      </div>
     </UPageBody>
 
     <template v-if="page?.body?.toc?.links?.length" #right>

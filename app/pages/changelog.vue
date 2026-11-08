@@ -29,7 +29,7 @@ defineOgImage('Vercube', {
 
 const appConfig = useAppConfig();
 
-const { data: versions } = await useFetch(
+const { data: versions, error } = await useFetch(
   computed(() => `https://ungh.cc/repos/${appConfig.repository}/releases`),
   {
     // Fresh data on every request (no payload / route cache reuse for this key).
@@ -76,7 +76,13 @@ function formatDate(date: string) {
     </SitePageHero>
 
     <section class="band">
-      <ol class="frame versions">
+      <p v-if="error" class="frame load-error">
+        Releases could not be loaded. See them
+        <NuxtLink :to="`https://github.com/${appConfig.repository}/releases`" target="_blank" class="link-arrow"
+          >on GitHub →</NuxtLink
+        >
+      </p>
+      <ol v-else class="frame versions">
         <li v-for="(version, i) in versions" :key="version.tag" class="version">
           <div class="side">
             <div class="sticky">
@@ -99,6 +105,12 @@ function formatDate(date: string) {
 </template>
 
 <style scoped>
+.load-error {
+  padding: 48px var(--pad);
+  font-size: 14px;
+  color: var(--h-muted);
+}
+
 .ctas {
   display: flex;
   flex-wrap: wrap;

@@ -12,10 +12,9 @@ if (!page.value) {
   throw createError({ statusCode: 404, statusMessage: 'Page not found', fatal: true });
 }
 
-// Posts are numbered by release, so the surroundings are the older and the
-// newer post.
+// Ordered by date, so the surroundings are the older and the newer post.
 const { data: surround } = await useAsyncData(`${kebabCase(route.path)}-surround`, () =>
-  queryCollectionItemSurroundings('blog', route.path, { fields: ['description'] }),
+  queryCollectionItemSurroundings('blog', route.path, { fields: ['description'] }).order('date', 'ASC'),
 );
 const older = computed(() => surround.value?.[0] ?? null);
 const newer = computed(() => surround.value?.[1] ?? null);

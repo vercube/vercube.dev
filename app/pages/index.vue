@@ -1,6 +1,6 @@
 <template>
   <div class="home">
-    <main>
+    <div>
       <HomeHero />
       <HomeRuntimes />
       <HomeRouting />
@@ -10,7 +10,7 @@
       <HomeBenchmarks />
       <HomeModules />
       <HomeOpenSource />
-    </main>
+    </div>
   </div>
 </template>
 
@@ -60,7 +60,14 @@ useSeoMeta({
 // Marks the page as scripted before first paint, so section entrances can
 // start hidden; without script nothing is ever hidden.
 useHead({
-  script: [{ innerHTML: "document.documentElement.classList.add('js')", tagPosition: 'head' }],
+  script: [
+    {
+      // If the bundle never mounts, nothing would reveal the sections: show them.
+      innerHTML:
+        "document.documentElement.classList.add('js');setTimeout(function(){var a=document.getElementById('__nuxt');if(!a||!a.__vue_app__)document.documentElement.classList.remove('js')},5000)",
+      tagPosition: 'head',
+    },
+  ],
 });
 
 let io: IntersectionObserver | null = null;

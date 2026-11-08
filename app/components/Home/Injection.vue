@@ -130,7 +130,8 @@ function tick() {
 }
 
 watch(test, () => {
-  step.value = 0;
+  // Without playback the trace stays complete.
+  step.value = globalThis.matchMedia('(prefers-reduced-motion: reduce)').matches ? trace.value.length - 1 : 0;
   tick();
 });
 

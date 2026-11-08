@@ -188,6 +188,8 @@ function parse(input: string): Plan {
   let dir = '';
   for (let i = 0; i < tokens.length; i++) {
     const token = tokens[i]!;
+    // npm's separator: everything after it goes to the generator.
+    if (token === '--') continue;
     if (!token.startsWith('--')) {
       if (dir) return { ...empty, error: `Unexpected argument ${token}.` };
       dir = token;
@@ -217,7 +219,7 @@ function parse(input: string): Plan {
   let picked = DEFAULT_MODULES;
   if (flags['--modules']) {
     picked = flags['--modules'] === 'none' ? [] : flags['--modules'].split(',').filter(Boolean);
-    const unknown = picked.find((id) => !MODULES[id]);
+    const unknown = picked.find((id) => !ORDER.includes(id));
     if (unknown) return { ...empty, error: `Unknown module ${unknown}. Try ${ORDER.join(', ')}.` };
   }
 

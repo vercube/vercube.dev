@@ -164,11 +164,11 @@ provide('navigationDisplay', navigationDisplay);
       <SiteHeader />
       <!-- No min-height (UMain forces 100vh): a short page should end on the
            footer's rule, not on empty space outside the frame. -->
-      <div class="site-main">
+      <main class="site-main">
         <NuxtLayout>
           <NuxtPage />
         </NuxtLayout>
-      </div>
+      </main>
       <SiteFooter />
     </div>
 

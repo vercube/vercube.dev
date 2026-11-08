@@ -35,7 +35,7 @@
       </div>
 
       <div class="screen">
-        <img
+        <div
           v-for="(panel, i) in panels"
           :id="`devtools-panel-${panel.id}`"
           :key="panel.id"
@@ -44,13 +44,16 @@
           role="tabpanel"
           :aria-labelledby="`devtools-tab-${panel.id}`"
           :aria-hidden="active !== i"
-          :src="`/images/devtools/${panel.id}.webp`"
-          :alt="`Vercube Devtools, ${panel.name} panel`"
-          :loading="i === 0 ? 'eager' : 'lazy'"
-          decoding="async"
-          width="2880"
-          height="1620"
-        />
+        >
+          <img
+            :src="`/images/devtools/${panel.id}.webp`"
+            :alt="`Vercube Devtools, ${panel.name} panel`"
+            :loading="i === 0 ? 'eager' : 'lazy'"
+            decoding="async"
+            width="2880"
+            height="1620"
+          />
+        </div>
       </div>
     </div>
   </section>
@@ -182,12 +185,15 @@ function onKey(event: KeyboardEvent) {
 
 .shot {
   grid-area: 1 / 1;
+  opacity: 0;
+  transition: opacity 240ms ease;
+}
+
+.shot img {
   display: block;
   width: 100%;
   height: auto;
   aspect-ratio: 16 / 9;
-  opacity: 0;
-  transition: opacity 240ms ease;
 }
 
 .shot.on {
