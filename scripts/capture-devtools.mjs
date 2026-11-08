@@ -97,6 +97,18 @@ const poses = {
   },
 
   async config() {},
+
+  async storage() {
+    await wait(1500);
+  },
+
+  async queues() {
+    await wait(1500);
+  },
+
+  async audit() {
+    await wait(2500);
+  },
 };
 
 async function capture(browser, id) {

@@ -52,20 +52,7 @@
           <template #right>
             <span v-if="!ran.error" class="mono count">{{ treeSummary }}</span>
           </template>
-          <TransitionGroup v-if="!ran.error" name="file" tag="ul" class="tree">
-            <li
-              v-for="(row, i) in ran.tree"
-              :key="row.path"
-              class="file"
-              :class="{ folder: row.folder, added: row.origin }"
-              :style="{ '--i': i }"
-            >
-              <span v-for="level in row.depth" :key="level" class="guide" aria-hidden="true" />
-              <UIcon :name="iconFor(row)" class="ico" />
-              <span class="name">{{ row.name }}</span>
-              <span v-if="row.origin" class="origin">{{ row.origin }}</span>
-            </li>
-          </TransitionGroup>
+          <SiteFileRows v-if="!ran.error" :rows="ran.tree" />
           <p v-else class="dim">Nothing created.</p>
         </HomeWindow>
       </div>
@@ -81,6 +68,9 @@
 </template>
 
 <script setup lang="ts">
+import { buildTree } from '~/utils/file-tree';
+import type { TreeRow } from '~/utils/file-tree';
+
 /*
  * A faithful, small model of `create-vercube` (docs: getting-started/project-generator).
  * It parses the same flags and answers with what the real recipes add. It runs
@@ -145,15 +135,6 @@ const examples = [
 ];
 
 const command = ref('pnpm create vercube my-app');
-
-interface TreeRow {
-  path: string;
-  name: string;
-  depth: number;
-  folder: boolean;
-  /** The recipe that writes this file; template files have none. */
-  origin?: string;
-}
 
 interface Plan {
   error?: string;
@@ -287,52 +268,6 @@ function parse(input: string): Plan {
 
   const implied = modules.filter((id) => !picked.includes(id));
   return { dir, pm, template, deploy, modules, implied, tree, recipes, services: [...services] };
-}
-
-/** Turns file paths into the rows of a tree, folders first. A trailing slash marks an empty folder. */
-function buildTree(files: Map<string, string | undefined>): TreeRow[] {
-  interface Node {
-    children: Map<string, Node>;
-    folder: boolean;
-    origin?: string;
-  }
-  const root: Node = { children: new Map(), folder: true };
-  for (const [path, origin] of files) {
-    const parts = path.split('/').filter(Boolean);
-    let node = root;
-    for (const [i, part] of parts.entries()) {
-      const leaf = i === parts.length - 1;
-      if (!node.children.has(part)) node.children.set(part, { children: new Map(), folder: !leaf || path.endsWith('/') });
-      node = node.children.get(part)!;
-    }
-    node.origin = origin;
-  }
-  const rows: TreeRow[] = [];
-  const walk = (node: Node, prefix: string, depth: number) => {
-    const entries = [...node.children].toSorted(([, a], [, b]) => Number(b.folder) - Number(a.folder));
-    for (const [name, child] of entries) {
-      const path = `${prefix}${name}`;
-      rows.push({ path, name, depth, folder: child.folder, origin: child.origin });
-      walk(child, `${path}/`, depth + 1);
-    }
-  };
-  walk(root, '', 0);
-  return rows;
-}
-
-// Full names on purpose: these are listed in `icon.clientBundle` (nuxt.config),
-// so the static site never asks the Iconify API for them.
-function iconFor(row: TreeRow): string {
-  if (row.folder) return 'lucide:folder-open';
-  if (row.name.endsWith('.test.ts')) return 'vscode-icons:file-type-testts';
-  if (row.name === 'vite.config.ts') return 'vscode-icons:file-type-vite';
-  if (row.name === 'package.json') return 'vscode-icons:file-type-npm';
-  if (row.name.startsWith('.env')) return 'vscode-icons:file-type-dotenv';
-  if (row.name === 'docker-compose.yml') return 'vscode-icons:file-type-docker2';
-  if (row.name.endsWith('.vue')) return 'vscode-icons:file-type-vue';
-  if (row.name.endsWith('.json')) return 'vscode-icons:file-type-json';
-  if (row.name.endsWith('.yml')) return 'vscode-icons:file-type-yaml';
-  return 'vscode-icons:file-type-typescript-official';
 }
 
 const plan = computed(() => parse(command.value));
@@ -618,90 +553,6 @@ printed.value = output.value;
 .count {
   font-size: 10.5px;
   color: var(--h-accent);
-}
-
-.tree {
-  margin: -2px -8px;
-}
-
-.file {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  height: 24px;
-  padding: 0 8px;
-  color: var(--h-dim);
-  white-space: nowrap;
-  transition: background-color 160ms ease;
-}
-
-.file:hover {
-  background: var(--h-raise);
-}
-
-.file.folder {
-  color: var(--h-muted);
-}
-
-.file.added .name {
-  color: var(--h-ink);
-}
-
-/* Indent guides: a run of nested rows draws one continuous line. */
-.guide {
-  align-self: stretch;
-  flex: 0 0 auto;
-  width: 8px;
-  margin-left: 7px;
-  margin-right: -8px;
-  border-left: 1px solid var(--h-line);
-}
-
-.ico {
-  flex: 0 0 auto;
-  width: 15px;
-  height: 15px;
-}
-
-.folder .ico {
-  color: var(--h-dim);
-}
-
-.name {
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.origin {
-  flex: 0 0 auto;
-  margin-left: auto;
-  padding-left: 12px;
-  font-size: 10.5px;
-  color: var(--h-accent);
-}
-
-.file-move {
-  transition: transform 280ms var(--ease);
-}
-
-.file-leave-active {
-  display: none;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .file-enter-active {
-    transition:
-      opacity 280ms var(--ease) calc(var(--i) * 28ms),
-      transform 280ms var(--ease) calc(var(--i) * 28ms),
-      background-color 1100ms ease calc(var(--i) * 28ms);
-  }
-
-  .file-enter-from {
-    opacity: 0;
-    transform: translateX(-8px);
-    background: rgb(188 78 255 / 0.22);
-  }
 }
 
 @keyframes out-in {

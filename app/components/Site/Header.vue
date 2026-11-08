@@ -54,6 +54,7 @@
 </template>
 
 <script setup lang="ts">
+import { openActiveNavSections } from '~/utils/sanitize-docs-navigation';
 import type { ContentNavigationItem } from '@nuxt/content';
 
 const { header } = useAppConfig();
@@ -66,8 +67,11 @@ const navigationDisplay = inject<ComputedRef<ContentNavigationItem[]>>(
   'navigationDisplay',
   computed(() => []),
 );
-const docsNavigation = computed(
-  () => navigationDisplay.value.find((item) => item.path === '/docs')?.children ?? navigationDisplay.value,
+const docsNavigation = computed(() =>
+  openActiveNavSections(
+    navigationDisplay.value.find((item) => item.path === '/docs')?.children ?? navigationDisplay.value,
+    route.path.replace(/\/$/, ''),
+  ),
 );
 
 watch(

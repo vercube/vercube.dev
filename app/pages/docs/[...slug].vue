@@ -145,8 +145,6 @@ const communityLinks = computed(() => [
     <template v-if="page?.body?.toc?.links?.length" #right>
       <UContentToc
         :links="page.body?.toc?.links"
-        highlight
-        highlight-color="primary"
         title="On this page"
         :ui="{
           // No negative margins or blur on desktop: they pushed the panel past
@@ -156,9 +154,13 @@ const communityLinks = computed(() => [
           link: 'text-[13px]',
         }"
       >
+        <template #content="{ links }">
+          <SiteTocList :links="links ?? []" />
+        </template>
         <template #bottom>
           <div class="hidden lg:block space-y-6 !mt-6">
-            <USeparator type="solid" />
+            <!-- Edge to edge: from the column's rule, across its 20px padding on both sides. -->
+            <USeparator type="solid" class="toc-rule -mx-5 w-[calc(100%+40px)]" />
             <UPageLinks
               title="Community"
               :links="communityLinks"
@@ -179,7 +181,7 @@ const communityLinks = computed(() => [
 
 :deep(.docs-right) {
   border-left: 1px solid var(--h-line);
-  padding-left: 20px;
+  padding-inline: 20px;
 }
 
 /* Previous / next and the page links run edge to edge across the content
@@ -210,7 +212,7 @@ const communityLinks = computed(() => [
 @media (width < 1024px) {
   :deep(.docs-right) {
     border-left: 0;
-    padding-left: 0;
+    padding-inline: 0;
   }
 }
 </style>
