@@ -82,13 +82,19 @@ const formatDate = (dateString: string | Date) => {
         <span>·</span>
         <span>{{ page.minRead }} min read</span>
       </template>
-      <div class="author">
+      <component
+        :is="page.author.to ? 'a' : 'div'"
+        class="author"
+        :href="page.author.to"
+        :target="page.author.to ? '_blank' : undefined"
+        :rel="page.author.to ? 'noopener' : undefined"
+      >
         <img v-if="page.author.avatar" :src="page.author.avatar.src" :alt="page.author.avatar.alt" class="avatar" />
         <span class="who">
           <b>{{ page.author.name }}</b>
           <span v-if="page.author.to" class="mono handle">@{{ page.author.to.split('/').pop() }}</span>
         </span>
-      </div>
+      </component>
     </SitePageHero>
 
     <section class="band">
@@ -131,6 +137,13 @@ const formatDate = (dateString: string | Date) => {
   display: flex;
   align-items: center;
   gap: 12px;
+  color: inherit;
+  text-decoration: none;
+}
+
+a.author:hover .who b {
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 
 .avatar {

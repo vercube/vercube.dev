@@ -22,7 +22,11 @@
     </div>
     <div class="frame legal mono" :class="{ wide }">
       <span>© {{ year }} Vercube · MIT License</span>
-      <span>Made by Oskar Lebuda and contributors</span>
+      <span>
+        Made by
+        <a href="https://github.com/OskarLebuda" target="_blank" rel="noopener" class="maker">Oskar Lebuda</a>
+        and contributors
+      </span>
     </div>
   </footer>
 </template>
@@ -63,6 +67,15 @@ const cols = [
 </script>
 
 <style scoped>
+.maker {
+  color: inherit;
+}
+
+.maker:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
 .cols {
   display: grid;
   grid-template-columns: 1.4fr repeat(3, 1fr);
