@@ -11,7 +11,7 @@ withDefaults(
     width?: number;
     height?: number;
   }>(),
-  { beforeLabel: 'Before', afterLabel: 'After', alt: '', width: 1440, height: 810 },
+  { beforeLabel: 'Before', afterLabel: 'After', alt: '', width: 960, height: 600 },
 );
 
 const position = ref(50);
@@ -96,7 +96,7 @@ const position = ref(50);
 
 .compare-tag {
   position: absolute;
-  top: 10px;
+  bottom: 10px;
   padding: 2px 8px;
   border-radius: 4px;
   background: rgb(0 0 0 / 0.6);
