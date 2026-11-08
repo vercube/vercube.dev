@@ -48,11 +48,24 @@
           </div>
         </HomeWindow>
 
-        <HomeWindow :title="`${plan.dir}/`" class="tree-win">
+        <HomeWindow :title="`${ran.dir}/`" class="tree-win">
           <template #right>
-            <span class="mono count">{{ plan.recipes.length }} recipes</span>
+            <span v-if="!ran.error" class="mono count">{{ treeSummary }}</span>
           </template>
-          <pre v-if="!plan.error" class="tree">{{ plan.tree }}</pre>
+          <TransitionGroup v-if="!ran.error" name="file" tag="ul" class="tree">
+            <li
+              v-for="(row, i) in ran.tree"
+              :key="row.path"
+              class="file"
+              :class="{ folder: row.folder, added: row.origin }"
+              :style="{ '--i': i }"
+            >
+              <span v-for="level in row.depth" :key="level" class="guide" aria-hidden="true" />
+              <UIcon :name="iconFor(row)" class="ico" />
+              <span class="name">{{ row.name }}</span>
+              <span v-if="row.origin" class="origin">{{ row.origin }}</span>
+            </li>
+          </TransitionGroup>
           <p v-else class="dim">Nothing created.</p>
         </HomeWindow>
       </div>
@@ -133,6 +146,15 @@ const examples = [
 
 const command = ref('pnpm create vercube my-app');
 
+interface TreeRow {
+  path: string;
+  name: string;
+  depth: number;
+  folder: boolean;
+  /** The recipe that writes this file; template files have none. */
+  origin?: string;
+}
+
 interface Plan {
   error?: string;
   template?: string;
@@ -141,14 +163,14 @@ interface Plan {
   implied?: string[];
   dir: string;
   pm: string;
-  tree: string;
+  tree: TreeRow[];
   recipes: { name: string; what: string }[];
   services: string[];
 }
 
 function parse(input: string): Plan {
   const tokens = input.trim().split(/\s+/).filter(Boolean);
-  const empty: Plan = { dir: 'my-app', pm: 'pnpm', tree: '', recipes: [], services: [] };
+  const empty: Plan = { dir: 'my-app', pm: 'pnpm', tree: [], recipes: [], services: [] };
 
   let pm = 'pnpm';
   const head = tokens.slice(0, 3).join(' ');
@@ -226,58 +248,89 @@ function parse(input: string): Plan {
   if (selected.has('queue') && queue !== 'memory') services.add(queue === 'bullmq' ? 'redis' : queue);
   if (selected.has('scheduler') && scheduler !== 'memory') services.add(scheduler);
 
-  // Files: the template's own, then what the recipes write.
-  const src = ['src/index.ts', 'src/boot/Container.ts', ...modules.flatMap((id) => MODULES[id]!.files)];
-  if (deploy === 'azure-functions') src.push('src/functions/httpTrigger.ts');
-  const root = ['vercube.config.ts', 'package.json'];
-  if (selected.has('auth') || services.size > 0 || storage === 's3') root.push('.env', '.env.example');
-  if (services.size > 0) root.push('docker-compose.yml');
-  if (deploy === 'aws-lambda') root.push('serverless.yml');
-  if (deploy === 'azure-functions') root.push('host.json', 'local.settings.json');
+  // Files: the template's own, then what each recipe writes (path -> recipe).
+  const envOwner = ['auth', 'queue', 'scheduler', 'storage'].find((id) => selected.has(id));
+  const composeOwner = selected.has('queue') && queue !== 'memory' ? 'queue' : 'scheduler';
+  const files = new Map<string, string | undefined>([
+    ['src/index.ts', undefined],
+    ['src/boot/Container.ts', undefined],
+  ]);
+  for (const id of modules) for (const file of MODULES[id]!.files) files.set(file, id);
+  if (deploy === 'azure-functions') files.set('src/functions/httpTrigger.ts', deploy);
+  files.set('vercube.config.ts', undefined);
+  files.set('package.json', undefined);
+  if (selected.has('auth') || services.size > 0 || storage === 's3') {
+    files.set('.env', envOwner);
+    files.set('.env.example', envOwner);
+  }
+  if (services.size > 0) files.set('docker-compose.yml', composeOwner);
+  if (deploy === 'aws-lambda') files.set('serverless.yml', deploy);
+  if (deploy === 'azure-functions') {
+    files.set('host.json', deploy);
+    files.set('local.settings.json', deploy);
+  }
 
-  const tree =
+  const tree = buildTree(
     template === 'fullstack-vue'
-      ? draw([
-          ...[...src, ...root].map((file) => `apps/api/${file}`),
-          'apps/web/src/App.vue',
-          'apps/web/src/api.ts',
-          'apps/web/vite.config.ts',
-          'packages/',
-          'package.json',
+      ? new Map([
+          ...[...files].map(([file, origin]) => [`apps/api/${file}`, origin] as [string, string | undefined]),
+          ['apps/web/src/App.vue', undefined],
+          ['apps/web/src/api.ts', undefined],
+          ['apps/web/vite.config.ts', undefined],
+          ['packages/', undefined],
+          ['package.json', undefined],
         ])
-      : draw([...src, ...root]);
+      : files,
+  );
 
   const implied = modules.filter((id) => !picked.includes(id));
   return { dir, pm, template, deploy, modules, implied, tree, recipes, services: [...services] };
 }
 
-/** Draws a list of paths as a tree, folders first, two levels deep at most. */
-function draw(paths: string[]): string {
+/** Turns file paths into the rows of a tree, folders first. A trailing slash marks an empty folder. */
+function buildTree(files: Map<string, string | undefined>): TreeRow[] {
   interface Node {
-    [key: string]: Node;
+    children: Map<string, Node>;
+    folder: boolean;
+    origin?: string;
   }
-  const root: Node = {};
-  for (const path of paths) {
+  const root: Node = { children: new Map(), folder: true };
+  for (const [path, origin] of files) {
+    const parts = path.split('/').filter(Boolean);
     let node = root;
-    for (const part of path.split('/').filter(Boolean)) node = node[part] ??= {};
+    for (const [i, part] of parts.entries()) {
+      const leaf = i === parts.length - 1;
+      if (!node.children.has(part)) node.children.set(part, { children: new Map(), folder: !leaf || path.endsWith('/') });
+      node = node.children.get(part)!;
+    }
+    node.origin = origin;
   }
-  const lines: string[] = [];
-  const walk = (node: Node, prefix: string) => {
-    const keys = Object.keys(node).sort((a, b) => {
-      const folderA = Object.keys(node[a]!).length > 0;
-      const folderB = Object.keys(node[b]!).length > 0;
-      if (folderA === folderB) return 0;
-      return folderA ? -1 : 1;
-    });
-    for (const [i, key] of keys.entries()) {
-      const last = i === keys.length - 1;
-      const folder = Object.keys(node[key]!).length > 0;
-      lines.push(`${prefix}${last ? '└─ ' : '├─ '}${key}${folder ? '/' : ''}`);
-      if (folder) walk(node[key]!, `${prefix}${last ? '   ' : '│  '}`);
+  const rows: TreeRow[] = [];
+  const walk = (node: Node, prefix: string, depth: number) => {
+    const entries = [...node.children].toSorted(([, a], [, b]) => Number(b.folder) - Number(a.folder));
+    for (const [name, child] of entries) {
+      const path = `${prefix}${name}`;
+      rows.push({ path, name, depth, folder: child.folder, origin: child.origin });
+      walk(child, `${path}/`, depth + 1);
     }
   };
-  walk(root, '');
-  return lines.join('\n');
+  walk(root, '', 0);
+  return rows;
+}
+
+// Full names on purpose: these are listed in `icon.clientBundle` (nuxt.config),
+// so the static site never asks the Iconify API for them.
+function iconFor(row: TreeRow): string {
+  if (row.folder) return 'lucide:folder-open';
+  if (row.name.endsWith('.test.ts')) return 'vscode-icons:file-type-testts';
+  if (row.name === 'vite.config.ts') return 'vscode-icons:file-type-vite';
+  if (row.name === 'package.json') return 'vscode-icons:file-type-npm';
+  if (row.name.startsWith('.env')) return 'vscode-icons:file-type-dotenv';
+  if (row.name === 'docker-compose.yml') return 'vscode-icons:file-type-docker2';
+  if (row.name.endsWith('.vue')) return 'vscode-icons:file-type-vue';
+  if (row.name.endsWith('.json')) return 'vscode-icons:file-type-json';
+  if (row.name.endsWith('.yml')) return 'vscode-icons:file-type-yaml';
+  return 'vscode-icons:file-type-typescript-official';
 }
 
 const plan = computed(() => parse(command.value));
@@ -324,6 +377,15 @@ const output = computed<OutLine[]>(() => {
 // the command runs again, not on every keystroke.
 const printed = shallowRef<OutLine[]>([]);
 
+// The plan of that same run, for the tree: it must not flicker while a flag is
+// half typed.
+const ran = shallowRef<Plan>(plan.value);
+const treeSummary = computed(() => {
+  const files = ran.value.tree.filter((row) => !row.folder).length;
+  const recipes = ran.value.recipes.filter((row) => row.name !== 'None').length;
+  return `${files} files · ${recipes} ${recipes === 1 ? 'recipe' : 'recipes'}`;
+});
+
 const input = ref<HTMLInputElement | null>(null);
 const runId = ref(0);
 const shownCount = ref(Number.POSITIVE_INFINITY);
@@ -340,6 +402,7 @@ function replay() {
   clearInterval(typing);
   runId.value++;
   printed.value = output.value;
+  ran.value = plan.value;
   if (reduced()) {
     shownCount.value = Number.POSITIVE_INFINITY;
     return;
@@ -556,10 +619,87 @@ printed.value = output.value;
 }
 
 .tree {
-  margin: 0;
-  font: inherit;
+  margin: -2px -8px;
+}
+
+.file {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 24px;
+  padding: 0 8px;
+  color: var(--h-dim);
+  white-space: nowrap;
+  transition: background-color 160ms ease;
+}
+
+.file:hover {
+  background: var(--h-raise);
+}
+
+.file.folder {
+  color: var(--h-muted);
+}
+
+.file.added .name {
   color: var(--h-ink);
-  white-space: pre;
+}
+
+/* Indent guides: a run of nested rows draws one continuous line. */
+.guide {
+  align-self: stretch;
+  flex: 0 0 auto;
+  width: 8px;
+  margin-left: 7px;
+  margin-right: -8px;
+  border-left: 1px solid var(--h-line);
+}
+
+.ico {
+  flex: 0 0 auto;
+  width: 15px;
+  height: 15px;
+}
+
+.folder .ico {
+  color: var(--h-dim);
+}
+
+.name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.origin {
+  flex: 0 0 auto;
+  margin-left: auto;
+  padding-left: 12px;
+  font-size: 10.5px;
+  color: var(--h-accent);
+}
+
+.file-move {
+  transition: transform 280ms var(--ease);
+}
+
+.file-leave-active {
+  display: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .file-enter-active {
+    transition:
+      opacity 280ms var(--ease) calc(var(--i) * 28ms),
+      transform 280ms var(--ease) calc(var(--i) * 28ms),
+      background-color 1100ms ease calc(var(--i) * 28ms);
+  }
+
+  .file-enter-from {
+    opacity: 0;
+    transform: translateX(-8px);
+    background: rgb(188 78 255 / 0.22);
+  }
 }
 
 @keyframes out-in {
@@ -579,6 +719,10 @@ printed.value = output.value;
 
   .pair > * {
     height: auto;
+  }
+
+  .pair > .tree-win {
+    height: 340px;
   }
 }
 </style>

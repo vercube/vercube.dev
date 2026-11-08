@@ -136,6 +136,21 @@ export default defineNuxtConfig({
 
   icon: {
     provider: 'iconify',
+    // Picked at runtime by the generator's file tree, so the bundle scan cannot see them.
+    clientBundle: {
+      icons: [
+        'lucide:folder-open',
+        'vscode-icons:file-type-typescript-official',
+        'vscode-icons:file-type-testts',
+        'vscode-icons:file-type-vite',
+        'vscode-icons:file-type-npm',
+        'vscode-icons:file-type-dotenv',
+        'vscode-icons:file-type-docker2',
+        'vscode-icons:file-type-vue',
+        'vscode-icons:file-type-json',
+        'vscode-icons:file-type-yaml',
+      ],
+    },
   },
 
   // GitHub Pages is static-only: there is no Nitro server for `/_ipx/*`. Use direct asset URLs when
