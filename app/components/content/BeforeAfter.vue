@@ -19,7 +19,14 @@ const position = ref(50);
 
 <template>
   <figure class="compare" :style="{ '--pos': `${position}%`, aspectRatio: `${width} / ${height}` }">
-    <img class="compare-img" :src="after" :alt="alt ? `${alt} (${afterLabel})` : ''" :width="width" :height="height" loading="lazy" />
+    <img
+      class="compare-img"
+      :src="after"
+      :alt="alt ? `${alt} (${afterLabel})` : ''"
+      :width="width"
+      :height="height"
+      loading="lazy"
+    />
     <img
       class="compare-img compare-before"
       :src="before"
@@ -34,7 +41,15 @@ const position = ref(50);
 
     <span class="compare-line" aria-hidden="true"><span class="compare-knob">&harr;</span></span>
 
-    <input v-model.number="position" class="compare-range" type="range" min="0" max="100" step="0.1" aria-label="Compare before and after" />
+    <input
+      v-model.number="position"
+      class="compare-range"
+      type="range"
+      min="0"
+      max="100"
+      step="0.1"
+      aria-label="Compare before and after"
+    />
   </figure>
 </template>
 
