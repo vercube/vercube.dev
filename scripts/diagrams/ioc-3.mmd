@@ -1,0 +1,14 @@
+flowchart LR
+  Container["Container"]
+  Controller1["Request 1"]
+  Instance1["Logger Instance 1"]
+  Controller2["Request 2"]
+  Instance2["Logger Instance 2"]
+  Controller3["Request 3"]
+  Instance3["Logger Instance 3"]
+  Controller1 -.->|"uses"| Instance1
+  Controller2 -.->|"uses"| Instance2
+  Controller3 -.->|"uses"| Instance3
+  Container -->|"creates"| Instance1
+  Container -->|"creates"| Instance2
+  Container -->|"creates"| Instance3

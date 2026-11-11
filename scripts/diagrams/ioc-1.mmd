@@ -1,0 +1,10 @@
+flowchart TB
+  Container["DI Container"]
+  UserService["UserService"]
+  Database["Database"]
+  Logger["Logger"]
+  Container -->|"creates and injects"| UserService
+  Container -->|"creates and injects"| Database
+  Container -->|"creates and injects"| Logger
+  UserService -.->|"needs"| Database
+  UserService -.->|"needs"| Logger

@@ -1,0 +1,12 @@
+flowchart TB
+  Request["Incoming Request"]
+  Extract["Extract Data"]
+  Validate{"Validate with<br/>Schema"}
+  Transform["Transform Data"]
+  Handler["Controller Handler"]
+  Error400["400 Bad Request"]
+  Request --> Extract
+  Extract --> Validate
+  Validate -->|"Invalid"| Error400
+  Validate -->|"Valid"| Transform
+  Transform --> Handler

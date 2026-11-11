@@ -33,7 +33,7 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  background: varinverted;
+  background: #26262b;
   border-radius: 5px;
 }
 
@@ -54,7 +54,6 @@
   --ui-bg-muted: var(--color-neutral-50);
   --ease-smooth: cubic-bezier(0.45, 0, 0.55, 1);
   --font-geist-mono: 'Geist Mono', monospace;
-  --font-geist-pixel-circle: 'Geist Pixel Circle', 'Geist Mono', monospace;
 
   ::selection {
     color: #282a30;
@@ -168,4 +167,299 @@ body,
   @media (width >= 1280px) {
     padding-inline: 3rem;
   }
+}
+
+/* ── Site ─────────────────────────────────────────────────────────────────
+   One system for every page: a framed column with hairline rules, pixel
+   display headings, mono labels and square panels (in the manner of
+   voidzero.dev and evlog.dev). */
+.site {
+  --h-bg: #09090b;
+  --h-panel: #0c0c0f;
+  --h-raise: #131317;
+  --h-line: #26262b;
+  --h-line-soft: #1b1b1f;
+  --h-ink: #fafafa;
+  --h-muted: #a1a1aa;
+  --h-dim: #71717a;
+  --h-accent: #bc4eff;
+  --h-green: #4ade80;
+  --h-amber: #fbbf24;
+  --h-red: #f87171;
+  --h-blue: #60a5fa;
+  --frame: 1080px;
+  --pad: 28px;
+  --ease: cubic-bezier(0.23, 1, 0.32, 1);
+
+  font-family: 'Geist', ui-sans-serif, system-ui, sans-serif;
+  font-size: 15px;
+  line-height: 1.65;
+  color: var(--h-muted);
+  background: var(--h-bg);
+  overflow-x: clip;
+}
+
+.site .mono {
+  font-family: 'Geist Mono', ui-monospace, monospace;
+}
+
+.site .pixel {
+  font-family: 'Geist Pixel Line', 'Geist Mono', monospace;
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  color: var(--h-ink);
+}
+
+/* Full-width band with a hairline on top; the frame inside carries the side rules. */
+.site .band {
+  position: relative;
+  border-top: 1px solid var(--h-line);
+}
+
+.site .frame {
+  position: relative;
+  max-width: var(--frame);
+  margin: 0 auto;
+  border-inline: 1px solid var(--h-line);
+}
+
+/* Small squares where the rules cross. */
+.site .band > .frame::before,
+.site .band > .frame::after {
+  content: '';
+  position: absolute;
+  top: -4px;
+  width: 7px;
+  height: 7px;
+  background: var(--h-bg);
+  border: 1px solid #3f3f46;
+  z-index: 2;
+}
+
+.site .band > .frame::before {
+  left: -4px;
+}
+
+.site .band > .frame::after {
+  right: -4px;
+}
+
+.site .grid-bg {
+  /* The grid fades out towards every edge, so a partial row or column never
+     sits a pixel or two away from the frame's own rules. */
+  background-image:
+    linear-gradient(to bottom, var(--h-bg), transparent 56px, transparent calc(100% - 56px), var(--h-bg)),
+    linear-gradient(to right, var(--h-bg), transparent 56px, transparent calc(100% - 56px), var(--h-bg)),
+    linear-gradient(var(--h-line-soft) 1px, transparent 1px), linear-gradient(90deg, var(--h-line-soft) 1px, transparent 1px);
+  background-size:
+    100% 100%,
+    100% 100%,
+    24px 24px,
+    24px 24px;
+  background-position:
+    0 0,
+    0 0,
+    center,
+    center;
+}
+
+.site .btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 36px;
+  padding: 0 14px;
+  border: 1px solid var(--h-line);
+  background: var(--h-raise);
+  color: var(--h-ink);
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+  transition:
+    border-color 160ms ease,
+    background-color 160ms ease,
+    transform 120ms ease;
+}
+
+.site .btn:hover {
+  border-color: #52525b;
+  background: #1a1a1f;
+}
+
+.site .btn:active {
+  transform: scale(0.97);
+}
+
+.site .btn.primary {
+  border-color: var(--h-accent);
+  background: var(--h-accent);
+  color: #0b0010;
+}
+
+.site .btn.primary:hover {
+  background: #c869ff;
+}
+
+.site .chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border: 1px solid var(--h-line);
+  background: rgb(39 39 42 / 0.45);
+  font-family: 'Geist Mono', ui-monospace, monospace;
+  font-size: 11px;
+  color: var(--h-muted);
+}
+
+.site .link-arrow {
+  font-family: 'Geist Mono', ui-monospace, monospace;
+  font-size: 12px;
+  color: var(--h-muted);
+  transition: color 160ms ease;
+}
+
+.site .link-arrow:hover {
+  color: var(--h-ink);
+}
+
+.site a:focus-visible,
+.site button:focus-visible,
+.site input:focus-visible {
+  outline: 2px solid var(--h-accent);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .js .site [data-reveal] {
+    opacity: 0;
+    transform: translateY(16px);
+    transition:
+      opacity 700ms var(--ease),
+      transform 800ms var(--ease);
+    transition-delay: calc(var(--r, 0) * 80ms);
+  }
+
+  .js .site [data-reveal].is-in {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (width < 720px) {
+  .site {
+    --pad: 18px;
+  }
+}
+
+html.dark,
+.dark {
+  --ui-bg: #09090b;
+  --ui-bg-muted: #111114;
+  --ui-bg-elevated: #131317;
+  --ui-bg-accented: #1c1c21;
+  --ui-border: #26262b;
+  --ui-border-muted: #1f1f24;
+  --ui-border-accented: #3f3f46;
+  --ui-text-dimmed: #71717a;
+  --ui-text-muted: #a1a1aa;
+  --ui-text-toned: #d4d4d8;
+  --ui-text: #d4d4d8;
+  --ui-text-highlighted: #fafafa;
+  --ui-primary: #bc4eff;
+}
+
+:root {
+  --ui-radius: 0rem;
+  --ui-header-height: 57px;
+}
+
+body {
+  background: #09090b;
+}
+
+/* Wider frame for pages with a sidebar and a table of contents. */
+.site .frame.wide {
+  max-width: 1360px;
+}
+
+/* Page title shared by docs, blog and changelog. */
+.site .page-title {
+  font-family: 'Geist Pixel Line', 'Geist Mono', monospace;
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  color: var(--h-ink);
+  text-shadow: 0 4px 24px rgb(0 0 0 / 0.5);
+}
+
+/* Footer of the search palette; the palette is teleported out of .site. */
+.search-foot {
+  display: flex;
+  gap: 18px;
+  padding: 9px 14px;
+  font-family: 'Geist Mono', ui-monospace, monospace;
+  font-size: 11px;
+  color: #71717a;
+}
+
+.search-foot kbd {
+  display: inline-block;
+  min-width: 18px;
+  margin-right: 4px;
+  padding: 0 4px;
+  border: 1px solid #26262b;
+  font-family: inherit;
+  font-size: 10px;
+  text-align: center;
+  color: #a1a1aa;
+}
+
+/* Tables in prose: rows split by hairlines, no cell grid. Code loses its chip,
+   a table full of bordered chips reads as noise. */
+.site table th {
+  padding: 9px 14px;
+  border-inline: 0;
+  font-family: 'Geist Mono', ui-monospace, monospace;
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--h-dim);
+}
+
+.site table td {
+  padding: 11px 14px;
+  border-inline: 0;
+  font-size: 13.5px;
+  line-height: 1.6;
+  vertical-align: top;
+  color: var(--h-muted);
+}
+
+.site table tbody tr {
+  transition: background-color 160ms ease;
+}
+
+.site table tbody tr:hover {
+  background: var(--h-panel);
+}
+
+.site table code {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  font-size: 12.5px;
+  font-weight: 400;
+  color: #d4d4d8;
+}
+
+/* A name in the first column stays whole. */
+.site table td:first-child:has(> code:only-child) {
+  white-space: nowrap;
+}
+
+.site table td:first-child > code:only-child {
+  font-weight: 500;
+  color: var(--h-ink);
 }

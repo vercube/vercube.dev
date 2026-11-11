@@ -1,0 +1,12 @@
+flowchart TB
+  Controller["@Controller '/users'"]
+  Method["@Get '/:id'"]
+  Combined["/users/:id"]
+  Route["HTTP GET /users/:id"]
+  Handler["Handler Function"]
+  YourCode["getUserById method"]
+  Controller -->|"Base path"| Combined
+  Method -->|"Route path"| Combined
+  Combined -->|"Registered as"| Route
+  Route -->|"When matched"| Handler
+  Handler -->|"Calls"| YourCode

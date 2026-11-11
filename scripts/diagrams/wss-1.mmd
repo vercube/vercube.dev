@@ -1,0 +1,18 @@
+sequenceDiagram
+  participant Client as Client
+  participant Server as Server
+  participant Handler as Handler
+  participant Decorator as Decorator
+  Client->>Server: Connect to ws://server/namespace?token=xyz
+  Server->>Handler: @OnConnectionAttempt(params, request)
+  Handler-->>Server: return true/false
+  alt Connection rejected
+    Server->>Client: Close with 403
+  else Connection accepted
+    Server->>Client: Connection established
+    Client->>Server: Send { event: 'message', data: {...} }
+    Server->>Handler: @Message({ event: 'message' })
+    Handler->>Decorator: Process handler function
+    Decorator->>Server: @Emit / @Broadcast
+    Server->>Client: Send response message
+  end

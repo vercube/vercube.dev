@@ -1,9 +1,7 @@
 <script setup lang="ts">
 import { kebabCase } from 'scule';
-import { ogDocsFonts } from '~/utils/og-docs-fonts';
 
 definePageMeta({
-  layout: 'blog',
   colorMode: 'dark',
 });
 
@@ -13,6 +11,13 @@ const { data: page } = await useAsyncData(kebabCase(route.path), () => queryColl
 if (!page.value) {
   throw createError({ statusCode: 404, statusMessage: 'Page not found', fatal: true });
 }
+
+// Ordered by date, so the surroundings are the older and the newer post.
+const { data: surround } = await useAsyncData(`${kebabCase(route.path)}-surround`, () =>
+  queryCollectionItemSurroundings('blog', route.path, { fields: ['description'] }).order('date', 'ASC'),
+);
+const older = computed(() => surround.value?.[0] ?? null);
+const newer = computed(() => surround.value?.[1] ?? null);
 
 const title = page.value.seo?.title || page.value.title;
 const description = page.value.seo?.description || page.value.description;
@@ -26,25 +31,70 @@ if (page.value.image) {
   // @ts-expect-error - url is not typed
   defineOgImage({ url: imageUrl });
 } else {
-  defineOgImage(
-    // @ts-expect-error - Docs is not typed
-    'Docs',
-    {
-      headline: page.value.category || 'Vercube Blog',
-      title,
-      description,
-    },
-    { fonts: [...ogDocsFonts] },
-  );
+  defineOgImage('Vercube', {
+    headline: [
+      'Blog',
+      page.value.category,
+      new Date(page.value.date).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }),
+    ]
+      .filter(Boolean)
+      .join(' · '),
+    // The card shows the post title; `seo.title` is only for the <title> tag.
+    title: page.value.title,
+    description,
+  });
 }
 const titleTemplate = ref('%s - Vercube Blog');
+
+const fullTitle = titleTemplate.value.replace('%s', page.value.title);
 
 useSeoMeta({
   title,
   titleTemplate,
   description,
   ogDescription: description,
-  ogTitle: titleTemplate.value?.includes('%s') ? titleTemplate.value.replace('%s', title) : title,
+  ogTitle: fullTitle,
+  twitterTitle: fullTitle,
+  twitterDescription: description,
+  ogType: 'article',
+  articlePublishedTime: new Date(page.value.date).toISOString(),
+  articleModifiedTime: new Date(page.value.date).toISOString(),
+  articleAuthor: page.value.author.to ? [page.value.author.to] : undefined,
+  articleSection: page.value.category,
+});
+
+// BlogPosting structured data, so search engines read the post as a dated article by a person.
+const postUrl = `${site.url || 'https://vercube.dev'}${route.path}`;
+
+useHead({
+  script: [
+    {
+      type: 'application/ld+json',
+      innerHTML: JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'BlogPosting',
+        headline: page.value.title,
+        description,
+        datePublished: new Date(page.value.date).toISOString(),
+        dateModified: new Date(page.value.date).toISOString(),
+        url: postUrl,
+        mainEntityOfPage: postUrl,
+        inLanguage: 'en',
+        articleSection: page.value.category,
+        author: {
+          '@type': 'Person',
+          name: page.value.author.avatar?.alt || page.value.author.name,
+          url: page.value.author.to,
+        },
+        publisher: {
+          '@type': 'Organization',
+          name: 'Vercube',
+          url: site.url || 'https://vercube.dev',
+          logo: { '@type': 'ImageObject', url: `${site.url || 'https://vercube.dev'}/web-app-manifest-512x512.png` },
+        },
+      }),
+    },
+  ],
 });
 
 const editThisPage = computed(() => ({
@@ -53,10 +103,8 @@ const editThisPage = computed(() => ({
   to: `https://github.com/vercube/vercube.dev/tree/main/content/${page?.value?.stem}.md`,
   target: '_blank',
 }));
-// oxlint-disable-next-line prefer-global-this
-const articleLink = computed(() => `${window.location}${page.value?.path}`);
 
-const formatDate = (dateString: string) => {
+const formatDate = (dateString: string | Date) => {
   return new Date(dateString).toLocaleDateString('en-US', {
     year: 'numeric',
     month: 'short',
@@ -66,81 +114,204 @@ const formatDate = (dateString: string) => {
 </script>
 
 <template>
-  <UPage v-if="page">
-    <div class="absolute inset-0 z-[-1] overflow-hidden">
-      <HomeBackground class="inset-0" />
-      <div class="absolute inset-0 bg-gradient-to-r from-black via-black/80 to-transparent pointer-events-none" />
-      <!-- On a phone the text column spans the full width, so the fading end of
-           the gradient above leaves half of every line sitting on the bright
-           halftone. This backs it. -->
-      <div class="absolute inset-0 bg-black/55 pointer-events-none md:hidden" />
-    </div>
-    <UContainer class="flex flex-col items-center gap-3 pt-24 sm:pt-28 xl:pt-30">
-      <UPageSection
-        :title="title"
-        :description="description"
-        class="relative"
-        orientation="vertical"
-        :ui="{
-          root: 'overflow-hidden pb-2',
-          container: 'z-[10] !p-4 !gap-8',
-          wrapper: 'relative flex flex-col',
-          title: 'text-left text-4xl font-normal font-(family-name:--font-geist-pixel-circle)',
-          description: 'max-w-3xl text-left font-(family-name:--font-geist-mono)',
-          links: 'gap-1 justify-start -ms-2.5',
-        }"
+  <div v-if="page">
+    <SitePageHero :title="page.title" :description="page.description" narrow plain>
+      <template #kicker>
+        <NuxtLink to="/blog" class="back">← Blog</NuxtLink>
+        <span>·</span>
+        <b>{{ page.category || 'Post' }}</b>
+        <span>·</span>
+        <time :datetime="String(page.date)">{{ formatDate(page.date) }}</time>
+        <span>·</span>
+        <span>{{ page.minRead }} min read</span>
+      </template>
+      <component
+        :is="page.author.to ? 'a' : 'div'"
+        class="author"
+        :href="page.author.to"
+        :target="page.author.to ? '_blank' : undefined"
+        :rel="page.author.to ? 'noopener' : undefined"
       >
-        <template #title>
-          <h1
-            class="sm:text-4xl lg:text-5xl text-pretty tracking-tight text-highlighted text-left text-4xl !font-normal font-(family-name:--font-geist-pixel-circle)"
-          >
-            {{ page.title }}
-          </h1>
-        </template>
+        <img v-if="page.author.avatar" :src="page.author.avatar.src" :alt="page.author.avatar.alt" class="avatar" />
+        <span class="who">
+          <b>{{ page.author.name }}</b>
+          <span v-if="page.author.to" class="mono handle">@{{ page.author.to.split('/').pop() }}</span>
+        </span>
+      </component>
+    </SitePageHero>
 
-        <template #top>
-          <NuxtImg
-            v-if="page.image"
-            :src="page.image"
-            :alt="page.title"
-            class="rounded-lg w-full h-[250px] object-cover object-center mb-4"
-          />
+    <section class="band">
+      <div class="frame body">
+        <article class="article">
+          <ContentRenderer v-if="page.body" :value="page" />
+        </article>
+      </div>
+    </section>
 
-          <div class="flex text-xs text-muted gap-2 w-full max-w-(--ui-container) mx-auto p-4">
-            <span>
-              {{ formatDate(page.date) }}
-            </span>
-            -
-            <span> {{ page.minRead }} MIN READ </span>
-          </div>
-        </template>
-
-        <template #default>
-          <UUser v-bind="page.author" :description="page.author.to ? `@${page.author.to.split('/').pop()}` : undefined" />
-        </template>
-      </UPageSection>
-    </UContainer>
-    <div class="bg-black border-t border-default">
-      <!-- `max-w-3xl` is wider than a phone, so `mx-auto` leaves no gutter at
-           all below that width. `px-4` matches the `!p-4` of the title block
-           above it, so both edges line up. -->
-      <UPageBody class="max-w-3xl mx-auto !mt-0 px-4 pt-5 sm:px-6">
-        <ContentRenderer v-if="page.body" :value="page" />
-
-        <AppDivider class="my-10">
-          <div class="flex items-center gap-2 text-sm text-muted">
-            <UButton
-              v-if="editThisPage && editThisPage.to"
-              size="sm"
-              variant="link"
-              color="neutral"
-              :to="editThisPage.to"
-              target="_blank"
-              label="Edit this page on GitHub"
-            />
-          </div>
-        </AppDivider>
-      </UPageBody>
-    </div>
-  </UPage>
+    <nav class="band" aria-label="More posts">
+      <div class="frame more">
+        <NuxtLink v-if="older" :to="older.path" class="cell">
+          <span class="mono dir">← Older</span>
+          <span class="cell-title">{{ older.title }}</span>
+          <span v-if="older.description" class="cell-desc">{{ older.description }}</span>
+        </NuxtLink>
+        <span v-else class="cell empty" />
+        <NuxtLink v-if="newer" :to="newer.path" class="cell newer">
+          <span class="mono dir">Newer →</span>
+          <span class="cell-title">{{ newer.title }}</span>
+          <span v-if="newer.description" class="cell-desc">{{ newer.description }}</span>
+        </NuxtLink>
+        <NuxtLink v-else to="/blog" class="cell newer">
+          <span class="mono dir">All posts →</span>
+          <span class="cell-title">This is the latest post</span>
+          <span class="cell-desc">Every release note and write-up, newest first.</span>
+        </NuxtLink>
+      </div>
+      <div class="frame meta-row mono">
+        <NuxtLink to="/blog">← All posts</NuxtLink>
+        <NuxtLink :to="editThisPage.to" target="_blank">Edit this page on GitHub →</NuxtLink>
+      </div>
+    </nav>
+  </div>
 </template>
+
+<style scoped>
+.author {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: inherit;
+  text-decoration: none;
+}
+
+a.author:hover .who b {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.avatar {
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--h-line);
+  object-fit: cover;
+}
+
+.who {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.3;
+}
+
+.who b {
+  font-weight: 500;
+  font-size: 14px;
+  color: var(--h-ink);
+}
+
+.handle {
+  font-size: 11px;
+  color: var(--h-dim);
+}
+
+.back {
+  color: var(--h-muted);
+  transition: color 160ms ease;
+}
+
+.back:hover {
+  color: var(--h-ink);
+}
+
+.body {
+  padding: 56px var(--pad) 72px;
+}
+
+.article {
+  width: min(100%, 720px);
+  margin-inline: auto;
+}
+
+.more {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.cell {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+  padding: 28px var(--pad);
+  transition: background-color 200ms ease;
+}
+
+.cell + .cell {
+  border-left: 1px solid var(--h-line);
+}
+
+a.cell:hover {
+  background: var(--h-panel);
+}
+
+.newer {
+  text-align: right;
+  align-items: flex-end;
+}
+
+.dir {
+  font-size: 11px;
+  color: var(--h-accent);
+}
+
+.cell-title {
+  font-family: 'Geist Pixel Line', 'Geist Mono', monospace;
+  font-size: 22px;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  color: var(--h-ink);
+}
+
+.cell-desc {
+  max-width: 52ch;
+  font-size: 13.5px;
+  color: var(--h-dim);
+}
+
+.meta-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px var(--pad);
+  border-top: 1px solid var(--h-line);
+  font-size: 11.5px;
+  color: var(--h-dim);
+}
+
+.meta-row a {
+  transition: color 160ms ease;
+}
+
+.meta-row a:hover {
+  color: var(--h-ink);
+}
+
+@media (width < 720px) {
+  .more {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .cell + .cell {
+    border-left: 0;
+    border-top: 1px solid var(--h-line);
+  }
+
+  .newer {
+    text-align: left;
+    align-items: flex-start;
+  }
+
+  .empty {
+    display: none;
+  }
+}
+</style>

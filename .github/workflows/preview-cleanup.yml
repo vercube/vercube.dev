@@ -1,0 +1,30 @@
+name: Remove preview
+
+# Vercel builds a preview for every PR branch (vercel.json). Production stays on
+# GitHub Pages, so once a PR is merged or closed its previews are deleted here.
+on:
+  pull_request:
+    types: [closed]
+
+jobs:
+  remove:
+    # PRs from forks get no secrets.
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    steps:
+      - name: Delete the branch's Vercel previews
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+          VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
+          BRANCH: ${{ github.event.pull_request.head.ref }}
+        run: |
+          api=https://api.vercel.com
+          team=${VERCEL_TEAM_ID:+teamId=$VERCEL_TEAM_ID}
+          ids=$(curl -fsS -H "Authorization: Bearer $VERCEL_TOKEN" \
+            "$api/v6/deployments?projectId=$VERCEL_PROJECT_ID&target=preview&limit=100&$team" \
+            | jq -r --arg branch "$BRANCH" '.deployments[] | select(.meta.githubCommitRef == $branch) | .uid')
+          for id in $ids; do
+            echo "Deleting $id"
+            curl -fsS -X DELETE -H "Authorization: Bearer $VERCEL_TOKEN" "$api/v13/deployments/$id?$team" > /dev/null
+          done

@@ -19,3 +19,26 @@ export function stripFolderOnlyNavPaths(items: ContentNavigationItem[], pathsWit
     return { ...item, children } as ContentNavigationItem;
   });
 }
+
+/** Opens the sections leading to `path`, so a section collapsed by default still shows the current page. */
+export function openActiveNavSections(items: ContentNavigationItem[], path: string): ContentNavigationItem[] {
+  return items.map((item) => {
+    if (!item.children?.length) return item;
+    const children = openActiveNavSections(item.children, path);
+    const containsPage = (nodes: ContentNavigationItem[]): boolean =>
+      nodes.some((node) => node.path === path || (node.children ? containsPage(node.children) : false));
+    return containsPage(children) ? { ...item, children, defaultOpen: true } : { ...item, children };
+  });
+}
+
+/** Identifies the open branch: it changes only when the current page moves to another section. */
+export function activeNavBranch(items: ContentNavigationItem[], path: string): string {
+  for (const item of items) {
+    if (item.path === path) return item.title;
+    if (item.children?.length) {
+      const inner = activeNavBranch(item.children, path);
+      if (inner) return item.children.some((child) => child.path === path) ? item.title : `${item.title}/${inner}`;
+    }
+  }
+  return '';
+}

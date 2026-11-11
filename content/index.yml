@@ -1,6 +1,6 @@
 hero:
   title: 'Unleash your server development.'
-  description: An ultra-efficient JavaScript server framework for Node.js, Bun, and Deno. Fast by default, fully yours to configure.
+  description: A TypeScript server framework with decorators and dependency injection, as fast as a bare router. Runs on Node.js, Bun and Deno.
   slug: 'runs on Node.js, Bun & Deno'
   tabs:
     - title: Routing
@@ -42,6 +42,20 @@ hero:
             return this.db.query('SELECT * FROM users');
           }
         }
+        ```
+    - title: Typed client
+      file: web/src/api.ts
+      content: |
+        ```ts
+        import { createClient } from '@vercube/client';
+        import type { VercubeRoutes } from '../.vercube/routes.js';
+
+        const api = createClient<VercubeRoutes>({ baseURL: '/api' });
+
+        const user = await api.get('/users/:id', { params: { id: '42' } });
+        //    ^? { id: string; name: string; createdAt: string }
+
+        await api.post('/users', { body: { name: 'Ada' } });
         ```
     - title: Serverless
       file: src/index.ts

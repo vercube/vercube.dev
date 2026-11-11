@@ -2,7 +2,6 @@
 import { findPageBreadcrumb } from '@nuxt/content/utils';
 import { mapContentNavigation } from '@nuxt/ui/utils/content';
 import { kebabCase } from 'scule';
-import { ogDocsFonts } from '~/utils/og-docs-fonts';
 import type { ContentNavigationItem } from '@nuxt/content';
 
 interface BreadcrumbLink {
@@ -12,6 +11,7 @@ interface BreadcrumbLink {
 
 definePageMeta({
   layout: 'docs',
+  colorMode: 'dark',
 });
 
 const navigation = inject<Ref<ContentNavigationItem[]>>('navigation', ref([]));
@@ -53,18 +53,21 @@ useSeoMeta({
   ogTitle: titleTemplate.value?.includes('%s') ? titleTemplate.value.replace('%s', title) : title,
 });
 
-defineOgImage(
-  // @ts-expect-error - Docs is not typed
-  'Docs',
-  {
-    headline: breadcrumb.value.length ? breadcrumb.value.map((link: BreadcrumbLink) => link.label).join(' > ') : '',
-    title,
-    description,
-  },
-  {
-    fonts: [...ogDocsFonts],
-  },
-);
+// The card names the subject, not the page: every page inside a section of
+// its own (/docs/modules/auth/overview, /docs/modules/auth/decorators, …) is
+// "Auth" under "Docs · Modules", and a top-level section's "Overview" page is
+// that section.
+const crumbs = computed(() => breadcrumb.value.map((link: BreadcrumbLink) => link.label).filter(Boolean) as string[]);
+const isOverview = /^overview$/i.test(title ?? '');
+const inSubsection = crumbs.value.length > 2 || (isOverview && crumbs.value.length > 1);
+const ogTitle = inSubsection ? crumbs.value.at(-1)! : title;
+const ogHeadline = (inSubsection ? crumbs.value.slice(0, -1) : crumbs.value).join(' · ') || 'Docs';
+
+defineOgImage('Vercube', {
+  headline: ogHeadline,
+  title: ogTitle,
+  description,
+});
 
 const editThisPage = computed(() => ({
   icon: 'i-heroicons-pencil-square-solid',
@@ -101,50 +104,115 @@ const communityLinks = computed(() => [
 </script>
 
 <template>
-  <UPage v-if="page">
+  <UPage
+    v-if="page"
+    :ui="{
+      root: 'lg:grid-cols-[minmax(0,1fr)_240px] lg:gap-0',
+      center: 'lg:col-span-1 min-w-0 docs-center',
+      right: 'lg:col-span-1 docs-right',
+    }"
+  >
     <UPageHeader
       :title="page.title"
       :description="page.description"
       :links="page.links?.map((link: any) => ({ ...link, size: 'md' }))"
+      :ui="{
+        root: 'border-b border-default pt-10 pb-8',
+        headline: 'mb-4 font-mono text-[11px] uppercase tracking-[0.08em] text-dimmed font-normal',
+        title: 'page-title text-4xl sm:text-[2.75rem] leading-[1.05] font-normal',
+        description: 'text-base text-muted mt-3',
+      }"
     >
       <template #headline>
-        <UBreadcrumb :items="breadcrumb" />
+        <UBreadcrumb
+          :items="breadcrumb"
+          :ui="{ link: 'font-mono text-[11px] uppercase tracking-[0.08em]', separatorIcon: 'size-3' }"
+        />
       </template>
     </UPageHeader>
 
-    <UPageBody>
+    <UPageBody :ui="{ base: 'mt-8 pb-0 space-y-12' }">
       <ContentRenderer v-if="page.body" :value="page" />
-      <div>
-        <AppDivider class="my-10">
-          <div class="flex items-center gap-2 text-sm text-muted">
-            <UButton
-              size="sm"
-              variant="link"
-              color="neutral"
-              to="https://github.com/vercube/vercube/issues/new/choose"
-              target="_blank"
-            >
-              Report an issue
-            </UButton>
-            or
-            <UButton size="sm" variant="link" color="neutral" :to="editThisPage.to" target="_blank">
-              Edit this page on GitHub
-            </UButton>
-          </div>
-        </AppDivider>
+      <div class="after">
         <AppSurround :surround="surroundDisplay as any" />
+        <p class="mono help">
+          <NuxtLink to="https://github.com/vercube/vercube/issues/new/choose" target="_blank">Report an issue</NuxtLink>
+          <NuxtLink :to="editThisPage.to" target="_blank">Edit this page on GitHub →</NuxtLink>
+        </p>
       </div>
     </UPageBody>
 
     <template v-if="page?.body?.toc?.links?.length" #right>
-      <UContentToc :links="page.body?.toc?.links" highlight class="lg:backdrop-blur-none">
+      <UContentToc
+        :links="page.body?.toc?.links"
+        title="On this page"
+        :ui="{
+          // No negative margins or blur on desktop: they pushed the panel past
+          // the frame and smeared its right rule into a grey strip.
+          root: 'lg:mx-0 lg:px-0 lg:backdrop-blur-none',
+          title: 'font-mono text-[11px] uppercase tracking-[0.08em] text-dimmed',
+          link: 'text-[13px]',
+        }"
+      >
+        <template #content="{ links }">
+          <SiteTocList :links="links ?? []" />
+        </template>
         <template #bottom>
-          <div class="hidden lg:block space-y-6" :class="{ '!mt-6': page.body?.toc?.links?.length }">
-            <USeparator v-if="page.body?.toc?.links?.length" type="dashed" />
-            <UPageLinks title="Community" :links="communityLinks" />
+          <div class="hidden lg:block space-y-6 !mt-6">
+            <!-- Edge to edge: from the column's rule, across its 20px padding on both sides. -->
+            <USeparator type="solid" class="toc-rule -mx-5 w-[calc(100%+40px)]" />
+            <UPageLinks
+              title="Community"
+              :links="communityLinks"
+              :ui="{ title: 'font-mono text-[11px] uppercase tracking-[0.08em] text-dimmed', link: 'text-[13px]' }"
+            />
           </div>
         </template>
       </UContentToc>
     </template>
   </UPage>
 </template>
+
+<style scoped>
+:deep(.docs-center) {
+  --docs-pad: clamp(20px, 3vw, 48px);
+  padding: 0 var(--docs-pad);
+}
+
+:deep(.docs-right) {
+  border-left: 1px solid var(--h-line);
+  padding-inline: 20px;
+}
+
+/* Previous / next and the page links run edge to edge across the content
+   column and close it, like the end of a blog post. */
+.after {
+  margin: 72px calc(-1 * var(--docs-pad)) 0;
+  border-top: 1px solid var(--h-line);
+}
+
+.help {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px var(--docs-pad);
+  border-top: 1px solid var(--h-line);
+  font-size: 11.5px;
+  color: var(--h-dim);
+}
+
+.help a {
+  transition: color 160ms ease;
+}
+
+.help a:hover {
+  color: var(--h-ink);
+}
+
+@media (width < 1024px) {
+  :deep(.docs-right) {
+    border-left: 0;
+    padding-inline: 0;
+  }
+}
+</style>

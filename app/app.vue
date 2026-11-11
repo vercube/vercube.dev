@@ -10,12 +10,26 @@ const { data: docsPathRows } = await useAsyncData('docs-path-index', () => query
 const docsPathSet = computed(() => new Set((docsPathRows.value ?? []).map((row) => row.path).filter(Boolean) as string[]));
 
 const navigationDisplay = computed(() => stripFolderOnlyNavPaths(navigation.value ?? [], docsPathSet.value));
+
+// The search groups its results by section and keys each group by the
+// section's `path`, so it takes the navigation before folder paths are
+// stripped. Starting at the sections of /docs gives one group per section.
+const searchNavigation = computed(
+  () => navigation.value?.find((item) => item.path === '/docs')?.children ?? navigation.value ?? [],
+);
 const { data: files } = useLazyAsyncData('search', () => queryCollectionSearchSections('docs'), {
   server: false,
 });
 
 const siteUrl = site.url || 'https://vercube.dev';
 const siteName = seo?.siteName || 'Vercube';
+
+// One canonical URL per page, so preview deployments and trailing-slash variants do not compete with it.
+const route = useRoute();
+const canonical = computed(() => `${siteUrl}${route.path === '/' ? '' : route.path.replace(/\/$/, '')}` || siteUrl);
+
+useHead({ link: [{ rel: 'canonical', href: canonical }] });
+useSeoMeta({ ogUrl: canonical });
 
 useHead({
   meta: [{ name: 'viewport', content: 'width=device-width, initial-scale=1' }],
@@ -144,18 +158,30 @@ provide('navigationDisplay', navigationDisplay);
 
 <template>
   <UApp>
-    <NuxtLoadingIndicator />
+    <NuxtLoadingIndicator color="#bc4eff" />
 
-    <UMain>
-      <NuxtLayout>
-        <NuxtPage />
-      </NuxtLayout>
-    </UMain>
-
-    <AppFooter />
+    <div class="site">
+      <SiteHeader />
+      <!-- No min-height (UMain forces 100vh): a short page should end on the
+           footer's rule, not on empty space outside the frame. -->
+      <main class="site-main">
+        <NuxtLayout>
+          <NuxtPage />
+        </NuxtLayout>
+      </main>
+      <SiteFooter />
+    </div>
 
     <ClientOnly>
-      <LazyUContentSearch :files="files" :navigation="navigationDisplay" />
+      <LazyUContentSearch :files="files" :navigation="searchNavigation" :color-mode="false" placeholder="Search the docs…">
+        <template #footer>
+          <div class="search-foot">
+            <span><kbd>↑</kbd><kbd>↓</kbd> navigate</span>
+            <span><kbd>↵</kbd> open</span>
+            <span><kbd>esc</kbd> close</span>
+          </div>
+        </template>
+      </LazyUContentSearch>
     </ClientOnly>
   </UApp>
 </template>

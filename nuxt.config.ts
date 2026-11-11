@@ -1,9 +1,19 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 // @ts-nocheck — `.nuxt/schema/nuxt.schema.d.ts` can merge `NuxtConfig` as `{}` when only `appConfig` keys are customized; runtime config stays valid.
 
+import { readdirSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
+
 // Set early so nuxt-og-image resolves `nitro-prerender` compatibility instead of the unknown
 // `github-pages` preset (the preset applies `static: true` after some module hooks run).
 const isGithubPagesDeploy = process.env.DEPLOY_TARGET === 'github-pages';
+
+// Blog posts are named after releases (`announcing-1.4`). The prerender crawler
+// reads the ".4" as a file extension and never visits them, so they are listed
+// here, one route per file in content/blog (`4.announcing-1.4.md`).
+const blogRoutes = readdirSync(fileURLToPath(new URL('./content/blog', import.meta.url)))
+  .filter((file) => file.endsWith('.md'))
+  .map((file) => `/blog/${file.replace(/^\d+\./, '').replace(/\.md$/, '')}`);
 
 export default defineNuxtConfig({
   modules: [
@@ -26,6 +36,12 @@ export default defineNuxtConfig({
   },
 
   css: ['~/assets/css/main.css'],
+
+  // The site has one dark theme; the design does not have a light variant.
+  colorMode: {
+    preference: 'dark',
+    fallback: 'dark',
+  },
 
   content: {
     build: {
@@ -85,7 +101,7 @@ export default defineNuxtConfig({
     ...(isGithubPagesDeploy ? { static: true } : {}),
     prerender: {
       // Seed docs so the crawler can follow sidebar/nav links to every page.
-      routes: ['/', '/docs/getting-started'],
+      routes: ['/', '/docs/getting-started', '/sitemap.xml', ...blogRoutes],
       crawlLinks: true,
       autoSubfolderIndex: false,
       // Nav includes parent paths without a markdown file (e.g. /docs/modules); crawlers still 404 those.
@@ -106,9 +122,12 @@ export default defineNuxtConfig({
         global: true,
       },
       {
-        name: 'Geist Pixel Circle',
+        // The same face as a TTF, for the OG images only: nuxt-og-image takes
+        // its fonts from here, and its Satori renderer cannot read WOFF2.
+        // Nothing on the site uses this family, so browsers never fetch it.
+        name: 'Geist Pixel Line OG',
         provider: 'local',
-        src: '/fonts/GeistPixel-Circle.ttf',
+        src: '/fonts/GeistPixel-Line.ttf',
         weights: [400],
         global: true,
       },
@@ -117,12 +136,32 @@ export default defineNuxtConfig({
 
   icon: {
     provider: 'iconify',
+    // Picked at runtime by the generator's file tree, so the bundle scan cannot see them.
+    clientBundle: {
+      icons: [
+        'lucide:folder-open',
+        'vscode-icons:file-type-typescript-official',
+        'vscode-icons:file-type-testts',
+        'vscode-icons:file-type-vite',
+        'vscode-icons:file-type-npm',
+        'vscode-icons:file-type-dotenv',
+        'vscode-icons:file-type-docker2',
+        'vscode-icons:file-type-vue',
+        'vscode-icons:file-type-json',
+        'vscode-icons:file-type-yaml',
+      ],
+    },
   },
 
   // GitHub Pages is static-only: there is no Nitro server for `/_ipx/*`. Use direct asset URLs when
   // `DEPLOY_TARGET=github-pages` (set in deploy workflow). Local dev keeps default `ipx`.
   image: {
     provider: process.env.DEPLOY_TARGET === 'github-pages' ? 'none' : 'ipx',
+    ipx: {
+      // SVGO strips geometry and styles the docs diagrams rely on (label
+      // boxes, embedded font). Sanitizing still runs.
+      svg: { optimize: false },
+    },
   },
 
   llms: {
@@ -136,6 +175,8 @@ export default defineNuxtConfig({
   },
 
   ogImage: {
+    // The standard social card size; the component is drawn for it.
+    defaults: { width: 1200, height: 630 },
     // Dev: /_og/debug.json + DevTools OG tab. Prod: keep false.
     debug: process.env.NODE_ENV !== 'production',
     // GitHub Pages is static: PNGs under /_og/** must be generated at build (Satori prerender).

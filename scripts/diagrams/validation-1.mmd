@@ -1,0 +1,18 @@
+sequenceDiagram
+  participant Client as Client
+  participant Vercube as Vercube
+  participant ValidationMiddleware as ValidationMiddleware
+  participant Schema as Schema
+  participant Controller as Controller
+  Client->>Vercube: POST /users<br/>{invalid data}
+  Vercube->>ValidationMiddleware: Validate request
+  ValidationMiddleware->>Schema: schema.parse(data)
+  Schema-->>ValidationMiddleware: ❌ Validation Error
+  ValidationMiddleware-->>Client: 400 Bad Request
+  Note over Client,Controller: Valid request flow
+  Client->>Vercube: POST /users<br/>{valid data}
+  Vercube->>ValidationMiddleware: Validate request
+  ValidationMiddleware->>Schema: schema.parse(data)
+  Schema-->>ValidationMiddleware: ✅ Transformed data
+  ValidationMiddleware->>Controller: Call handler
+  Controller-->>Client: 201 Created

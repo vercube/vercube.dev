@@ -1,0 +1,15 @@
+sequenceDiagram
+  participant Client as Client
+  participant Router as Router
+  participant Middleware as Middleware
+  participant Controller as Controller
+  participant Service as Service
+  Client->>Router: GET /users/123
+  Router->>Router: Match route pattern
+  Router->>Middleware: Execute middleware chain
+  Middleware->>Controller: Call getUserById()
+  Controller->>Service: Fetch user data
+  Service-->>Controller: Return user
+  Controller->>Controller: Transform response
+  Controller-->>Router: Return result
+  Router-->>Client: Send JSON response
